@@ -1,0 +1,17 @@
+{
+  "name": "articles-platform",
+  "version": "1.0.0",
+  "description": "منصة نشر مقالات باستخدام Firebase",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx live-server --port=3000",
+    "build": "echo 'No build step required for static site'"
+  },
+  "keywords": ["articles", "firebase", "platform", "arabic"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
