@@ -43,10 +43,17 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .alert-success {
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <!-- شريط التنقل للجوال -->
+    <!-- شريط التنقل -->
     <nav class="bg-white shadow-lg sticky top-0 z-50">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center py-3">
@@ -198,7 +205,7 @@
     <script type="module">
         import { auth, db } from './js/firebase-config.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-        import { collection, getDocs, addDoc, query, orderBy, limit, where, doc, getDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { collection, getDocs, addDoc, query, orderBy, limit, doc, getDoc, updateDoc, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
         class ArticleManager {
             constructor() {
@@ -218,9 +225,50 @@
                     onAuthStateChanged(auth, async (user) => {
                         this.currentUser = user;
                         this.updateAuthUI();
+                        await this.checkUserProfile(user);
                         resolve();
                     });
                 });
+            }
+
+            async checkUserProfile(user) {
+                if (!user) return;
+                
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (!userDoc.exists()) {
+                        // إنشاء ملف المستخدم إذا لم يكن موجوداً
+                        await this.createUserProfile(user);
+                    }
+                } catch (error) {
+                    console.error("خطأ في التحقق من ملف المستخدم:", error);
+                }
+            }
+
+            async createUserProfile(user) {
+                try {
+                    const userData = {
+                        uid: user.uid,
+                        username: user.displayName || 'مستخدم',
+                        email: user.email || '',
+                        displayName: user.displayName || 'مستخدم',
+                        photoURL: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=667eea&color=fff`,
+                        followers: [],
+                        following: [],
+                        articles: [],
+                        bio: '',
+                        role: 'user',
+                        isVerified: false,
+                        createdAt: serverTimestamp(),
+                        updatedAt: serverTimestamp(),
+                        lastLogin: serverTimestamp()
+                    };
+                    
+                    await addDoc(collection(db, "users"), userData);
+                    console.log("تم إنشاء ملف المستخدم بنجاح");
+                } catch (error) {
+                    console.error("خطأ في إنشاء ملف المستخدم:", error);
+                }
             }
 
             updateAuthUI() {
@@ -323,7 +371,7 @@
                                         <span class="text-sm font-medium">${article.authorName || 'مستخدم'}</span>
                                     </div>
                                     <div class="flex items-center space-x-3 space-x-reverse">
-                                        <button onclick="articleManager.likeArticle('${docSnapshot.id}')" class="flex items-center space-x-1 text-gray-500 hover:text-red-500">
+                                        <button onclick="window.articleManager.likeArticle('${docSnapshot.id}')" class="flex items-center space-x-1 text-gray-500 hover:text-red-500">
                                             <span>❤️</span>
                                             <span class="text-xs">${article.likes || 0}</span>
                                         </button>
@@ -376,7 +424,7 @@
                                         </div>
                                     </div>
                                     ${this.currentUser && this.currentUser.uid !== article.authorId ? `
-                                        <button onclick="articleManager.followUser('${article.authorId}')" 
+                                        <button onclick="window.articleManager.followUser('${article.authorId}')" 
                                                 class="text-xs bg-purple-600 text-white px-3 py-1 rounded-full hover:bg-purple-700">
                                             متابعة
                                         </button>
@@ -388,7 +436,7 @@
                                 
                                 <div class="flex items-center justify-between border-t pt-3">
                                     <div class="flex space-x-4 space-x-reverse">
-                                        <button onclick="articleManager.likeArticle('${docSnapshot.id}')" 
+                                        <button onclick="window.articleManager.likeArticle('${docSnapshot.id}')" 
                                                 class="flex items-center space-x-2 space-x-reverse text-gray-600 hover:text-red-500">
                                             <span>❤️</span>
                                             <span class="text-sm">${article.likes || 0}</span>
@@ -469,17 +517,8 @@
 
                 try {
                     const currentUserRef = doc(db, "users", this.currentUser.uid);
-                    const targetUserRef = doc(db, "users", userId);
-                    
-                    // إضافة للمتابَعين
                     await updateDoc(currentUserRef, {
                         following: arrayUnion(userId),
-                        updatedAt: serverTimestamp()
-                    });
-
-                    // إضافة للمتابِعين
-                    await updateDoc(targetUserRef, {
-                        followers: arrayUnion(this.currentUser.uid),
                         updatedAt: serverTimestamp()
                     });
 
@@ -510,7 +549,8 @@
                         updatedAt: serverTimestamp()
                     };
 
-                    await addDoc(collection(db, "articles"), articleData);
+                    const docRef = await addDoc(collection(db, "articles"), articleData);
+                    console.log("تم نشر المقال بنجاح:", docRef.id);
                     return true;
                 } catch (error) {
                     console.error("خطأ في نشر المقال:", error);
@@ -538,7 +578,7 @@
                 if (mobileCreateArticleBtn) mobileCreateArticleBtn.addEventListener('click', showCreateModal);
                 if (floatingCreateBtn) floatingCreateBtn.addEventListener('click', showCreateModal);
 
-                // زر الملف الشخصي
+                // زر الملف الشخصي - إصلاح المشكلة هنا
                 const profileBtn = document.getElementById('profileBtn');
                 const mobileProfileBtn = document.getElementById('mobileProfileBtn');
                 
@@ -613,7 +653,7 @@
                 if (closeMobileMenu) closeMobileMenu.addEventListener('click', hideMobileMenu);
                 if (mobileMenuOverlay) mobileMenuOverlay.addEventListener('click', hideMobileMenu);
 
-                // إرسال نموذج المقال
+                // إرسال نموذج المقال - إصلاح المشكلة هنا
                 const articleForm = document.getElementById('articleForm');
                 const articleTitle = document.getElementById('articleTitle');
                 const titleCounter = document.getElementById('titleCounter');
@@ -658,13 +698,15 @@
                             if (success) {
                                 this.showAlert('🎉 تم نشر المقال بنجاح!', 'success');
                                 closeModal();
-                                await this.loadArticles(); // تحديث القوائم
+                                setTimeout(() => {
+                                    this.loadArticles(); // تحديث القوائم
+                                }, 500);
                             } else {
                                 errorDiv.textContent = 'حدث خطأ في نشر المقال';
                                 errorDiv.classList.remove('hidden');
                             }
                         } catch (error) {
-                            errorDiv.textContent = 'حدث خطأ غير متوقع';
+                            errorDiv.textContent = 'حدث خطأ غير متوقع: ' + error.message;
                             errorDiv.classList.remove('hidden');
                         } finally {
                             submitBtn.disabled = false;
@@ -752,7 +794,7 @@
                 
                 const alertDiv = document.createElement('div');
                 alertDiv.id = `alert-${alertId}`;
-                alertDiv.className = `${colors[type]} border-l-4 p-4 rounded shadow-lg transform transition-all duration-300 translate-x-0`;
+                alertDiv.className = `${colors[type]} border-l-4 p-4 rounded shadow-lg alert-success`;
                 alertDiv.innerHTML = `
                     <div class="flex items-center">
                         <span class="ml-3">${message}</span>
@@ -767,8 +809,7 @@
                 setTimeout(() => {
                     const alertElement = document.getElementById(`alert-${alertId}`);
                     if (alertElement) {
-                        alertElement.style.transform = 'translateX(100%)';
-                        setTimeout(() => alertElement.remove(), 300);
+                        alertElement.remove();
                     }
                 }, 5000);
             }
