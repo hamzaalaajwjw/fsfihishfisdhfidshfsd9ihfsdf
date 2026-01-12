@@ -3,679 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الملف الشخصي | مقالات</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>الملف الشخصي - مقالات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="./js/firebase-config.js"></script>
+    <script type="module" src="./js/auth.js" defer></script>
     <style>
-        :root {
-            --primary-color: #1DA1F2;
-            --secondary-color: #14171A;
-            --accent-color: #E0245E;
-            --light-color: #F5F8FA;
-            --dark-color: #14171A;
-            --success-color: #17BF63;
-            --warning-color: #FFAD1F;
-            --border-color: #E1E8ED;
-            --hover-color: #E8F5FE;
-            --border-radius: 12px;
-            --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            --box-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.15);
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Cairo', sans-serif;
-        }
-
-        body {
-            background-color: var(--light-color);
-            color: var(--dark-color);
-            line-height: 1.6;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* الشريط الجانبي */
-        .sidebar {
-            width: 250px;
-            background: white;
-            border-left: 1px solid var(--border-color);
-            position: fixed;
-            right: 0;
-            top: 0;
-            height: 100vh;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .logo {
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: var(--primary-color);
-            margin-bottom: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo i {
-            font-size: 2rem;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.8rem 1rem;
-            margin-bottom: 0.5rem;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: var(--transition);
-            color: var(--dark-color);
-            font-weight: 600;
-            font-size: 1.1rem;
-            text-decoration: none;
-        }
-
-        .nav-item:hover {
-            background-color: var(--hover-color);
-        }
-
-        .nav-item.active {
-            color: var(--primary-color);
-        }
-
-        .nav-item i {
-            font-size: 1.3rem;
-            width: 30px;
-            text-align: center;
-        }
-
-        .tweet-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 0.8rem;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: var(--transition);
-            margin: 1rem 0;
-            width: 100%;
-        }
-
-        .tweet-btn:hover {
-            background-color: #1a91da;
-        }
-
-        .user-profile {
-            margin-top: auto;
-            padding: 1rem;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .user-profile:hover {
-            background-color: var(--hover-color);
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        /* المحتوى الرئيسي */
-        .main-content {
-            flex: 1;
-            margin-right: 250px;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
-        }
-
-        /* صورة الغلاف */
-        .cover-image {
-            height: 200px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: var(--border-radius);
-            margin-bottom: 1rem;
-            position: relative;
-        }
-
-        /* صورة الملف الشخصي */
-        .profile-image {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 4px solid white;
-            background: var(--primary-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            font-weight: bold;
-            position: absolute;
-            bottom: -60px;
-            right: 20px;
-        }
-
-        /* معلومات الملف الشخصي */
-        .profile-info {
-            margin-top: 70px;
-            padding: 1.5rem;
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-        }
-
-        .profile-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
-        }
-
-        .profile-name h2 {
-            font-size: 1.8rem;
-            font-weight: 900;
-            margin-bottom: 0.3rem;
-        }
-
-        .profile-username {
-            color: #657786;
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .profile-bio {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-        }
-
-        .profile-details {
-            display: flex;
-            gap: 2rem;
-            margin-bottom: 1.5rem;
-            color: #657786;
-        }
-
-        .profile-detail {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .profile-stats {
-            display: flex;
-            gap: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 900;
-            color: var(--dark-color);
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: #657786;
-        }
-
-        .follow-btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 0.5rem 1.5rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .follow-btn:hover {
-            background-color: #1a91da;
-        }
-
-        .follow-btn.following {
-            background-color: transparent;
-            color: var(--primary-color);
-            border: 1px solid var(--primary-color);
-        }
-
-        /* مقالات المستخدم */
-        .user-tweets {
-            margin-top: 2rem;
-        }
-
-        .section-title {
-            font-size: 1.3rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-        }
-
-        .tweet {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            box-shadow: var(--box-shadow);
-            transition: var(--transition);
-        }
-
-        .tweet:hover {
-            box-shadow: var(--box-shadow-hover);
-        }
-
-        .tweet-header {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            margin-bottom: 1rem;
-        }
-
-        .tweet-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--primary-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .tweet-author {
-            flex-grow: 1;
-        }
-
-        .tweet-author-name {
-            font-weight: 700;
-            font-size: 1rem;
-        }
-
-        .tweet-author-username {
-            color: #657786;
-            font-size: 0.9rem;
-        }
-
-        .tweet-date {
-            color: #657786;
-            font-size: 0.8rem;
-        }
-
-        .tweet-content {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-
-        .tweet-stats {
-            display: flex;
-            gap: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .tweet-stat {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #657786;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .tweet-stat:hover {
-            color: var(--primary-color);
-        }
-
-        /* تحسينات للجوال */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 70px;
-                padding: 1rem 0.5rem;
-            }
-            
-            .logo span,
-            .nav-item span {
-                display: none;
-            }
-            
-            .main-content {
-                margin-right: 70px;
-            }
-            
-            .tweet-btn span {
-                display: none;
-            }
-            
-            .user-profile .user-info {
-                display: none;
-            }
-            
-            .profile-image {
-                width: 80px;
-                height: 80px;
-                font-size: 2rem;
-                bottom: -40px;
-            }
-            
-            .profile-info {
-                margin-top: 40px;
-            }
-        }
-
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: var(--primary-color);
-        }
-
-        .hidden {
-            display: none !important;
-        }
+        * { font-family: 'Cairo', sans-serif; }
     </style>
 </head>
-<body>
-    <div class="container">
-        <!-- الشريط الجانبي -->
-        <div class="sidebar">
-            <div class="logo">
-                <i class="fas fa-feather-alt"></i>
-                <span>مقالات</span>
+<body class="bg-gray-50">
+    <!-- شريط التنقل -->
+    <nav class="bg-white shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold text-purple-700">مقالات</a>
+                </div>
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <a href="index.html" class="text-gray-700 hover:text-purple-600">الرئيسية</a>
+                    <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">تسجيل الخروج</button>
+                </div>
             </div>
-            
-            <a href="index.html" class="nav-item">
-                <i class="fas fa-home"></i>
-                <span>الرئيسية</span>
-            </a>
-            
-            <a href="#" class="nav-item">
-                <i class="fas fa-search"></i>
-                <span>استكشف</span>
-            </a>
-            
-            <a href="#" class="nav-item">
-                <i class="far fa-bell"></i>
-                <span>الإشعارات</span>
-            </a>
-            
-            <a href="my-profile.html" class="nav-item">
-                <i class="far fa-user"></i>
-                <span>ملفي</span>
-            </a>
-            
-            <button class="tweet-btn">
-                <i class="fas fa-feather-alt"></i>
-                <span>تغريدة</span>
-            </button>
-            
-            <div class="user-profile">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div class="user-avatar" id="sidebar-avatar">م</div>
-                    <div class="user-info">
-                        <div id="sidebar-name">مستخدم</div>
-                        <div id="sidebar-username">@username</div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- معلومات الملف الشخصي -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-6 space-x-reverse">
+                <img id="profileAvatar" src="https://ui-avatars.com/api/?name=User&background=667eea&color=fff" 
+                     class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">
+                
+                <div class="flex-1 text-center md:text-right">
+                    <h1 id="profileName" class="text-3xl font-bold text-gray-800"></h1>
+                    <p id="profileBio" class="text-gray-600 mt-2">لم يتم إضافة وصف بعد</p>
+                    <div class="flex justify-center md:justify-start space-x-6 space-x-reverse mt-4">
+                        <div class="text-center">
+                            <span id="followersCount" class="block text-2xl font-bold text-gray-800">0</span>
+                            <span class="text-gray-600">متابِع</span>
+                        </div>
+                        <div class="text-center">
+                            <span id="followingCount" class="block text-2xl font-bold text-gray-800">0</span>
+                            <span class="text-gray-600">متابَع</span>
+                        </div>
+                        <div class="text-center">
+                            <span id="articlesCount" class="block text-2xl font-bold text-gray-800">0</span>
+                            <span class="text-gray-600">مقالات</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- المحتوى الرئيسي -->
-        <div class="main-content">
-            <!-- صورة الغلاف -->
-            <div class="cover-image">
-                <!-- سيتم تعيين الخلفية ديناميكياً -->
+
+        <!-- مقالات المستخدم -->
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">مقالاتي</h2>
+            <div id="userArticles" class="space-y-6">
+                <!-- سيتم تعبئتها بالجافاسكريبت -->
             </div>
+        </section>
+    </main>
+
+    <script type="module">
+        import { auth, db } from './js/firebase-config.js';
+        import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = auth.currentUser;
             
-            <!-- صورة الملف الشخصي -->
-            <div class="profile-image" id="profile-avatar">
-                <!-- سيتم تعيين الحرف ديناميكياً -->
-            </div>
-            
-            <!-- معلومات الملف الشخصي -->
-            <div class="profile-info">
-                <div class="profile-header">
-                    <div class="profile-name">
-                        <h2 id="profile-name">أحمد التميمي</h2>
-                        <div class="profile-username" id="profile-username">@ahmedtech</div>
-                    </div>
-                    <button class="follow-btn" id="follow-btn" onclick="toggleFollow()">متابعة</button>
-                </div>
-                
-                <div class="profile-bio" id="profile-bio">
-                    مطور ويب ومهتم بالتكنولوجيا. أحب مشاركة المعرفة وتعلم الجديد.
-                </div>
-                
-                <div class="profile-details">
-                    <div class="profile-detail">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span id="profile-location">الرياض، السعودية</span>
-                    </div>
-                    <div class="profile-detail">
-                        <i class="fas fa-link"></i>
-                        <span id="profile-website">ahmedtech.com</span>
-                    </div>
-                    <div class="profile-detail">
-                        <i class="far fa-calendar-alt"></i>
-                        <span id="profile-join-date">انضم يناير 2023</span>
-                    </div>
-                </div>
-                
-                <div class="profile-stats">
-                    <div class="stat">
-                        <div class="stat-value" id="tweets-count">25</div>
-                        <div class="stat-label">مقالات</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value" id="following-count">150</div>
-                        <div class="stat-label">متابَعون</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value" id="followers-count">320</div>
-                        <div class="stat-label">متابعون</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- مقالات المستخدم -->
-            <div class="user-tweets">
-                <h3 class="section-title">مقالات أحمد</h3>
-                <div id="tweets-container">
-                    <div class="loading" id="loading">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>جاري تحميل المقالات...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // بيانات المستخدم الحالي
-        let currentUser = null;
-        let isFollowing = false;
-
-        // بيانات المستخدم المعروض
-        const userProfile = {
-            name: "أحمد التميمي",
-            username: "ahmedtech",
-            bio: "مطور ويب ومهتم بالتكنولوجيا. أحب مشاركة المعرفة وتعلم الجديد.",
-            location: "الرياض، السعودية",
-            website: "ahmedtech.com",
-            joinDate: "انضم يناير 2023",
-            tweetsCount: 25,
-            followingCount: 150,
-            followersCount: 320
-        };
-
-        // بيانات تجريبية للمقالات
-        const sampleTweets = [
-            {
-                id: 1,
-                content: "تعلمت اليوم تقنية جديدة في React.js تسمى Concurrent Features. ممتازة لتحسين أداء التطبيقات! #برمجة #تكنولوجيا",
-                likes: 42,
-                comments: 8,
-                retweets: 15,
-                date: "قبل يوم"
-            },
-            {
-                id: 2,
-                content: "شاركت في مؤتمر المطورين العرب وكانت تجربة رائعة! التعرف على مجتمع المطورين العرب كان ممتعاً. #تطوير #مجتمع",
-                likes: 65,
-                comments: 12,
-                retweets: 22,
-                date: "قبل يومين"
-            },
-            {
-                id: 3,
-                content: "بدأت مشروع مفتوح المصدر جديد لمساعدة المطورين المبتدئين. سأشارك التفاصيل قريباً! #مفتوح_المصدر #تعلم",
-                likes: 38,
-                comments: 5,
-                retweets: 10,
-                date: "قبل 3 أيام"
-            },
-            {
-                id: 4,
-                content: "قرأت كتاباً ممتازاً عن أنماط التصميم في البرمجة. أنصح به كل مطور! #كتب #برمجة",
-                likes: 29,
-                comments: 7,
-                retweets: 8,
-                date: "قبل أسبوع"
-            },
-            {
-                id: 5,
-                content: "الذكاء الاصطناعي يغير طريقة تطوير البرمجيات. كيف تستخدمون الذكاء الاصطناعي في عملكم؟ #ذكاء_اصطناعي #تقنية",
-                likes: 51,
-                comments: 15,
-                retweets: 18,
-                date: "قبل أسبوعين"
-            }
-        ];
-
-        // تحميل بيانات المستخدم الحالي
-        function loadCurrentUser() {
-            const data = localStorage.getItem('userData');
-            if (data) {
-                currentUser = JSON.parse(data);
-                document.getElementById('sidebar-avatar').textContent = currentUser.name.charAt(0);
-                document.getElementById('sidebar-name').textContent = currentUser.name;
-                document.getElementById('sidebar-username').textContent = `@${currentUser.username}`;
-            }
-        }
-
-        // تحميل بيانات الملف الشخصي
-        function loadProfileData() {
-            document.getElementById('profile-name').textContent = userProfile.name;
-            document.getElementById('profile-username').textContent = `@${userProfile.username}`;
-            document.getElementById('profile-avatar').textContent = userProfile.name.charAt(0);
-            document.getElementById('profile-bio').textContent = userProfile.bio;
-            document.getElementById('profile-location').textContent = userProfile.location;
-            document.getElementById('profile-website').textContent = userProfile.website;
-            document.getElementById('profile-join-date').textContent = userProfile.joinDate;
-            document.getElementById('tweets-count').textContent = userProfile.tweetsCount;
-            document.getElementById('following-count').textContent = userProfile.followingCount;
-            document.getElementById('followers-count').textContent = userProfile.followersCount;
-        }
-
-        // تحميل المقالات
-        function loadTweets() {
-            const container = document.getElementById('tweets-container');
-            const loading = document.getElementById('loading');
-            
-            setTimeout(() => {
-                loading.classList.add('hidden');
-                
-                sampleTweets.forEach(tweet => {
-                    const tweetElement = document.createElement('div');
-                    tweetElement.className = 'tweet';
-                    tweetElement.innerHTML = `
-                        <div class="tweet-header">
-                            <div class="tweet-avatar">${userProfile.name.charAt(0)}</div>
-                            <div class="tweet-author">
-                                <div class="tweet-author-name">${userProfile.name}</div>
-                                <div class="tweet-author-username">@${userProfile.username}</div>
-                            </div>
-                            <div class="tweet-date">${tweet.date}</div>
-                        </div>
-                        <div class="tweet-content">${tweet.content}</div>
-                        <div class="tweet-stats">
-                            <div class="tweet-stat">
-                                <i class="far fa-comment"></i>
-                                <span>${tweet.comments}</span>
-                            </div>
-                            <div class="tweet-stat">
-                                <i class="fas fa-retweet"></i>
-                                <span>${tweet.retweets}</span>
-                            </div>
-                            <div class="tweet-stat">
-                                <i class="far fa-heart"></i>
-                                <span>${tweet.likes}</span>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(tweetElement);
-                });
-            }, 1000);
-        }
-
-        // تبديل المتابعة
-        function toggleFollow() {
-            const btn = document.getElementById('follow-btn');
-            if (!currentUser) {
-                alert('يجب تسجيل الدخول لمتابعة المستخدمين');
+            if (!user) {
                 window.location.href = 'login.html';
                 return;
             }
-            
-            if (isFollowing) {
-                isFollowing = false;
-                btn.textContent = 'متابعة';
-                btn.classList.remove('following');
-                userProfile.followersCount--;
-            } else {
-                isFollowing = true;
-                btn.textContent = 'متابَع';
-                btn.classList.add('following');
-                userProfile.followersCount++;
-            }
-            
-            document.getElementById('followers-count').textContent = userProfile.followersCount;
-        }
 
-        // تحميل الصفحة
-        window.onload = function() {
-            loadCurrentUser();
-            loadProfileData();
-            loadTweets();
-        };
+            // تحديث معلومات الملف الشخصي
+            const profileName = document.getElementById('profileName');
+            const profileAvatar = document.getElementById('profileAvatar');
+            const followersCount = document.getElementById('followersCount');
+            const followingCount = document.getElementById('followingCount');
+            const articlesCount = document.getElementById('articlesCount');
+
+            profileName.textContent = user.displayName || 'مستخدم';
+            profileAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=667eea&color=fff`;
+
+            // جلب معلومات المستخدم من Firestore
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                followersCount.textContent = userData.followers?.length || 0;
+                followingCount.textContent = userData.following?.length || 0;
+                
+                // جلب مقالات المستخدم
+                const articlesQuery = query(collection(db, "articles"), where("authorId", "==", user.uid));
+                const articlesSnapshot = await getDocs(articlesQuery);
+                articlesCount.textContent = articlesSnapshot.size;
+                
+                // عرض المقالات
+                const userArticles = document.getElementById('userArticles');
+                articlesSnapshot.forEach((doc) => {
+                    const article = doc.data();
+                    userArticles.innerHTML += `
+                        <div class="bg-white rounded-lg shadow-md p-6 article-card">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">${article.title}</h3>
+                            <p class="text-gray-600 mb-4">${article.content.substring(0, 200)}...</p>
+                            <div class="flex justify-between items-center text-sm text-gray-500">
+                                <div class="flex space-x-4 space-x-reverse">
+                                    <span>❤️ ${article.likes || 0}</span>
+                                    <span>💬 ${article.comments || 0}</span>
+                                    <span>👁️ ${article.views || 0}</span>
+                                </div>
+                                <span>${new Date(article.createdAt).toLocaleDateString('ar-SA')}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // تسجيل الخروج
+            document.getElementById('logoutBtn').addEventListener('click', async () => {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            });
+        });
     </script>
 </body>
 </html>
