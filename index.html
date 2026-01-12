@@ -1791,7 +1791,7 @@
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
         const storage = firebase.storage();
@@ -2144,7 +2144,7 @@
                         ${tagsHtml ? `<div class="article-tags">${tagsHtml}</div>` : ''}
                     </div>
                     <div class="article-content">
-                        <div class="article-excerpt">${article.excerpt || article.content.substring(0, 200)}...</div>
+                        <div class="article-excerpt">${article.excerpt || (article.content ? article.content.substring(0, 200) : '')}...</div>
                     </div>
                     <div class="article-footer">
                         <div class="article-stats">
@@ -2203,7 +2203,7 @@
             const article = articles.find(a => a.id === articleId);
             if (article) {
                 // في تطبيق حقيقي، هنا نفتح صفحة جديدة أو modal
-                alert(`عرض المقال: ${article.title}\n\nالمؤلف: ${article.authorName || 'مستخدم'}\n\n${article.content}`);
+                alert(`عرض المقال: ${article.title}\n\nالمؤلف: ${article.authorName || 'مستخدم'}\n\n${article.content || article.excerpt}`);
                 
                 // زيادة عدد المشاهدات
                 increaseViewCount(articleId);
@@ -2312,10 +2312,10 @@
                 userCard.className = 'user-card';
                 
                 userCard.innerHTML = `
-                    <div class="user-avatar">${user.name ? user.name.charAt(0) : user.username.charAt(0)}</div>
+                    <div class="user-avatar">${user.name ? user.name.charAt(0) : (user.username ? user.username.charAt(0) : 'م')}</div>
                     <div class="user-info">
                         <h3>${user.name || 'مستخدم'}</h3>
-                        <p class="username">@${user.username}</p>
+                        <p class="username">@${user.username || 'user'}</p>
                         ${user.bio ? `<p style="color: #666; margin-top: 0.5rem;">${user.bio}</p>` : ''}
                         <div class="user-stats">
                             <div class="user-stat">
@@ -2476,6 +2476,10 @@
                 
                 showMessage('success', 'تم تسجيل الدخول بنجاح!', 'login-message');
                 showSection('home-section');
+                
+                // حفظ حالة تسجيل الدخول
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userId', currentUser.uid);
             } catch (error) {
                 console.error('خطأ في تسجيل الدخول:', error);
                 let errorMessage = 'حدث خطأ في تسجيل الدخول.';
@@ -2525,6 +2529,10 @@
                 updateUIForUser(name, username);
                 showMessage('success', 'تم إنشاء الحساب بنجاح!', 'register-message');
                 showSection('home-section');
+                
+                // حفظ حالة تسجيل الدخول
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userId', currentUser.uid);
             } catch (error) {
                 console.error('خطأ في إنشاء الحساب:', error);
                 let errorMessage = 'حدث خطأ في إنشاء الحساب.';
@@ -2547,7 +2555,7 @@
             userMenu.classList.remove('hidden');
             
             usernameDisplay.textContent = name || username;
-            userAvatar.textContent = name ? name.charAt(0) : username.charAt(0);
+            userAvatar.textContent = name ? name.charAt(0) : (username ? username.charAt(0) : 'م');
             
             // تحديث معلومات المستخدم الحالي
             currentUser = {
@@ -2566,6 +2574,10 @@
                 userMenu.classList.add('hidden');
                 showSection('home-section');
                 showMessage('success', 'تم تسجيل الخروج بنجاح.');
+                
+                // حذف حالة تسجيل الدخول
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userId');
             } catch (error) {
                 console.error('خطأ في تسجيل الخروج:', error);
                 showMessage('error', 'حدث خطأ في تسجيل الخروج.');
@@ -3129,17 +3141,42 @@
                 } else {
                     updateUIForUser(user.email, 'مستخدم');
                 }
+                
+                // حفظ حالة تسجيل الدخول
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userId', user.uid);
             } else {
                 currentUser = null;
+                // حذف حالة تسجيل الدخول
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userId');
             }
             
             // تحميل البيانات الأولية
             loadHomeData();
         });
 
+        // تحميل حالة تسجيل الدخول من localStorage
+        function loadAuthState() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const userId = localStorage.getItem('userId');
+            
+            if (isLoggedIn === 'true' && userId) {
+                // محاولة استعادة جلسة المستخدم
+                auth.onAuthStateChanged((user) => {
+                    if (!user) {
+                        // إذا لم يكن هناك مستخدم مسجل دخول، إعادة تعيين localStorage
+                        localStorage.removeItem('isLoggedIn');
+                        localStorage.removeItem('userId');
+                    }
+                });
+            }
+        }
+
         // تهيئة المحرر عند تحميل الصفحة
         window.addEventListener('DOMContentLoaded', () => {
             initEditor();
+            loadAuthState();
             
             // إضافة بعض البيانات الافتراضية إذا كانت قاعدة البيانات فارغة
             setTimeout(() => {
@@ -3204,7 +3241,7 @@
             document.execCommand('insertText', false, text);
         });
 
-        console.log('تم تحميل تطبيق منصة مقالات بنجاح! 🚀');
+        console.log('تم تحميل تطبيق منصة المقالات بنجاح! 🚀');
     </script>
 </body>
 </html>
