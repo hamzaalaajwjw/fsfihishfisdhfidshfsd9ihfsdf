@@ -2,45 +2,126 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Red Pill Platform</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    body{margin:0;font-family:'Cairo',sans-serif;background:#0f0f0f;color:#eee}
-    header{padding:15px 20px;background:#151515;font-size:20px;font-weight:700}
-    .container{display:flex;min-height:100vh}
-    aside{width:260px;background:#111;padding:15px;box-sizing:border-box}
-    main{flex:1;padding:20px}
-    .btn{width:100%;padding:10px;margin:6px 0;border:none;border-radius:8px;background:#c62828;color:#fff;font-size:15px;cursor:pointer}
+  <title>Red Pill Platform</title>  <!-- Google Font -->  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">  <style>
+    /* ====== GLOBAL ====== */
+    body{
+      margin:0;
+      font-family:'Cairo',sans-serif;
+      background:#0e0e0e;
+      color:#eee;
+    }
+    h2,h3{margin:0 0 10px}
+    button{cursor:pointer}
+
+    /* ====== LAYOUT ====== */
+    header{
+      background:#141414;
+      padding:15px 20px;
+      font-size:20px;
+      font-weight:700;
+      border-bottom:1px solid #222;
+    }
+
+    .container{
+      display:flex;
+      min-height:calc(100vh - 60px);
+    }
+
+    aside{
+      width:270px;
+      background:#111;
+      padding:15px;
+      box-sizing:border-box;
+      border-left:1px solid #222;
+    }
+
+    main{
+      flex:1;
+      padding:20px;
+    }
+
+    /* ====== UI ====== */
+    .card{
+      background:#1a1a1a;
+      border-radius:12px;
+      padding:15px;
+      margin-bottom:15px;
+    }
+
+    .btn{
+      width:100%;
+      padding:10px;
+      border:none;
+      border-radius:8px;
+      background:#c62828;
+      color:#fff;
+      font-size:15px;
+      margin-top:6px;
+    }
+
     .btn.secondary{background:#333}
-    .card{background:#1a1a1a;border-radius:12px;padding:15px;margin-bottom:15px}
-    .article-title{font-size:18px;font-weight:700}
-    .likes{color:#ff5252;cursor:pointer}
-    textarea,input{width:100%;background:#0f0f0f;border:1px solid #333;color:#fff;border-radius:8px;padding:8px;margin-top:6px}
-    .comment{font-size:14px;border-bottom:1px solid #333;padding:6px 0}
+
+    input,textarea{
+      width:100%;
+      background:#0f0f0f;
+      border:1px solid #333;
+      color:#fff;
+      border-radius:8px;
+      padding:8px;
+      margin-top:6px;
+      box-sizing:border-box;
+    }
+
+    textarea{min-height:80px;resize:vertical}
+
+    .article-title{
+      font-size:18px;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+
+    .meta{
+      font-size:13px;
+      color:#aaa;
+      margin-bottom:8px;
+    }
+
+    .actions{
+      display:flex;
+      gap:15px;
+      margin-top:10px;
+      font-size:14px;
+    }
+
+    .like{color:#ff5252;cursor:pointer}
+    .liked{font-weight:700}
+
+    .comment{
+      border-bottom:1px solid #333;
+      padding:6px 0;
+      font-size:14px;
+    }
+
+    /* ====== MOBILE ====== */
     @media(max-width:900px){
       .container{flex-direction:column}
       aside{width:100%}
     }
-  </style>
-</head>
-<body>
-<header>منصة Red Pill</header>
-<div class="container">
-  <aside>
-    <div id="authBox" class="card"></div>
-    <button class="btn" onclick="showPublish()">نشر مقال</button>
-  </aside>
-  <main>
-    <h2>الأكثر إثارة</h2>
-    <div id="articles"></div>
-  </main>
-</div><script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  </style></head>
+<body><header>منصة Red Pill</header><div class="container">  <!-- ===== SIDEBAR ===== -->  <aside>
+    <div id="authBox" class="card"></div><div class="card">
+  <button class="btn" onclick="openPublish()">نشر مقال</button>
+</div>
 
+  </aside>  <!-- ===== MAIN ===== -->  <main>
+    <h2>🔥 الأكثر إثارة</h2>
+    <div id="articles"></div>
+  </main></div><!-- ===== FIREBASE ===== --><script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getDatabase, ref, push, onValue, update, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+/* ===== CONFIG ===== */
 const firebaseConfig = {
   apiKey: "AIzaSyCdoubvkI7VEvYxtG3CzKFAJg74XXl7fX4",
   authDomain: "redpill-1c7e2.firebaseapp.com",
@@ -58,56 +139,121 @@ const db = getDatabase(app);
 const authBox = document.getElementById('authBox');
 const articlesDiv = document.getElementById('articles');
 
+/* ===== AUTH UI ===== */
 onAuthStateChanged(auth,user=>{
   if(user){
-    authBox.innerHTML = `<p>مرحباً ${user.email}</p><button class='btn secondary' id='logout'>تسجيل خروج</button>`;
-    document.getElementById('logout').onclick=()=>signOut(auth);
-  } else {
     authBox.innerHTML = `
-      <input id='email' placeholder='ايميل'>
-      <input id='pass' type='password' placeholder='كلمة المرور'>
-      <button class='btn' id='login'>دخول</button>
-      <button class='btn secondary' id='register'>انشاء حساب</button>`;
-    document.getElementById('login').onclick=()=>login();
-    document.getElementById('register').onclick=()=>register();
+      <h3>الحساب</h3>
+      <p>${user.email}</p>
+      <button class="btn secondary" id="logout">تسجيل خروج</button>
+    `;
+    document.getElementById('logout').onclick = ()=>signOut(auth);
+  }else{
+    authBox.innerHTML = `
+      <h3>تسجيل الدخول</h3>
+      <input id="email" placeholder="الإيميل">
+      <input id="pass" type="password" placeholder="كلمة المرور">
+      <button class="btn" id="login">دخول</button>
+      <button class="btn secondary" id="register">إنشاء حساب</button>
+    `;
+    document.getElementById('login').onclick = ()=>login();
+    document.getElementById('register').onclick = ()=>register();
   }
 });
 
 function login(){
-  signInWithEmailAndPassword(auth,email.value,pass.value).catch(e=>alert(e.message));
-}
-function register(){
-  createUserWithEmailAndPassword(auth,email.value,pass.value).catch(e=>alert(e.message));
+  signInWithEmailAndPassword(auth,email.value,pass.value)
+    .catch(e=>alert(e.message));
 }
 
-window.showPublish = ()=>{
-  if(!auth.currentUser){alert('سجل دخول اولاً');return;}
+function register(){
+  createUserWithEmailAndPassword(auth,email.value,pass.value)
+    .catch(e=>alert(e.message));
+}
+
+/* ===== PUBLISH ===== */
+window.openPublish = ()=>{
+  if(!auth.currentUser){alert('سجل دخول أولاً');return;}
   const title = prompt('عنوان المقال');
   const content = prompt('نص المقال');
-  if(!title||!content)return;
+  if(!title || !content) return;
+
   push(ref(db,'articles'),{
-    title,content,likes:0,created:Date.now(),author:auth.currentUser.uid
+    title,
+    content,
+    author: auth.currentUser.uid,
+    created: Date.now(),
+    likesCount: 0
   });
 }
 
+/* ===== LOAD ARTICLES ===== */
 onValue(ref(db,'articles'),snap=>{
   articlesDiv.innerHTML='';
-  let arr=[];
-  snap.forEach(s=>arr.push({id:s.key,...s.val()}));
-  arr.sort((a,b)=>b.likes-a.likes);
-  arr.forEach(a=>{
-    const d=document.createElement('div');
-    d.className='card';
-    d.innerHTML=`
-      <div class='article-title'>${a.title}</div>
-      <p>${a.content}</p>
-      <div class='likes'>❤️ ${a.likes}</div>`;
-    d.querySelector('.likes').onclick=()=>{
-      if(!auth.currentUser){alert('سجل دخول');return;}
-      update(ref(db,'articles/'+a.id),{likes:(a.likes||0)+1});
-    }
-    articlesDiv.appendChild(d);
-  })
+  let list=[];
+
+  snap.forEach(s=>list.push({id:s.key,...s.val()}));
+
+  // ترتيب حسب الأكثر تفاعل
+  list.sort((a,b)=>(b.likesCount||0)-(a.likesCount||0));
+
+  list.forEach(a=>renderArticle(a));
 });
-</script></body>
+
+async function renderArticle(a){
+  const card = document.createElement('div');
+  card.className='card';
+
+  let liked=false;
+  if(auth.currentUser){
+    const likeSnap = await get(ref(db,`likes/${a.id}/${auth.currentUser.uid}`));
+    liked = likeSnap.exists();
+  }
+
+  card.innerHTML = `
+    <div class="article-title">${a.title}</div>
+    <div class="meta">${new Date(a.created).toLocaleDateString()}</div>
+    <p>${a.content}</p>
+
+    <div class="actions">
+      <span class="like ${liked?'liked':''}" data-id="${a.id}">
+        ❤️ ${a.likesCount||0}
+      </span>
+    </div>
+
+    <div class="comments" id="c-${a.id}"></div>
+
+    <textarea placeholder="اكتب تعليق" id="t-${a.id}"></textarea><button class="btn secondary" data-comment="${a.id}">إرسال</button>
+
+`;
+
+// لايك card.querySelector('.like').onclick = ()=>toggleLike(a,liked);
+
+// تعليق card.querySelector('[data-comment]').onclick = ()=>sendComment(a.id);
+
+loadComments(a.id, card.querySelector(#c-${a.id}));
+
+articlesDiv.appendChild(card); }
+
+/* ===== LIKE SYSTEM (1 USER = 1 LIKE) ===== */ async function toggleLike(article,liked){ if(!auth.currentUser){alert('سجل دخول');return;}
+
+const likeRef = ref(db,likes/${article.id}/${auth.currentUser.uid}); const articleRef = ref(db,articles/${article.id});
+
+if(liked) return; // منع التكرار
+
+await update(articleRef,{ likesCount: (article.likesCount||0)+1 });
+
+await update(likeRef,{value:true}); }
+
+/* ===== COMMENTS ===== */ function sendComment(articleId){ if(!auth.currentUser){alert('سجل دخول');return;}
+
+const textarea = document.getElementById(t-${articleId}); if(!textarea.value) return;
+
+push(ref(db,comments/${articleId}),{ uid: auth.currentUser.uid, text: textarea.value, created: Date.now() });
+
+textarea.value=''; }
+
+function loadComments(articleId,container){ onValue(ref(db,comments/${articleId}),snap=>{ container.innerHTML=''; snap.forEach(s=>{ const c = s.val(); const div = document.createElement('div'); div.className='comment'; div.textContent = c.text; container.appendChild(div); }) }); } </script>
+
+</body>
 </html>
