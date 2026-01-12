@@ -1,198 +1,172 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Red Pill Platform</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Red Pill</title>
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
 
-  <style>
-  /* =====================================================
-     GLOBAL / RESET
-  ===================================================== */
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:'Cairo',sans-serif;
-    background:#0b0b0d;
-    color:#eaeaea;
-    overflow-x:hidden;
-  }
-  h1,h2,h3,h4{margin:0}
-  button{cursor:pointer;font-family:inherit}
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:'Cairo',sans-serif;
+  background:#0b0b0d;
+  color:#fff;
+}
 
-  /* =====================================================
-     THEME VARIABLES (PERFORMANCE FRIENDLY)
-  ===================================================== */
-  :root{
-    --bg:#0b0b0d;
-    --panel:#141417;
-    --card:#1b1b20;
-    --border:#26262c;
-    --accent:#e53935;
-    --text-muted:#9a9aa0;
-    --radius:14px;
-    --transition:0.18s ease;
-  }
+/* ===== Layout ===== */
+.layout{display:flex;min-height:100vh}
+aside{
+  width:240px;
+  background:#141417;
+  padding:14px;
+}
+main{flex:1;padding:16px;max-width:900px;margin:auto}
 
-  /* =====================================================
-     LAYOUT
-  ===================================================== */
-  header{
-    height:60px;
-    background:linear-gradient(90deg,#111,#151515);
-    border-bottom:1px solid var(--border);
-    display:flex;
-    align-items:center;
-    padding:0 20px;
-    font-size:20px;
-    font-weight:800;
-    letter-spacing:.5px;
-  }
+/* ===== Sidebar ===== */
+aside button{
+  width:100%;
+  background:none;
+  border:none;
+  color:#fff;
+  padding:12px;
+  text-align:right;
+  font-size:15px;
+}
+aside button.active{background:#1f1f26}
 
-  .app{
-    display:flex;
-    min-height:calc(100vh - 60px);
-  }
-
+/* ===== Mobile ===== */
+.menu-btn{
+  display:none;
+  position:fixed;
+  top:10px;right:10px;
+  z-index:999;
+  background:#e53935;
+  border:none;
+  color:#fff;
+  padding:10px 14px;
+  border-radius:8px;
+}
+@media(max-width:768px){
   aside{
-    width:280px;
-    background:var(--panel);
-    border-left:1px solid var(--border);
-    padding:16px;
-    display:flex;
-    flex-direction:column;
-    gap:14px;
+    position:fixed;
+    right:-260px;
+    top:0;
+    height:100%;
+    transition:.25s;
+    z-index:998;
   }
+  aside.open{right:0}
+  .menu-btn{display:block}
+}
 
-  main{
-    flex:1;
-    padding:22px;
-    max-width:900px;
-    margin:auto;
-  }
+/* ===== Pages ===== */
+.page{display:none}
+.page.active{display:block}
 
-  /* =====================================================
-     UI COMPONENTS
-  ===================================================== */
-  .card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    padding:16px;
-    margin-bottom:18px;
-    transition:transform var(--transition);
-  }
-  .card:hover{transform:translateY(-2px)}
-
-  .btn{
-    width:100%;
-    padding:11px;
-    border-radius:10px;
-    border:none;
-    background:var(--accent);
-    color:#fff;
-    font-weight:700;
-  }
-  .btn.ghost{background:#232329}
-  .btn.small{padding:6px 10px;font-size:13px;width:auto}
-
-  input,textarea{
-    width:100%;
-    background:#0f0f13;
-    border:1px solid var(--border);
-    border-radius:10px;
-    padding:10px;
-    color:#fff;
-    margin-top:6px;
-  }
-
-  .muted{color:var(--text-muted);font-size:13px}
-
-  /* =====================================================
-     ARTICLE
-  ===================================================== */
-  .article-title{font-size:19px;font-weight:800}
-  .article-meta{font-size:13px;color:var(--text-muted);margin:6px 0}
-  .article-actions{display:flex;gap:18px;margin-top:12px;font-size:14px}
-  .like{color:#ff5a5a;cursor:pointer}
-  .liked{font-weight:800}
-
-  /* =====================================================
-     PROFILE
-  ===================================================== */
-  .profile-header{
-    display:flex;
-    gap:14px;
-    align-items:center;
-  }
-  .avatar{
-    width:60px;height:60px;
-    border-radius:50%;
-    background:#2a2a32;
-    display:flex;align-items:center;justify-content:center;
-    font-size:22px;font-weight:800;
-  }
-
-  /* =====================================================
-     MOBILE
-  ===================================================== */
-  @media(max-width:900px){
-    .app{flex-direction:column}
-    aside{width:100%}
-    main{padding:14px}
-  }
-  </style>
+/* ===== Cards ===== */
+.card{
+  background:#1b1b20;
+  border:1px solid #26262c;
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:14px;
+}
+input,textarea{
+  width:100%;
+  background:#0f0f13;
+  border:1px solid #26262c;
+  border-radius:10px;
+  padding:10px;
+  color:#fff;
+  margin-top:6px;
+}
+.btn{
+  width:100%;
+  background:#e53935;
+  border:none;
+  padding:10px;
+  border-radius:10px;
+  color:#fff;
+  font-weight:700;
+  margin-top:10px;
+}
+.like{cursor:pointer;color:#ff5a5a}
+</style>
 </head>
+
 <body>
 
-<header>Red Pill Platform</header>
+<button class="menu-btn" onclick="toggleMenu()">☰</button>
 
-<div class="app">
+<div class="layout">
 
-  <!-- ================= SIDEBAR ================= -->
-  <aside>
-    <div id="authBox" class="card"></div>
+<aside id="sidebar">
+  <button onclick="showPage('feed')" class="active">🏠 المنشورات</button>
+  <button onclick="showPage('login')">🔐 تسجيل دخول</button>
+  <button onclick="showPage('register')">➕ إنشاء حساب</button>
+  <button onclick="showPage('publish')">✍️ نشر مقال</button>
+  <button onclick="showPage('profile')">👤 الملف الشخصي</button>
+</aside>
 
-    <div class="card">
-      <button class="btn" onclick="openPublish()">✍️ نشر مقال</button>
-    </div>
+<main>
 
-    <div class="card">
-      <button class="btn ghost" onclick="openProfile()">👤 الملف الشخصي</button>
-    </div>
-  </aside>
+<!-- ===== Feed ===== -->
+<section id="feed" class="page active">
+  <h2>🔥 أحدث المنشورات</h2>
+  <div id="articles"></div>
+</section>
 
-  <!-- ================= MAIN ================= -->
-  <main>
-    <h2>🔥 الأكثر إثارة</h2>
-    <div id="articles"></div>
+<!-- ===== Login ===== -->
+<section id="login" class="page">
+  <div class="card">
+    <h3>تسجيل دخول</h3>
+    <input id="loginEmail" placeholder="الإيميل">
+    <input id="loginPass" type="password" placeholder="كلمة المرور">
+    <button class="btn" onclick="login()">دخول</button>
+  </div>
+</section>
 
-    <div id="profileView" style="display:none"></div>
-  </main>
+<!-- ===== Register ===== -->
+<section id="register" class="page">
+  <div class="card">
+    <h3>إنشاء حساب</h3>
+    <input id="regEmail" placeholder="الإيميل">
+    <input id="regPass" type="password" placeholder="كلمة المرور">
+    <button class="btn" onclick="register()">تسجيل</button>
+  </div>
+</section>
 
+<!-- ===== Publish ===== -->
+<section id="publish" class="page">
+  <div class="card">
+    <h3>✍️ نشر مقال</h3>
+    <input id="postTitle" placeholder="العنوان">
+    <textarea id="postContent" rows="5" placeholder="نص المقال"></textarea>
+    <button class="btn" onclick="publish()">نشر</button>
+  </div>
+</section>
+
+<!-- ===== Profile ===== -->
+<section id="profile" class="page">
+  <div class="card" id="profileBox"></div>
+</section>
+
+</main>
 </div>
 
 <script type="module">
-/* =====================================================
-   FIREBASE IMPORTS
-===================================================== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getDatabase, ref, push, onValue, update, get, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-/* =====================================================
-   CONFIG
-===================================================== */
 const firebaseConfig = {
   apiKey: "AIzaSyCdoubvkI7VEvYxtG3CzKFAJg74XXl7fX4",
   authDomain: "redpill-1c7e2.firebaseapp.com",
   databaseURL: "https://redpill-1c7e2-default-rtdb.firebaseio.com",
   projectId: "redpill-1c7e2",
-  storageBucket: "redpill-1c7e2.firebasestorage.app",
-  messagingSenderId: "337690521778",
   appId: "1:337690521778:web:ba3c99ad55e6b0d58f59ab"
 };
 
@@ -200,150 +174,57 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-const authBox = document.getElementById('authBox');
-const articlesDiv = document.getElementById('articles');
-const profileView = document.getElementById('profileView');
+/* ===== SPA ===== */
+window.showPage=(id)=>{
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('aside button').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  sidebar.classList.remove('open');
+}
+window.toggleMenu=()=>sidebar.classList.toggle('open');
 
-/* =====================================================
-   AUTH UI
-===================================================== */
-onAuthStateChanged(auth,user=>{
-  if(user){
-    authBox.innerHTML = `
-      <div class="profile-header">
-        <div class="avatar">${user.email[0].toUpperCase()}</div>
-        <div>
-          <strong>${user.email}</strong>
-          <div class="muted">عضو مسجل</div>
-        </div>
-      </div>
-      <button class="btn ghost" id="logout">تسجيل خروج</button>
-    `;
-    document.getElementById('logout').onclick=()=>signOut(auth);
+/* ===== Auth ===== */
+window.login=()=>signInWithEmailAndPassword(auth,loginEmail.value,loginPass.value);
+window.register=()=>createUserWithEmailAndPassword(auth,regEmail.value,regPass.value);
 
-    initProfile(user.uid);
-  }else{
-    authBox.innerHTML = `
-      <h3>تسجيل الدخول</h3>
-      <input id="email" placeholder="الإيميل">
-      <input id="pass" type="password" placeholder="كلمة المرور">
-      <button class="btn" id="login">دخول</button>
-      <button class="btn ghost" id="register">إنشاء حساب</button>
-    `;
-    document.getElementById('login').onclick=()=>login();
-    document.getElementById('register').onclick=()=>register();
-  }
+/* ===== Profile ===== */
+onAuthStateChanged(auth,async user=>{
+  if(!user) return;
+  const r=ref(db,'users/'+user.uid);
+  const s=await get(r);
+  if(!s.exists()) set(r,{username:'مستخدم',bio:''});
+  profileBox.innerHTML=`<h3>${user.email}</h3>`;
 });
 
-function login(){
-  signInWithEmailAndPassword(auth,email.value,pass.value).catch(e=>alert(e.message));
-}
-function register(){
-  createUserWithEmailAndPassword(auth,email.value,pass.value).catch(e=>alert(e.message));
-}
-
-/* =====================================================
-   PROFILE SYSTEM
-===================================================== */
-function initProfile(uid){
-  const userRef = ref(db,'users/'+uid);
-  get(userRef).then(s=>{
-    if(!s.exists()){
-      set(userRef,{
-        username:'مستخدم جديد',
-        bio:'',
-        created:Date.now()
-      });
-    }
-  });
-}
-
-window.openProfile = async ()=>{
-  if(!auth.currentUser){alert('سجل دخول');return;}
-
-  articlesDiv.style.display='none';
-  profileView.style.display='block';
-
-  const snap = await get(ref(db,'users/'+auth.currentUser.uid));
-  const u = snap.val();
-
-  profileView.innerHTML = `
-    <div class="card">
-      <h3>👤 الملف الشخصي</h3>
-      <label>اسم المستخدم</label>
-      <input id="p-name" value="${u.username}">
-      <label>نبذة</label>
-      <textarea id="p-bio">${u.bio}</textarea>
-      <button class="btn small" onclick="saveProfile()">حفظ التعديلات</button>
-    </div>
-  `;
-}
-
-window.saveProfile = ()=>{
-  update(ref(db,'users/'+auth.currentUser.uid),{
-    username:document.getElementById('p-name').value,
-    bio:document.getElementById('p-bio').value
-  });
-  alert('تم الحفظ');
-}
-
-/* =====================================================
-   PUBLISH / ARTICLES / LIKES / COMMENTS
-===================================================== */
-window.openPublish = ()=>{
-  if(!auth.currentUser){alert('سجل دخول');return;}
-  const title = prompt('عنوان المقال');
-  const content = prompt('نص المقال');
-  if(!title||!content) return;
+/* ===== Publish ===== */
+window.publish=()=>{
+  if(!auth.currentUser) return alert('سجل دخول');
   push(ref(db,'articles'),{
-    title,content,
-    author:auth.currentUser.uid,
+    title:postTitle.value,
+    content:postContent.value,
     created:Date.now(),
-    likesCount:0
+    likes:0
   });
+  postTitle.value=postContent.value='';
+  showPage('feed');
 }
 
+/* ===== Feed ===== */
 onValue(ref(db,'articles'),snap=>{
-  articlesDiv.innerHTML='';
-  articlesDiv.style.display='block';
-  profileView.style.display='none';
-
+  articles.innerHTML='';
   let arr=[];
   snap.forEach(s=>arr.push({id:s.key,...s.val()}));
-  arr.sort((a,b)=>(b.likesCount||0)-(a.likesCount||0));
-  arr.forEach(a=>renderArticle(a));
-});
-
-async function renderArticle(a){
-  const card=document.createElement('div');
-  card.className='card';
-
-  let liked=false;
-  if(auth.currentUser){
-    const l=await get(ref(db,`likes/${a.id}/${auth.currentUser.uid}`));
-    liked=l.exists();
-  }
-
-  card.innerHTML=`
-    <div class="article-title">${a.title}</div>
-    <div class="article-meta">${new Date(a.created).toLocaleDateString()}</div>
-    <p>${a.content}</p>
-    <div class="article-actions">
-      <span class="like ${liked?'liked':''}" data-id="${a.id}">❤️ ${a.likesCount||0}</span>
-    </div>
-  `;
-
-  card.querySelector('.like').onclick=()=>toggleLike(a,liked);
-  articlesDiv.appendChild(card);
-}
-
-async function toggleLike(article,liked){
-  if(!auth.currentUser||liked) return;
-  await update(ref(db,'articles/'+article.id),{
-    likesCount:(article.likesCount||0)+1
+  arr.sort((a,b)=>b.created-a.created);
+  arr.forEach(a=>{
+    articles.innerHTML+=`
+      <div class="card">
+        <h3>${a.title}</h3>
+        <p>${a.content}</p>
+      </div>`;
   });
-  await set(ref(db,`likes/${article.id}/${auth.currentUser.uid}`),true);
-}
+});
 </script>
+
 </body>
 </html>
