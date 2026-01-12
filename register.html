@@ -3,384 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إنشاء حساب | مقالات</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>إنشاء حساب - مقالات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="./js/firebase-config.js"></script>
     <style>
-        :root {
-            --primary-color: #1DA1F2;
-            --secondary-color: #14171A;
-            --accent-color: #E0245E;
-            --light-color: #F5F8FA;
-            --dark-color: #14171A;
-            --success-color: #17BF63;
-            --warning-color: #FFAD1F;
-            --border-color: #E1E8ED;
-            --hover-color: #E8F5FE;
-            --border-radius: 12px;
-            --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Cairo', sans-serif;
-        }
-
-        body {
-            background-color: var(--light-color);
-            color: var(--dark-color);
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .register-container {
-            width: 100%;
-            max-width: 500px;
-            padding: 2rem;
-        }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .logo i {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        .logo h1 {
-            font-size: 1.8rem;
-            color: var(--primary-color);
-            font-weight: 900;
-        }
-
-        .register-form {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--dark-color);
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(29, 161, 242, 0.2);
-        }
-
-        .small-text {
-            font-size: 0.9rem;
-            color: #657786;
-            margin-top: 0.3rem;
-        }
-
-        .password-strength {
-            margin-top: 0.5rem;
-        }
-
-        .strength-bars {
-            display: flex;
-            gap: 0.2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .strength-bar {
-            flex: 1;
-            height: 4px;
-            background: #ddd;
-            border-radius: 2px;
-            transition: var(--transition);
-        }
-
-        .strength-text {
-            font-size: 0.9rem;
-            color: #657786;
-        }
-
-        .register-btn {
-            width: 100%;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 0.8rem;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: var(--transition);
-            margin-top: 1rem;
-        }
-
-        .register-btn:hover {
-            background-color: #1a91da;
-        }
-
-        .form-footer {
-            text-align: center;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .form-footer a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .form-footer a:hover {
-            text-decoration: underline;
-        }
-
-        .message {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .message.success {
-            background-color: rgba(23, 191, 99, 0.1);
-            color: var(--success-color);
-            border: 1px solid var(--success-color);
-        }
-
-        .message.error {
-            background-color: rgba(224, 36, 94, 0.1);
-            color: var(--accent-color);
-            border: 1px solid var(--accent-color);
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .terms {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .terms input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+        * { font-family: 'Cairo', sans-serif; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
     </style>
 </head>
-<body>
-    <div class="register-container">
-        <div class="logo">
-            <i class="fas fa-feather-alt"></i>
-            <h1>مقالات</h1>
-        </div>
-        
-        <div class="register-form">
-            <div id="message" class="message hidden"></div>
-            
-            <form id="registerForm">
-                <div class="form-group">
-                    <label for="name">الاسم الكامل</label>
-                    <input type="text" id="name" class="form-control" placeholder="أدخل اسمك الكامل" required>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div class="p-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">انضم إلينا</h2>
+                <p class="text-gray-600 mt-2">أنشئ حسابك وابدأ بنشر مقالاتك</p>
+            </div>
+
+            <form id="registerForm" class="space-y-6">
+                <div>
+                    <label class="block text-gray-700 mb-2">اسم المستخدم</label>
+                    <input type="text" id="username" required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none">
                 </div>
-                
-                <div class="form-group">
-                    <label for="username">اسم المستخدم</label>
-                    <input type="text" id="username" class="form-control" placeholder="اختر اسم مستخدم فريد" required>
-                    <div class="small-text">سيظهر هذا الاسم في مقالاتك (@username)</div>
+
+                <div>
+                    <label class="block text-gray-700 mb-2">البريد الإلكتروني</label>
+                    <input type="email" id="email" required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none">
                 </div>
-                
-                <div class="form-group">
-                    <label for="email">البريد الإلكتروني</label>
-                    <input type="email" id="email" class="form-control" placeholder="أدخل بريدك الإلكتروني" required>
+
+                <div>
+                    <label class="block text-gray-700 mb-2">كلمة المرور</label>
+                    <input type="password" id="password" required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none">
                 </div>
-                
-                <div class="form-group">
-                    <label for="password">كلمة المرور</label>
-                    <input type="password" id="password" class="form-control" placeholder="اختر كلمة مرور قوية" required minlength="6">
-                    <div class="password-strength">
-                        <div class="strength-bars">
-                            <div class="strength-bar" id="bar1"></div>
-                            <div class="strength-bar" id="bar2"></div>
-                            <div class="strength-bar" id="bar3"></div>
-                            <div class="strength-bar" id="bar4"></div>
-                        </div>
-                        <div class="strength-text" id="strengthText">قوة كلمة المرور</div>
-                    </div>
+
+                <div>
+                    <label class="block text-gray-700 mb-2">تأكيد كلمة المرور</label>
+                    <input type="password" id="confirmPassword" required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none">
                 </div>
-                
-                <div class="form-group">
-                    <label for="confirmPassword">تأكيد كلمة المرور</label>
-                    <input type="password" id="confirmPassword" class="form-control" placeholder="أعد إدخال كلمة المرور" required>
-                    <div class="small-text" id="passwordMatch"></div>
-                </div>
-                
-                <div class="terms">
-                    <input type="checkbox" id="terms" required>
-                    <label for="terms">أوافق على <a href="#">الشروط والأحكام</a> و <a href="#">سياسة الخصوصية</a></label>
-                </div>
-                
-                <button type="submit" class="register-btn">إنشاء حساب</button>
+
+                <div id="errorMessage" class="hidden bg-red-50 text-red-600 p-3 rounded-lg"></div>
+                <div id="successMessage" class="hidden bg-green-50 text-green-600 p-3 rounded-lg"></div>
+
+                <button type="submit" class="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90">
+                    إنشاء حساب
+                </button>
             </form>
-            
-            <div class="form-footer">
-                <p>لديك حساب بالفعل؟ <a href="login.html">سجل الدخول</a></p>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">
+                    لديك حساب بالفعل؟ 
+                    <a href="login.html" class="text-purple-600 font-semibold hover:text-purple-700">سجل دخول</a>
+                </p>
+                <a href="index.html" class="mt-4 inline-block text-gray-500 hover:text-gray-700">← العودة للرئيسية</a>
             </div>
         </div>
     </div>
 
-    <script>
-        // التحقق من تسجيل الدخول
-        function checkLogin() {
-            const userData = localStorage.getItem('userData');
-            if (userData) {
-                window.location.href = 'index.html';
-            }
-        }
+    <script type="module">
+        import { auth } from './js/firebase-config.js';
+        import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+        import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { db } from './js/firebase-config.js';
 
-        // التحقق من قوة كلمة المرور
-        document.getElementById('password').addEventListener('input', function() {
-            const password = this.value;
-            const bars = [
-                document.getElementById('bar1'),
-                document.getElementById('bar2'),
-                document.getElementById('bar3'),
-                document.getElementById('bar4')
-            ];
-            const text = document.getElementById('strengthText');
-            
-            // إعادة تعيين الألوان
-            bars.forEach(bar => {
-                bar.style.background = '#ddd';
-            });
-            
-            let strength = 0;
-            
-            // التحقق من الطول
-            if (password.length >= 6) strength++;
-            if (password.length >= 8) strength++;
-            
-            // التحقق من التعقيد
-            if (/[A-Z]/.test(password)) strength++;
-            if (/[0-9]/.test(password)) strength++;
-            if (/[^A-Za-z0-9]/.test(password)) strength++;
-            
-            strength = Math.min(strength, 4);
-            
-            // تحديث الألوان
-            const colors = ['#E0245E', '#FFAD1F', '#1DA1F2', '#17BF63'];
-            for (let i = 0; i < strength; i++) {
-                bars[i].style.background = colors[i];
-            }
-            
-            // تحديث النص
-            const texts = ['ضعيفة', 'متوسطة', 'جيدة', 'قوية'];
-            text.textContent = `قوة كلمة المرور: ${texts[strength - 1] || 'ضعيفة'}`;
-            text.style.color = colors[strength - 1] || '#E0245E';
-        });
+        const registerForm = document.getElementById('registerForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
 
-        // التحقق من تطابق كلمة المرور
-        document.getElementById('confirmPassword').addEventListener('input', function() {
-            const password = document.getElementById('password').value;
-            const confirm = this.value;
-            const match = document.getElementById('passwordMatch');
-            
-            if (confirm === '') {
-                match.textContent = '';
-                match.style.color = '#657786';
-            } else if (password === confirm) {
-                match.textContent = '✓ كلمتا المرور متطابقتان';
-                match.style.color = '#17BF63';
-            } else {
-                match.textContent = '✗ كلمتا المرور غير متطابقتين';
-                match.style.color = '#E0245E';
-            }
-        });
-
-        // معالجة إنشاء الحساب
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
+        registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const name = document.getElementById('name').value;
             const username = document.getElementById('username').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
-            // التحقق من البيانات
             if (password !== confirmPassword) {
-                const message = document.getElementById('message');
-                message.textContent = 'كلمتا المرور غير متطابقتين';
-                message.className = 'message error';
-                message.classList.remove('hidden');
+                errorMessage.textContent = 'كلمات المرور غير متطابقة';
+                errorMessage.classList.remove('hidden');
                 return;
             }
             
-            if (!document.getElementById('terms').checked) {
-                const message = document.getElementById('message');
-                message.textContent = 'يجب الموافقة على الشروط والأحكام';
-                message.className = 'message error';
-                message.classList.remove('hidden');
-                return;
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                await updateProfile(user, {
+                    displayName: username
+                });
+                
+                await setDoc(doc(db, "users", user.uid), {
+                    username: username,
+                    email: email,
+                    createdAt: new Date().toISOString(),
+                    followers: [],
+                    following: [],
+                    articles: [],
+                    bio: '',
+                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=667eea&color=fff`
+                });
+                
+                successMessage.textContent = 'تم إنشاء الحساب بنجاح!';
+                successMessage.classList.remove('hidden');
+                errorMessage.classList.add('hidden');
+                
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+                
+            } catch (error) {
+                errorMessage.textContent = error.message;
+                errorMessage.classList.remove('hidden');
+                successMessage.classList.add('hidden');
             }
-            
-            // إنشاء حساب المستخدم
-            const user = {
-                name: name,
-                username: username,
-                email: email,
-                password: password,
-                joinDate: new Date().toLocaleDateString('ar-SA')
-            };
-            
-            // حفظ بيانات المستخدم
-            localStorage.setItem('userData', JSON.stringify(user));
-            
-            // عرض رسالة نجاح
-            const message = document.getElementById('message');
-            message.textContent = 'تم إنشاء حسابك بنجاح!';
-            message.className = 'message success';
-            message.classList.remove('hidden');
-            
-            // الانتقال إلى الصفحة الرئيسية بعد ثانية
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1000);
         });
-
-        // تحميل الصفحة
-        window.onload = function() {
-            checkLogin();
-        };
     </script>
 </body>
 </html>
