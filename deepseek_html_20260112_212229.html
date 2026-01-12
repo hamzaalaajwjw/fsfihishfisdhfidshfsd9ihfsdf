@@ -1,0 +1,2507 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Red Pill Platform</title>
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+  /* =====================================================
+     GLOBAL / RESET
+  ===================================================== */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: #0a0a0b;
+    color: #f0f0f0;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    font-weight: 700;
+  }
+  
+  button {
+    cursor: pointer;
+    font-family: inherit;
+    border: none;
+    outline: none;
+  }
+  
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  /* =====================================================
+     THEME VARIABLES (PERFORMANCE FRIENDLY)
+  ===================================================== */
+  :root {
+    --bg: #0a0a0b;
+    --panel: #111114;
+    --card: #1a1a1f;
+    --card-hover: #202026;
+    --border: #2a2a30;
+    --accent: #e63946;
+    --accent-light: #ff6b6b;
+    --accent-dark: #c1121f;
+    --secondary: #457b9d;
+    --text: #f8f9fa;
+    --text-muted: #a0a0a8;
+    --text-light: #d4d4dc;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    --shadow-light: 0 5px 15px rgba(0, 0, 0, 0.2);
+    --gradient: linear-gradient(135deg, #e63946 0%, #457b9d 100%);
+  }
+  
+  /* =====================================================
+     LAYOUT
+  ===================================================== */
+  header {
+    height: 70px;
+    background: linear-gradient(90deg, #0c0c0e, #111114);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    background-color: rgba(11, 11, 13, 0.9);
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 24px;
+    font-weight: 900;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.5px;
+  }
+  
+  .logo i {
+    font-size: 22px;
+  }
+  
+  .menu-toggle {
+    display: none;
+    background: none;
+    color: var(--text);
+    font-size: 24px;
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition);
+  }
+  
+  .menu-toggle:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .app {
+    display: flex;
+    min-height: calc(100vh - 70px);
+  }
+  
+  /* =====================================================
+     SIDEBAR (HIDDEN BY DEFAULT ON MOBILE)
+  ===================================================== */
+  .sidebar {
+    width: 320px;
+    background: var(--panel);
+    border-left: 1px solid var(--border);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: relative;
+    overflow-y: auto;
+    max-height: calc(100vh - 70px);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 90;
+  }
+  
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 70px;
+    right: 0;
+    width: 100%;
+    height: calc(100vh - 70px);
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 80;
+    backdrop-filter: blur(3px);
+  }
+  
+  main {
+    flex: 1;
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  /* =====================================================
+     UI COMPONENTS
+  ===================================================== */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    transition: all var(--transition);
+    box-shadow: var(--shadow-light);
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow);
+    border-color: #3a3a40;
+  }
+  
+  .card.highlight {
+    background: linear-gradient(145deg, #1c1c22, #151519);
+    border-color: var(--accent);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .card.highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--gradient);
+  }
+  
+  /* ============= تحسين كرت الحساب ============= */
+  .auth-card {
+    background: linear-gradient(145deg, #1c1c22, #151519);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--accent);
+  }
+  
+  .auth-card .profile-header {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .auth-card .profile-header .avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+  }
+  
+  .auth-card .profile-header .user-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .auth-card .profile-header .user-info strong {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .auth-card .profile-header .user-info .muted {
+    font-size: 13px;
+    opacity: 0.8;
+  }
+  
+  .auth-card .auth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .auth-card .auth-buttons input {
+    width: 100%;
+    background: rgba(15, 15, 20, 0.8);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    color: #fff;
+    font-family: 'Cairo', sans-serif;
+    transition: all var(--transition);
+  }
+  
+  .auth-card .auth-buttons input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.2);
+  }
+  /* ============================================= */
+  
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: var(--gradient);
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    transition: all var(--transition);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+  
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+    z-index: -1;
+  }
+  
+  .btn:hover::before {
+    left: 100%;
+  }
+  
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(230, 57, 70, 0.3);
+  }
+  
+  .btn.ghost {
+    background: transparent;
+    border: 2px solid var(--border);
+    color: var(--text-light);
+  }
+  
+  .btn.ghost:hover {
+    border-color: var(--accent);
+    background: rgba(230, 57, 70, 0.05);
+  }
+  
+  .btn.small {
+    padding: 8px 16px;
+    font-size: 14px;
+    width: auto;
+    border-radius: 8px;
+  }
+  
+  .btn.danger {
+    background: linear-gradient(135deg, #e63946 0%, #c1121f 100%);
+  }
+  
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: transparent;
+    color: var(--text-light);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition);
+    border: none;
+    width: 100%;
+    text-align: right;
+    font-size: 16px;
+  }
+  
+  .menu-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--accent-light);
+    transform: translateX(-5px);
+  }
+  
+  .menu-item.active {
+    background: rgba(230, 57, 70, 0.1);
+    color: var(--accent-light);
+    border-right: 3px solid var(--accent);
+  }
+  
+  .menu-item i {
+    width: 24px;
+    font-size: 18px;
+  }
+  
+  input, textarea, select {
+    width: 100%;
+    background: rgba(15, 15, 20, 0.8);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    color: #fff;
+    margin-top: 8px;
+    font-family: 'Cairo', sans-serif;
+    transition: all var(--transition);
+  }
+  
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.2);
+  }
+  
+  .muted {
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  
+  .tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(69, 123, 157, 0.15);
+    color: #8ecae6;
+    border-radius: 20px;
+    font-size: 12px;
+    margin-left: 8px;
+    margin-top: 8px;
+  }
+  
+  .tag.hot {
+    background: rgba(230, 57, 70, 0.15);
+    color: #ff9a9e;
+  }
+  
+  .tag.new {
+    background: rgba(72, 187, 120, 0.15);
+    color: #80ed99;
+  }
+  
+  /* =====================================================
+     CONTENT SECTIONS
+  ===================================================== */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  .section-title {
+    font-size: 28px;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  /* =====================================================
+     ARTICLE
+  ===================================================== */
+  .article-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    line-height: 1.4;
+    color: var(--text);
+  }
+  
+  .article-content {
+    font-size: 16px;
+    line-height: 1.7;
+    margin: 16px 0;
+    color: var(--text-light);
+  }
+  
+  .article-meta {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .article-meta i {
+    margin-left: 5px;
+  }
+  
+  .article-author {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  
+  .article-actions {
+    display: flex;
+    gap: 24px;
+    margin-top: 20px;
+    font-size: 15px;
+    flex-wrap: wrap;
+  }
+  
+  .action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 6px 0;
+    user-select: none;
+  }
+  
+  .action-btn:hover {
+    color: var(--accent-light);
+  }
+  
+  .action-btn.like {
+    color: #ff6b6b;
+  }
+  
+  .action-btn.like.active {
+    color: #ff4757;
+    font-weight: 700;
+  }
+  
+  .action-btn.comment:hover {
+    color: #8ecae6;
+  }
+  
+  .action-btn.share:hover {
+    color: #80ed99;
+  }
+  
+  /* ============== تحسين لون الإعجاب عند الضغط ============== */
+  .action-btn.like:active {
+    transform: scale(0.95);
+    transition: transform 0.1s;
+  }
+  
+  /* =====================================================
+     PROFILE
+  ===================================================== */
+  .profile-header {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 800;
+    color: white;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .profile-stats {
+    display: flex;
+    gap: 30px;
+    margin: 24px 0;
+    padding: 20px;
+    background: rgba(30, 30, 36, 0.5);
+    border-radius: var(--radius);
+  }
+  
+  .stat {
+    text-align: center;
+  }
+  
+  .stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .stat-label {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  
+  /* =====================================================
+     FILTERS & SORTING
+  ===================================================== */
+  .filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  
+  .filter-btn {
+    padding: 10px 22px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    color: var(--text-light);
+    font-size: 15px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  
+  .filter-btn:hover:not(.active) {
+    border-color: var(--accent-light);
+    color: var(--accent-light);
+  }
+  
+  /* =====================================================
+     MODALS
+  ===================================================== */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(8px);
+  }
+  
+  .modal {
+    background: var(--panel);
+    border-radius: var(--radius);
+    padding: 30px;
+    width: 90%;
+    max-width: 700px;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    position: relative;
+    animation: modalFadeIn 0.3s ease-out;
+  }
+  
+  @keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .modal-close {
+    background: none;
+    color: var(--text-muted);
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+  
+  .modal-close:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+  }
+  
+  /* =====================================================
+     COMMENTS
+  ===================================================== */
+  .comments-section {
+    margin-top: 30px;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+  }
+  
+  .comment {
+    background: rgba(30, 30, 36, 0.5);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-top: 16px;
+    border-left: 3px solid var(--secondary);
+  }
+  
+  .comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  .comment-author {
+    font-weight: 600;
+    font-size: 15px;
+  }
+  
+  .comment-time {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  
+  .comment-content {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  
+  /* =====================================================
+     LOADING & EMPTY STATES
+  ===================================================== */
+  .loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px;
+  }
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--accent);
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  
+  .empty-state i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  
+  /* =====================================================
+     NOTIFICATION
+  ===================================================== */
+  .notification {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    background: var(--panel);
+    border-radius: var(--radius);
+    padding: 16px 24px;
+    border-left: 4px solid var(--accent);
+    box-shadow: var(--shadow);
+    display: none;
+    align-items: center;
+    gap: 12px;
+    z-index: 1001;
+    animation: slideIn 0.3s ease-out;
+    max-width: 400px;
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  .notification.success {
+    border-left-color: #52b788;
+  }
+  
+  .notification.error {
+    border-left-color: #e63946;
+  }
+  
+  /* ================ إضافة ميزة التمرير السلس ================ */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* ================ إضافة تباين للصور الظلية ================ */
+  .card {
+    position: relative;
+  }
+  
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+  }
+  
+  /* ================ تحسين ظهور العناصر ================ */
+  .fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  /* ================ تحسين تنسيق النصوص الطويلة ================ */
+  .article-title, .comment-author {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* =====================================================
+     MOBILE RESPONSIVE
+  ===================================================== */
+  @media (max-width: 992px) {
+    .menu-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .sidebar {
+      position: fixed;
+      top: 70px;
+      right: 0;
+      height: calc(100vh - 70px);
+      transform: translateX(100%);
+      z-index: 100;
+      width: 320px;
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    }
+    
+    .sidebar.active {
+      transform: translateX(0);
+    }
+    
+    .sidebar-overlay.active {
+      display: block;
+    }
+    
+    main {
+      padding: 20px;
+      width: 100%;
+    }
+    
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .profile-stats {
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .modal {
+      width: 95%;
+      padding: 20px;
+    }
+    
+    .auth-card .profile-header {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .auth-card .profile-header .user-info {
+      width: 100%;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    header {
+      padding: 0 20px;
+      height: 60px;
+    }
+    
+    .logo {
+      font-size: 20px;
+    }
+    
+    .sidebar {
+      width: 280px;
+    }
+    
+    .article-actions {
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .filters {
+      justify-content: center;
+    }
+    
+    .notification {
+      left: 20px;
+      right: 20px;
+      max-width: none;
+    }
+    
+    .menu-item {
+      padding: 12px 16px;
+      font-size: 15px;
+    }
+    
+    .auth-card {
+      padding: 15px;
+    }
+    
+    .auth-card .auth-buttons {
+      gap: 8px;
+    }
+    
+    .btn {
+      padding: 12px;
+      font-size: 14px;
+    }
+  }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <i class="fas fa-pills"></i>
+      <span>Red Pill Platform</span>
+    </div>
+    
+    <button class="menu-toggle" id="menuToggle">
+      <i class="fas fa-bars"></i>
+    </button>
+  </header>
+  
+  <div class="app">
+    <!-- ================= SIDEBAR ================= -->
+    <div class="sidebar" id="sidebar">
+      <!-- ========== كرت الحساب المحسن ========== -->
+      <div id="authBox" class="auth-card"></div>
+      
+      <div class="card">
+        <h4><i class="fas fa-sliders-h"></i> القائمة الرئيسية</h4>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
+          <button class="menu-item active" onclick="showSection('articles')">
+            <i class="fas fa-newspaper"></i>
+            <span>المقالات</span>
+          </button>
+          
+          <button class="menu-item" onclick="showSection('profile')">
+            <i class="fas fa-user-circle"></i>
+            <span>الملف الشخصي</span>
+          </button>
+          
+          <button class="menu-item" onclick="showSection('myArticles')">
+            <i class="fas fa-file-alt"></i>
+            <span>مقالاتي</span>
+          </button>
+          
+          <button class="menu-item" onclick="showSection('stats')">
+            <i class="fas fa-chart-bar"></i>
+            <span>الإحصائيات</span>
+          </button>
+          
+          <button class="menu-item" onclick="openPublishModal()">
+            <i class="fas fa-pen-fancy"></i>
+            <span>نشر مقال جديد</span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h4><i class="fas fa-info-circle"></i> معلومات المنصة</h4>
+        <div class="muted" style="margin-top: 10px; line-height: 1.8;">
+          <p>مرحبًا بكم في منصة Red Pill للكتابة والمقالات الحصرية.</p>
+          <p style="margin-top: 10px;">شارك أفكارك واقرأ مقالات الآخرين في مجتمع متكامل.</p>
+          <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border);">
+            <p><i class="fas fa-users"></i> <strong>المستخدمون النشطون:</strong> <span id="activeUsersCount">0</span></p>
+            <p style="margin-top: 8px;"><i class="fas fa-fire"></i> <strong>مقال اليوم:</strong> <span id="todayArticlesCount">0</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    
+    <!-- ================= MAIN CONTENT ================= -->
+    <main>
+      <!-- مقالات Section (Default) -->
+      <div id="articlesSection" class="content-section">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fas fa-fire"></i> المقالات الشائعة</h2>
+          <div class="filters">
+            <button class="filter-btn active" onclick="filterArticles('all')">
+              <i class="fas fa-layer-group"></i> الكل
+            </button>
+            <button class="filter-btn" onclick="filterArticles('popular')">
+              <i class="fas fa-fire"></i> الأكثر شعبية
+            </button>
+            <button class="filter-btn" onclick="filterArticles('recent')">
+              <i class="fas fa-clock"></i> الأحدث
+            </button>
+            <button class="filter-btn" onclick="filterArticles('featured')">
+              <i class="fas fa-star"></i> المميزة
+            </button>
+          </div>
+        </div>
+        
+        <div id="articles" class="articles-container">
+          <div class="loading" id="loadingArticles">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- الملف الشخصي Section -->
+      <div id="profileSection" class="content-section" style="display: none;">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fas fa-user-circle"></i> الملف الشخصي</h2>
+          <button class="btn small ghost" onclick="showSection('articles')">
+            <i class="fas fa-arrow-right"></i> العودة للمقالات
+          </button>
+        </div>
+        
+        <div id="profileView"></div>
+      </div>
+      
+      <!-- مقالاتي Section -->
+      <div id="myArticlesSection" class="content-section" style="display: none;">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fas fa-file-alt"></i> مقالاتي</h2>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn small" onclick="openPublishModal()">
+              <i class="fas fa-plus"></i> مقال جديد
+            </button>
+            <button class="btn small ghost" onclick="showSection('articles')">
+              <i class="fas fa-arrow-right"></i> العودة
+            </button>
+          </div>
+        </div>
+        
+        <div id="myArticlesView"></div>
+      </div>
+      
+      <!-- الإحصائيات Section -->
+      <div id="statsSection" class="content-section" style="display: none;">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fas fa-chart-bar"></i> إحصائيات المنصة</h2>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn small" onclick="refreshStats()">
+              <i class="fas fa-redo"></i> تحديث
+            </button>
+            <button class="btn small ghost" onclick="showSection('articles')">
+              <i class="fas fa-arrow-right"></i> العودة
+            </button>
+          </div>
+        </div>
+        
+        <div id="statsView" class="card highlight">
+          <div class="loading" id="loadingStats">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- ================= PUBLISH MODAL ================= -->
+  <div class="modal-overlay" id="publishModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fas fa-pen-fancy"></i> كتابة مقال جديد</h3>
+        <button class="modal-close" onclick="closePublishModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-content">
+        <label>عنوان المقال</label>
+        <input id="articleTitle" placeholder="اكتب عنوانًا جذابًا لمقالك">
+        
+        <label style="margin-top: 20px;">نص المقال</label>
+        <textarea id="articleContent" placeholder="اكتب محتوى مقالك هنا..." rows="8"></textarea>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+          <div>
+            <label>التصنيف</label>
+            <select id="articleCategory">
+              <option value="عام">عام</option>
+              <option value="تكنولوجيا">تكنولوجيا</option>
+              <option value="فلسفة">فلسفة</option>
+              <option value="أدب">أدب</option>
+              <option value="علم">علم</option>
+              <option value="تطوير ذاتي">تطوير ذاتي</option>
+              <option value="سياسة">سياسة</option>
+              <option value="ثقافة">ثقافة</option>
+            </select>
+          </div>
+          
+          <div>
+            <label>القراءة المتوقعة</label>
+            <select id="articleReadTime">
+              <option value="1">دقيقة واحدة</option>
+              <option value="3">٣ دقائق</option>
+              <option value="5">٥ دقائق</option>
+              <option value="10">١٠ دقائق</option>
+              <option value="15">١٥ دقيقة</option>
+            </select>
+          </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+          <label style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="articleFeatured" style="width: auto;">
+            <span>تمييز المقال كمميز</span>
+          </label>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 30px;">
+          <button class="btn" style="flex: 1;" onclick="publishArticle()">
+            <i class="fas fa-paper-plane"></i> نشر المقال
+          </button>
+          <button class="btn ghost" onclick="closePublishModal()" style="width: auto;">
+            إلغاء
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ================= COMMENT MODAL ================= -->
+  <div class="modal-overlay" id="commentModal">
+    <div class="modal" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-comments"></i> التعليقات</h3>
+        <button class="modal-close" onclick="closeCommentModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-content">
+        <div id="commentsList" style="max-height: 400px; overflow-y: auto;"></div>
+        
+        <div style="margin-top: 20px;">
+          <textarea id="newComment" placeholder="اكتب تعليقك هنا..." rows="3"></textarea>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <div class="muted" style="font-size: 12px;">
+              اضغط Ctrl+Enter لإرسال التعليق
+            </div>
+            <button class="btn small" onclick="postComment()">
+              <i class="fas fa-paper-plane"></i> إضافة تعليق
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ================= NOTIFICATION ================= -->
+  <div class="notification" id="notification">
+    <i class="fas fa-check-circle" id="notificationIcon"></i>
+    <span id="notificationText"></span>
+  </div>
+
+  <script type="module">
+  /* =====================================================
+     FIREBASE IMPORTS
+  ===================================================== */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+  import { getDatabase, ref, push, onValue, update, get, set, remove, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  
+  /* =====================================================
+     CONFIG
+  ===================================================== */
+  const firebaseConfig = {
+    apiKey: "AIzaSyCdoubvkI7VEvYxtG3CzKFAJg74XXl7fX4",
+    authDomain: "redpill-1c7e2.firebaseapp.com",
+    databaseURL: "https://redpill-1c7e2-default-rtdb.firebaseio.com",
+    projectId: "redpill-1c7e2",
+    storageBucket: "redpill-1c7e2.firebasestorage.app",
+    messagingSenderId: "337690521778",
+    appId: "1:337690521778:web:ba3c99ad55e6b0d58f59ab"
+  };
+  
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+  
+  // DOM Elements
+  const authBox = document.getElementById('authBox');
+  const articlesDiv = document.getElementById('articles');
+  const profileView = document.getElementById('profileView');
+  const myArticlesView = document.getElementById('myArticlesView');
+  const statsView = document.getElementById('statsView');
+  const publishModal = document.getElementById('publishModal');
+  const commentModal = document.getElementById('commentModal');
+  const notification = document.getElementById('notification');
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const activeUsersCount = document.getElementById('activeUsersCount');
+  const todayArticlesCount = document.getElementById('todayArticlesCount');
+  
+  // Section elements
+  const articlesSection = document.getElementById('articlesSection');
+  const profileSection = document.getElementById('profileSection');
+  const myArticlesSection = document.getElementById('myArticlesSection');
+  const statsSection = document.getElementById('statsSection');
+  
+  // Global variables
+  let currentUser = null;
+  let currentArticleId = null;
+  let currentFilter = 'all';
+  let allArticles = [];
+  let userLikes = new Map(); // لتخزين الإعجابات المحلية
+  
+  /* =====================================================
+     SIDEBAR FUNCTIONS
+  ===================================================== */
+  function toggleSidebar() {
+    sidebar.classList.toggle('active');
+    sidebarOverlay.classList.toggle('active');
+  }
+  
+  menuToggle.addEventListener('click', toggleSidebar);
+  
+  // Close sidebar when clicking on overlay
+  sidebarOverlay.addEventListener('click', toggleSidebar);
+  
+  // Close sidebar when clicking a menu item on mobile
+  function closeSidebarOnMobile() {
+    if (window.innerWidth <= 992) {
+      toggleSidebar();
+    }
+  }
+  
+  /* =====================================================
+     SECTION NAVIGATION
+  ===================================================== */
+  window.showSection = (sectionName) => {
+    // Hide all sections
+    articlesSection.style.display = 'none';
+    profileSection.style.display = 'none';
+    myArticlesSection.style.display = 'none';
+    statsSection.style.display = 'none';
+    
+    // Remove active class from all menu items
+    document.querySelectorAll('.menu-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    
+    // Show selected section
+    switch(sectionName) {
+      case 'articles':
+        articlesSection.style.display = 'block';
+        document.querySelector('.menu-item:nth-child(1)').classList.add('active');
+        loadArticles();
+        break;
+      case 'profile':
+        profileSection.style.display = 'block';
+        document.querySelector('.menu-item:nth-child(2)').classList.add('active');
+        openProfile();
+        break;
+      case 'myArticles':
+        myArticlesSection.style.display = 'block';
+        document.querySelector('.menu-item:nth-child(3)').classList.add('active');
+        openMyArticles();
+        break;
+      case 'stats':
+        statsSection.style.display = 'block';
+        document.querySelector('.menu-item:nth-child(4)').classList.add('active');
+        loadStats();
+        break;
+    }
+    
+    // Close sidebar on mobile after selection
+    closeSidebarOnMobile();
+  };
+  
+  /* =====================================================
+     AUTHENTICATION
+  ===================================================== */
+  onAuthStateChanged(auth, async (user) => {
+    currentUser = user;
+    
+    if (user) {
+      // User is logged in
+      authBox.innerHTML = `
+        <div class="profile-header">
+          <div class="avatar">${user.email[0].toUpperCase()}</div>
+          <div class="user-info">
+            <strong>${user.email.split('@')[0]}</strong>
+            <div class="muted">عضو مسجل</div>
+            <div class="muted" style="margin-top: 5px; font-size: 12px;">
+              <i class="fas fa-clock"></i> ${formatDate(user.metadata.lastSignInTime || Date.now())}
+            </div>
+          </div>
+        </div>
+        <div class="auth-buttons">
+          <button class="btn ghost" id="logout">
+            <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+          </button>
+        </div>
+      `;
+      
+      document.getElementById('logout').onclick = () => signOut(auth);
+      initProfile(user.uid);
+      updateStats();
+    } else {
+      // User is not logged in
+      authBox.innerHTML = `
+        <h3 style="margin-bottom: 15px;"><i class="fas fa-user"></i> تسجيل الدخول</h3>
+        <div class="auth-buttons">
+          <input id="email" placeholder="البريد الإلكتروني" type="email">
+          <input id="pass" type="password" placeholder="كلمة المرور">
+          <button class="btn" id="login">
+            <i class="fas fa-sign-in-alt"></i> دخول
+          </button>
+          <button class="btn ghost" id="register">
+            <i class="fas fa-user-plus"></i> إنشاء حساب جديد
+          </button>
+        </div>
+      `;
+      
+      document.getElementById('login').onclick = () => login();
+      document.getElementById('register').onclick = () => register();
+      
+      // إضافة إمكانية الضغط على Enter لتسجيل الدخول
+      document.getElementById('pass')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') login();
+      });
+    }
+    
+    // Load articles by default
+    loadArticles();
+  });
+  
+  function login() {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('pass').value;
+    
+    if (!email || !pass) {
+      showNotification('يرجى ملء جميع الحقول', 'error');
+      return;
+    }
+    
+    signInWithEmailAndPassword(auth, email, pass)
+      .then(() => showNotification('تم تسجيل الدخول بنجاح', 'success'))
+      .catch(e => showNotification(e.message, 'error'));
+  }
+  
+  function register() {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('pass').value;
+    
+    if (!email || !pass) {
+      showNotification('يرجى ملء جميع الحقول', 'error');
+      return;
+    }
+    
+    if (pass.length < 6) {
+      showNotification('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
+      return;
+    }
+    
+    createUserWithEmailAndPassword(auth, email, pass)
+      .then(() => showNotification('تم إنشاء الحساب بنجاح', 'success'))
+      .catch(e => showNotification(e.message, 'error'));
+  }
+  
+  /* =====================================================
+     PROFILE SYSTEM
+  ===================================================== */
+  function initProfile(uid) {
+    const userRef = ref(db, 'users/' + uid);
+    get(userRef).then(snap => {
+      if (!snap.exists()) {
+        set(userRef, {
+          username: `مستخدم_${Math.floor(Math.random() * 1000)}`,
+          bio: 'مرحبًا! أنا مستخدم جديد في Red Pill Platform.',
+          joinDate: Date.now(),
+          lastLogin: Date.now(),
+          articlesCount: 0,
+          likesCount: 0,
+          commentsCount: 0
+        });
+      } else {
+        // تحديث وقت آخر دخول
+        update(userRef, { lastLogin: Date.now() });
+      }
+    });
+  }
+  
+  async function openProfile() {
+    if (!currentUser) {
+      profileView.innerHTML = `
+        <div class="card highlight">
+          <div class="empty-state">
+            <i class="fas fa-user-lock"></i>
+            <h3>يجب تسجيل الدخول</h3>
+            <p>سجل الدخول لعرض وتعديل ملفك الشخصي</p>
+            <button class="btn" onclick="showSection('articles')" style="margin-top: 20px; width: auto;">
+              <i class="fas fa-arrow-right"></i> العودة للمقالات
+            </button>
+          </div>
+        </div>
+      `;
+      return;
+    }
+    
+    const snap = await get(ref(db, 'users/' + currentUser.uid));
+    const userData = snap.val();
+    
+    // Get user's articles count
+    const articlesSnap = await get(ref(db, 'articles'));
+    let userArticlesCount = 0;
+    articlesSnap.forEach(article => {
+      if (article.val().author === currentUser.uid) {
+        userArticlesCount++;
+      }
+    });
+    
+    // Get user's likes count
+    let userLikesCount = 0;
+    articlesSnap.forEach(article => {
+      const likes = article.val().likesCount || 0;
+      if (article.val().author === currentUser.uid) {
+        userLikesCount += likes;
+      }
+    });
+    
+    // Get user's comments count
+    let userCommentsCount = 0;
+    const commentsSnap = await get(ref(db, 'comments'));
+    if (commentsSnap.exists()) {
+      commentsSnap.forEach(commentSection => {
+        commentSection.forEach(comment => {
+          if (comment.val().author === currentUser.uid) {
+            userCommentsCount++;
+          }
+        });
+      });
+    }
+    
+    profileView.innerHTML = `
+      <div class="card highlight fade-in">
+        <div class="profile-header">
+          <div class="avatar">${currentUser.email[0].toUpperCase()}</div>
+          <div>
+            <h3>${userData.username || 'مستخدم'}</h3>
+            <div class="muted">${currentUser.email}</div>
+            <div class="muted">منذ ${formatDate(userData.joinDate)}</div>
+          </div>
+        </div>
+        
+        <div class="profile-stats">
+          <div class="stat">
+            <div class="stat-value">${userArticlesCount}</div>
+            <div class="stat-label">مقالات</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">${userLikesCount}</div>
+            <div class="stat-label">إعجابات</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">${userCommentsCount}</div>
+            <div class="stat-label">تعليقات</div>
+          </div>
+        </div>
+        
+        <div style="background: rgba(30, 30, 36, 0.5); padding: 15px; border-radius: var(--radius-sm); margin: 20px 0;">
+          <h4><i class="fas fa-info-circle"></i> معلومات الحساب</h4>
+          <div class="muted" style="margin-top: 10px;">
+            <p><i class="fas fa-envelope"></i> <strong>البريد:</strong> ${currentUser.email}</p>
+            <p style="margin-top: 8px;"><i class="fas fa-calendar"></i> <strong>تاريخ الانضمام:</strong> ${new Date(userData.joinDate).toLocaleDateString('ar-SA')}</p>
+            <p style="margin-top: 8px;"><i class="fas fa-clock"></i> <strong>آخر نشاط:</strong> ${formatDate(userData.lastLogin || userData.joinDate)}</p>
+          </div>
+        </div>
+        
+        <label>اسم المستخدم</label>
+        <input id="p-name" value="${userData.username || ''}" placeholder="اسم المستخدم">
+        
+        <label style="margin-top: 15px;">نبذة عنك</label>
+        <textarea id="p-bio" rows="3" placeholder="اكتب نبذة عن نفسك...">${userData.bio || ''}</textarea>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button class="btn" onclick="saveProfile()">
+            <i class="fas fa-save"></i> حفظ التعديلات
+          </button>
+          <button class="btn ghost" onclick="showSection('articles')">
+            <i class="fas fa-arrow-right"></i> العودة
+          </button>
+        </div>
+      </div>
+    `;
+  }
+  
+  window.saveProfile = () => {
+    const username = document.getElementById('p-name').value.trim();
+    const bio = document.getElementById('p-bio').value.trim();
+    
+    if (!username) {
+      showNotification('يرجى إدخال اسم مستخدم', 'error');
+      return;
+    }
+    
+    if (username.length < 3) {
+      showNotification('اسم المستخدم يجب أن يكون 3 أحرف على الأقل', 'error');
+      return;
+    }
+    
+    update(ref(db, 'users/' + currentUser.uid), {
+      username: username,
+      bio: bio,
+      updated: Date.now()
+    }).then(() => {
+      showNotification('تم تحديث الملف الشخصي', 'success');
+      openProfile();
+    }).catch(error => {
+      showNotification(error.message, 'error');
+    });
+  };
+  
+  /* =====================================================
+     ARTICLES SYSTEM
+  ===================================================== */
+  function loadArticles() {
+    articlesDiv.innerHTML = `
+      <div class="loading" id="loadingArticles">
+        <div class="spinner"></div>
+      </div>
+    `;
+    
+    const articlesRef = ref(db, 'articles');
+    onValue(articlesRef, async (snap) => {
+      articlesDiv.innerHTML = '';
+      allArticles = [];
+      
+      if (!snap.exists()) {
+        articlesDiv.innerHTML = `
+          <div class="empty-state fade-in">
+            <i class="fas fa-newspaper"></i>
+            <h3>لا توجد مقالات بعد</h3>
+            <p>كن أول من ينشر مقالًا على المنصة!</p>
+            <button class="btn" onclick="openPublishModal()" style="margin-top: 20px; width: auto;">
+              <i class="fas fa-pen-fancy"></i> نشر أول مقال
+            </button>
+          </div>
+        `;
+        return;
+      }
+      
+      // Convert to array
+      snap.forEach(articleSnap => {
+        allArticles.push({
+          id: articleSnap.key,
+          ...articleSnap.val()
+        });
+      });
+      
+      // Apply current filter
+      let filteredArticles = [...allArticles];
+      
+      if (currentFilter === 'popular') {
+        filteredArticles.sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0));
+      } else if (currentFilter === 'recent') {
+        filteredArticles.sort((a, b) => b.created - a.created);
+      } else if (currentFilter === 'featured') {
+        // تصفية المقالات المميزة (نفترض أن المقالات المميزة تحتوي على خاصية featured: true)
+        filteredArticles = filteredArticles.filter(article => article.featured === true);
+        filteredArticles.sort((a, b) => b.created - a.created);
+      } else {
+        // 'all' - show all articles
+        filteredArticles.sort((a, b) => b.created - a.created);
+      }
+      
+      // تحميل إعجابات المستخدم الحالي
+      if (currentUser) {
+        await loadUserLikes();
+      }
+      
+      // Render each article
+      for (const article of filteredArticles) {
+        await renderArticle(article);
+      }
+      
+      updateStats();
+      updateTodayArticlesCount();
+    });
+  }
+  
+  // تحميل إعجابات المستخدم الحالي
+  async function loadUserLikes() {
+    if (!currentUser) return;
+    
+    userLikes.clear();
+    const likesRef = ref(db, 'likes');
+    const likesSnap = await get(likesRef);
+    
+    if (likesSnap.exists()) {
+      likesSnap.forEach(articleLikes => {
+        const articleId = articleLikes.key;
+        articleLikes.forEach(like => {
+          if (like.key === currentUser.uid) {
+            userLikes.set(articleId, true);
+          }
+        });
+      });
+    }
+  }
+  
+  window.filterArticles = (filterType) => {
+    currentFilter = filterType;
+    
+    // حفظ موضع التمرير الحالي
+    const scrollPosition = window.scrollY;
+    
+    // Update active filter button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    
+    event.target.classList.add('active');
+    
+    // Reload articles with new filter
+    loadArticles();
+    
+    // العودة لنفس موضع التمرير بعد تحميل المقالات
+    setTimeout(() => {
+      window.scrollTo(0, scrollPosition);
+    }, 100);
+  };
+  
+  async function renderArticle(article) {
+    const card = document.createElement('div');
+    card.className = 'card fade-in';
+    
+    // Get author info
+    let authorName = 'مجهول';
+    let authorInitial = '?';
+    
+    if (article.author) {
+      const authorSnap = await get(ref(db, 'users/' + article.author));
+      if (authorSnap.exists()) {
+        authorName = authorSnap.val().username || 'مستخدم';
+        authorInitial = authorName.charAt(0);
+      }
+    }
+    
+    // Check if current user liked this article
+    let liked = false;
+    if (currentUser) {
+      liked = userLikes.has(article.id);
+    }
+    
+    // Check if current user is the author
+    const isAuthor = currentUser && article.author === currentUser.uid;
+    
+    // Add tags based on article properties
+    let tagsHTML = '';
+    if (article.likesCount > 10) {
+      tagsHTML += '<span class="tag hot">🔥 شائع</span>';
+    }
+    
+    if (Date.now() - article.created < 24 * 60 * 60 * 1000) {
+      tagsHTML += '<span class="tag new">🆕 جديد</span>';
+    }
+    
+    if (article.featured) {
+      tagsHTML += '<span class="tag" style="background: rgba(255, 193, 7, 0.15); color: #ffd166;">⭐ مميز</span>';
+    }
+    
+    if (article.category) {
+      tagsHTML += `<span class="tag">${article.category}</span>`;
+    }
+    
+    if (article.readTime) {
+      tagsHTML += `<span class="tag" style="background: rgba(108, 117, 125, 0.15); color: #adb5bd;">⏱️ ${article.readTime} د</span>`;
+    }
+    
+    // حساب وقت القراءة التقريبي إذا لم يكن محددًا
+    const readTime = article.readTime || Math.max(1, Math.floor((article.content.length || 0) / 500));
+    
+    card.innerHTML = `
+      <div class="article-title">${article.title}</div>
+      <div style="margin-top: 8px;">
+        ${tagsHTML}
+      </div>
+      <div class="article-meta">
+        <span><i class="far fa-calendar"></i> ${formatDate(article.created)}</span>
+        <span><i class="far fa-user"></i> ${authorName}</span>
+        <span><i class="far fa-eye"></i> ${Math.floor(Math.random() * 100) + 10} مشاهدة</span>
+        <span><i class="far fa-clock"></i> ${readTime} دقيقة قراءة</span>
+      </div>
+      <div class="article-content">
+        ${article.content.length > 250 ? article.content.substring(0, 250) + '...' : article.content}
+      </div>
+      <div class="article-actions">
+        <div class="action-btn like ${liked ? 'active' : ''}" data-id="${article.id}" onclick="toggleLike('${article.id}', ${liked})">
+          <i class="${liked ? 'fas' : 'far'} fa-heart"></i>
+          <span class="like-count-${article.id}">${article.likesCount || 0}</span>
+        </div>
+        <div class="action-btn comment" onclick="openComments('${article.id}')">
+          <i class="far fa-comment"></i>
+          <span>${article.commentsCount || 0}</span>
+        </div>
+        <div class="action-btn share" onclick="shareArticle('${article.id}', '${article.title}')">
+          <i class="far fa-share-square"></i>
+          <span>مشاركة</span>
+        </div>
+        ${isAuthor ? `
+        <div class="action-btn" style="color: #ff6b6b;" onclick="deleteArticle('${article.id}')">
+          <i class="far fa-trash-alt"></i>
+          <span>حذف</span>
+        </div>
+        ` : ''}
+        ${isAuthor && article.featured ? `
+        <div class="action-btn" style="color: #ffc107;">
+          <i class="fas fa-star"></i>
+          <span>مميز</span>
+        </div>
+        ` : ''}
+      </div>
+    `;
+    
+    articlesDiv.appendChild(card);
+  }
+  
+  /* =====================================================
+     MY ARTICLES VIEW
+  ===================================================== */
+  async function openMyArticles() {
+    if (!currentUser) {
+      myArticlesView.innerHTML = `
+        <div class="card highlight">
+          <div class="empty-state">
+            <i class="fas fa-user-lock"></i>
+            <h3>يجب تسجيل الدخول</h3>
+            <p>سجل الدخول لعرض مقالاتك</p>
+            <button class="btn" onclick="showSection('articles')" style="margin-top: 20px; width: auto;">
+              <i class="fas fa-arrow-right"></i> العودة للمقالات
+            </button>
+          </div>
+        </div>
+      `;
+      return;
+    }
+    
+    myArticlesView.innerHTML = `
+      <div class="card highlight fade-in">
+        <h3><i class="fas fa-newspaper"></i> مقالاتي</h3>
+        <p class="muted" style="margin-top: 10px;">إدارة مقالاتك المنشورة على المنصة</p>
+        <div id="myArticlesList" style="margin-top: 20px;"></div>
+      </div>
+    `;
+    
+    const myArticlesList = document.getElementById('myArticlesList');
+    myArticlesList.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    
+    // Get user's articles
+    const articlesSnap = await get(ref(db, 'articles'));
+    const userArticles = [];
+    
+    articlesSnap.forEach(articleSnap => {
+      const article = articleSnap.val();
+      if (article.author === currentUser.uid) {
+        userArticles.push({
+          id: articleSnap.key,
+          ...article
+        });
+      }
+    });
+    
+    if (userArticles.length === 0) {
+      myArticlesList.innerHTML = `
+        <div class="empty-state fade-in">
+          <i class="fas fa-newspaper"></i>
+          <p>لم تنشر أي مقالات بعد</p>
+          <button class="btn" onclick="openPublishModal()" style="margin-top: 15px; width: auto;">
+            <i class="fas fa-pen-fancy"></i> نشر أول مقال
+          </button>
+        </div>
+      `;
+      return;
+    }
+    
+    // Sort by date (newest first)
+    userArticles.sort((a, b) => b.created - a.created);
+    
+    // Display user's articles
+    userArticles.forEach(article => {
+      const articleEl = document.createElement('div');
+      articleEl.className = 'card fade-in';
+      articleEl.style.marginBottom = '15px';
+      articleEl.style.padding = '20px';
+      
+      const isFeatured = article.featured ? '<span style="color: #ffc107; margin-right: 5px;"><i class="fas fa-star"></i></span>' : '';
+      
+      articleEl.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+          <div style="flex: 1; min-width: 200px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              ${isFeatured}
+              <strong>${article.title}</strong>
+            </div>
+            <div class="muted" style="margin-top: 5px;">
+              ${formatDate(article.created)} • ${article.category || 'عام'} • ${article.readTime || '1'} دقيقة قراءة
+            </div>
+            <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 14px;">
+              <span><i class="far fa-heart"></i> ${article.likesCount || 0} إعجاب</span>
+              <span><i class="far fa-comment"></i> ${article.commentsCount || 0} تعليق</span>
+              <span><i class="far fa-eye"></i> ${Math.floor(Math.random() * 100) + 10} مشاهدة</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn small" onclick="toggleFeatured('${article.id}', ${article.featured || false})">
+              ${article.featured ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>'}
+              ${article.featured ? 'إلغاء التميز' : 'تمييز'}
+            </button>
+            <button class="btn small danger" onclick="deleteArticle('${article.id}')">
+              <i class="far fa-trash-alt"></i> حذف
+            </button>
+          </div>
+        </div>
+      `;
+      
+      myArticlesList.appendChild(articleEl);
+    });
+  }
+  
+  /* =====================================================
+     STATS VIEW
+  ===================================================== */
+  async function loadStats() {
+    statsView.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    
+    // Get articles count
+    const articlesSnap = await get(ref(db, 'articles'));
+    const articlesCount = articlesSnap.exists() ? articlesSnap.size : 0;
+    
+    // Get users count
+    const usersSnap = await get(ref(db, 'users'));
+    const usersCount = usersSnap.exists() ? usersSnap.size : 0;
+    
+    // Calculate total likes
+    let totalLikes = 0;
+    let totalFeatured = 0;
+    if (articlesSnap.exists()) {
+      articlesSnap.forEach(article => {
+        totalLikes += article.val().likesCount || 0;
+        if (article.val().featured) {
+          totalFeatured++;
+        }
+      });
+    }
+    
+    // Calculate total comments
+    let totalComments = 0;
+    const commentsSnap = await get(ref(db, 'comments'));
+    if (commentsSnap.exists()) {
+      commentsSnap.forEach(commentSection => {
+        totalComments += commentSection.size || 0;
+      });
+    }
+    
+    // حساب المقالات المنشورة اليوم
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayTimestamp = today.getTime();
+    let todayArticles = 0;
+    if (articlesSnap.exists()) {
+      articlesSnap.forEach(article => {
+        if (article.val().created >= todayTimestamp) {
+          todayArticles++;
+        }
+      });
+    }
+    
+    // حساب المستخدمين النشطين (دخلوا خلال آخر 7 أيام)
+    const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    let activeUsers = 0;
+    if (usersSnap.exists()) {
+      usersSnap.forEach(user => {
+        if (user.val().lastLogin && user.val().lastLogin >= weekAgo) {
+          activeUsers++;
+        }
+      });
+    }
+    
+    statsView.innerHTML = `
+      <div class="fade-in">
+        <div class="profile-stats">
+          <div class="stat">
+            <div class="stat-value">${articlesCount}</div>
+            <div class="stat-label">مقالات</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">${usersCount}</div>
+            <div class="stat-label">مستخدمين</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">${totalLikes}</div>
+            <div class="stat-label">إعجابات</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">${totalComments}</div>
+            <div class="stat-label">تعليقات</div>
+          </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 30px 0;">
+          <div style="background: rgba(30, 30, 36, 0.5); padding: 20px; border-radius: var(--radius);">
+            <h4><i class="fas fa-chart-line"></i> النشاط اليومي</h4>
+            <div style="margin-top: 10px;">
+              <div class="stat-value">${todayArticles}</div>
+              <div class="stat-label">مقالات اليوم</div>
+            </div>
+          </div>
+          
+          <div style="background: rgba(30, 30, 36, 0.5); padding: 20px; border-radius: var(--radius);">
+            <h4><i class="fas fa-users"></i> المستخدمون</h4>
+            <div style="margin-top: 10px;">
+              <div class="stat-value">${activeUsers}</div>
+              <div class="stat-label">نشطون هذا الأسبوع</div>
+            </div>
+          </div>
+          
+          <div style="background: rgba(30, 30, 36, 0.5); padding: 20px; border-radius: var(--radius);">
+            <h4><i class="fas fa-star"></i> المحتوى المميز</h4>
+            <div style="margin-top: 10px;">
+              <div class="stat-value">${totalFeatured}</div>
+              <div class="stat-label">مقالات مميزة</div>
+            </div>
+          </div>
+        </div>
+        
+        <h4 style="margin-top: 30px;"><i class="fas fa-chart-bar"></i> إحصائيات مفصلة</h4>
+        <div class="muted" style="margin-top: 15px; line-height: 1.8;">
+          <p><i class="fas fa-file-alt"></i> <strong>إجمالي المقالات:</strong> ${articlesCount} مقال</p>
+          <p><i class="fas fa-user-friends"></i> <strong>المستخدمون المسجلون:</strong> ${usersCount} مستخدم</p>
+          <p><i class="fas fa-heart"></i> <strong>إجمالي الإعجابات:</strong> ${totalLikes} إعجاب</p>
+          <p><i class="fas fa-comments"></i> <strong>إجمالي التعليقات:</strong> ${totalComments} تعليق</p>
+          <p><i class="fas fa-star"></i> <strong>المقالات المميزة:</strong> ${totalFeatured} مقال</p>
+          <p><i class="fas fa-calendar-day"></i> <strong>مقالات اليوم:</strong> ${todayArticles} مقال</p>
+          <p><i class="fas fa-user-check"></i> <strong>المستخدمون النشطون:</strong> ${activeUsers} مستخدم</p>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 30px;">
+          <button class="btn small" onclick="refreshStats()">
+            <i class="fas fa-redo"></i> تحديث الإحصائيات
+          </button>
+          <button class="btn small ghost" onclick="showSection('articles')">
+            <i class="fas fa-arrow-right"></i> تصفح المقالات
+          </button>
+        </div>
+      </div>
+    `;
+  }
+  
+  window.refreshStats = () => {
+    loadStats();
+    showNotification('تم تحديث الإحصائيات', 'success');
+  };
+  
+  /* =====================================================
+     UPDATE TODAY ARTICLES COUNT
+  ===================================================== */
+  async function updateTodayArticlesCount() {
+    const articlesSnap = await get(ref(db, 'articles'));
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayTimestamp = today.getTime();
+    let todayArticles = 0;
+    
+    if (articlesSnap.exists()) {
+      articlesSnap.forEach(article => {
+        if (article.val().created >= todayTimestamp) {
+          todayArticles++;
+        }
+      });
+    }
+    
+    todayArticlesCount.textContent = todayArticles;
+  }
+  
+  /* =====================================================
+     PUBLISH ARTICLE
+  ===================================================== */
+  window.openPublishModal = () => {
+    if (!currentUser) {
+      showNotification('يجب تسجيل الدخول أولاً', 'error');
+      return;
+    }
+    
+    publishModal.style.display = 'flex';
+    document.getElementById('articleTitle').focus();
+    closeSidebarOnMobile();
+  };
+  
+  window.closePublishModal = () => {
+    publishModal.style.display = 'none';
+    // Clear form
+    document.getElementById('articleTitle').value = '';
+    document.getElementById('articleContent').value = '';
+    document.getElementById('articleCategory').value = 'عام';
+    document.getElementById('articleReadTime').value = '3';
+    document.getElementById('articleFeatured').checked = false;
+  };
+  
+  window.publishArticle = () => {
+    const title = document.getElementById('articleTitle').value.trim();
+    const content = document.getElementById('articleContent').value.trim();
+    const category = document.getElementById('articleCategory').value;
+    const readTime = document.getElementById('articleReadTime').value;
+    const featured = document.getElementById('articleFeatured').checked;
+    
+    if (!title || !content) {
+      showNotification('يرجى ملء جميع الحقول', 'error');
+      return;
+    }
+    
+    if (title.length < 5) {
+      showNotification('عنوان المقال قصير جدًا', 'error');
+      return;
+    }
+    
+    if (content.length < 50) {
+      showNotification('محتوى المقال قصير جدًا', 'error');
+      return;
+    }
+    
+    const articleData = {
+      title: title,
+      content: content,
+      category: category,
+      author: currentUser.uid,
+      created: Date.now(),
+      likesCount: 0,
+      commentsCount: 0,
+      readTime: readTime,
+      featured: featured
+    };
+    
+    push(ref(db, 'articles'), articleData).then((result) => {
+      showNotification('تم نشر المقال بنجاح', 'success');
+      closePublishModal();
+      showSection('articles');
+      
+      // Update user's articles count
+      const userRef = ref(db, 'users/' + currentUser.uid);
+      get(userRef).then(snap => {
+        const userData = snap.val() || {};
+        const currentCount = userData.articlesCount || 0;
+        update(userRef, { 
+          articlesCount: currentCount + 1,
+          lastArticle: Date.now()
+        });
+      });
+      
+      // إذا كان المقال مميزًا، إضافة إشعار
+      if (featured) {
+        setTimeout(() => {
+          showNotification('تم نشر مقال مميز جديد!', 'success');
+        }, 1000);
+      }
+    }).catch(error => {
+      showNotification(error.message, 'error');
+    });
+  };
+  
+  /* =====================================================
+     LIKES SYSTEM - تم التعديل لمنع إعادة التحميل
+  ===================================================== */
+  window.toggleLike = async (articleId, liked) => {
+    if (!currentUser) {
+      showNotification('يجب تسجيل الدخول أولاً', 'error');
+      return;
+    }
+    
+    const likeBtn = event.target.closest('.action-btn');
+    const likeIcon = likeBtn.querySelector('i');
+    const likeCountSpan = likeBtn.querySelector(`.like-count-${articleId}`);
+    
+    // منع النقر المزدوج
+    if (likeBtn.classList.contains('processing')) return;
+    likeBtn.classList.add('processing');
+    
+    const likeRef = ref(db, `likes/${articleId}/${currentUser.uid}`);
+    const articleRef = ref(db, `articles/${articleId}`);
+    
+    try {
+      if (liked) {
+        // إزالة الإعجاب
+        await remove(likeRef);
+        
+        // تحديث عدد الإعجابات
+        const articleSnap = await get(articleRef);
+        const articleData = articleSnap.val();
+        const newLikesCount = Math.max(0, (articleData.likesCount || 1) - 1);
+        
+        await update(articleRef, { likesCount: newLikesCount });
+        
+        // تحديث واجهة المستخدم
+        likeBtn.classList.remove('active');
+        likeIcon.className = 'far fa-heart';
+        if (likeCountSpan) likeCountSpan.textContent = newLikesCount;
+        
+        // تحديث الخريطة المحلية
+        userLikes.delete(articleId);
+        
+      } else {
+        // إضافة الإعجاب
+        await set(likeRef, true);
+        
+        // تحديث عدد الإعجابات
+        const articleSnap = await get(articleRef);
+        const articleData = articleSnap.val();
+        const newLikesCount = (articleData.likesCount || 0) + 1;
+        
+        await update(articleRef, { likesCount: newLikesCount });
+        
+        // تحديث واجهة المستخدم
+        likeBtn.classList.add('active');
+        likeIcon.className = 'fas fa-heart';
+        if (likeCountSpan) likeCountSpan.textContent = newLikesCount;
+        
+        // تحديث الخريطة المحلية
+        userLikes.set(articleId, true);
+        
+        // تأثير بسيط للإعجاب
+        likeBtn.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+          likeBtn.style.transform = 'scale(1)';
+        }, 200);
+      }
+    } catch (error) {
+      showNotification('حدث خطأ أثناء تحديث الإعجاب', 'error');
+    } finally {
+      setTimeout(() => {
+        likeBtn.classList.remove('processing');
+      }, 300);
+    }
+  };
+  
+  /* =====================================================
+     COMMENTS SYSTEM
+  ===================================================== */
+  window.openComments = (articleId) => {
+    if (!currentUser) {
+      showNotification('يجب تسجيل الدخول أولاً', 'error');
+      return;
+    }
+    
+    currentArticleId = articleId;
+    commentModal.style.display = 'flex';
+    loadComments(articleId);
+  };
+  
+  window.closeCommentModal = () => {
+    commentModal.style.display = 'none';
+    document.getElementById('newComment').value = '';
+  };
+  
+  async function loadComments(articleId) {
+    const commentsList = document.getElementById('commentsList');
+    commentsList.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    
+    const commentsRef = ref(db, `comments/${articleId}`);
+    const commentsSnap = await get(commentsRef);
+    
+    commentsList.innerHTML = '';
+    
+    if (!commentsSnap.exists()) {
+      commentsList.innerHTML = `
+        <div class="empty-state fade-in">
+          <i class="far fa-comments"></i>
+          <p>لا توجد تعليقات بعد</p>
+          <p class="muted">كن أول من يعلق على هذا المقال</p>
+        </div>
+      `;
+      return;
+    }
+    
+    const comments = [];
+    commentsSnap.forEach(commentSnap => {
+      comments.push({
+        id: commentSnap.key,
+        ...commentSnap.val()
+      });
+    });
+    
+    // Sort by date (newest first)
+    comments.sort((a, b) => b.created - a.created);
+    
+    // Display comments
+    for (const comment of comments) {
+      const commentEl = document.createElement('div');
+      commentEl.className = 'comment fade-in';
+      
+      // Get author info
+      let authorName = 'مجهول';
+      if (comment.author) {
+        const authorSnap = await get(ref(db, 'users/' + comment.author));
+        if (authorSnap.exists()) {
+          authorName = authorSnap.val().username || 'مستخدم';
+        }
+      }
+      
+      commentEl.innerHTML = `
+        <div class="comment-header">
+          <div class="comment-author">${authorName}</div>
+          <div class="comment-time">${formatDate(comment.created)}</div>
+        </div>
+        <div class="comment-content">${comment.text}</div>
+      `;
+      
+      commentsList.appendChild(commentEl);
+    }
+  }
+  
+  window.postComment = async () => {
+    const commentText = document.getElementById('newComment').value.trim();
+    
+    if (!commentText) {
+      showNotification('يرجى كتابة تعليق', 'error');
+      return;
+    }
+    
+    const commentRef = ref(db, `comments/${currentArticleId}`);
+    const articleRef = ref(db, `articles/${currentArticleId}`);
+    
+    try {
+      // Add comment
+      await push(commentRef, {
+        text: commentText,
+        author: currentUser.uid,
+        created: Date.now()
+      });
+      
+      // Update comments count
+      const articleSnap = await get(articleRef);
+      const articleData = articleSnap.val();
+      const newCommentsCount = (articleData.commentsCount || 0) + 1;
+      
+      await update(articleRef, { commentsCount: newCommentsCount });
+      
+      // تحديث عدد تعليقات المستخدم
+      const userRef = ref(db, 'users/' + currentUser.uid);
+      get(userRef).then(snap => {
+        const userData = snap.val() || {};
+        const currentComments = userData.commentsCount || 0;
+        update(userRef, { commentsCount: currentComments + 1 });
+      });
+      
+      // Clear input and reload comments
+      document.getElementById('newComment').value = '';
+      loadComments(currentArticleId);
+      
+      showNotification('تم إضافة التعليق', 'success');
+    } catch (error) {
+      showNotification('حدث خطأ أثناء إضافة التعليق', 'error');
+    }
+  };
+  
+  /* =====================================================
+     DELETE ARTICLE
+  ===================================================== */
+  window.deleteArticle = async (articleId) => {
+    if (!confirm('هل أنت متأكد من حذف هذا المقال؟ سيتم حذف جميع الإعجابات والتعليقات المرتبطة به.')) return;
+    
+    const articleRef = ref(db, `articles/${articleId}`);
+    
+    try {
+      // Delete article
+      await remove(articleRef);
+      
+      // Delete associated likes
+      const likesRef = ref(db, `likes/${articleId}`);
+      await remove(likesRef);
+      
+      // Delete associated comments
+      const commentsRef = ref(db, `comments/${articleId}`);
+      await remove(commentsRef);
+      
+      // تحديث عدد مقالات المستخدم
+      if (currentUser) {
+        const userRef = ref(db, 'users/' + currentUser.uid);
+        get(userRef).then(snap => {
+          const userData = snap.val() || {};
+          const currentCount = userData.articlesCount || 1;
+          update(userRef, { articlesCount: Math.max(0, currentCount - 1) });
+        });
+      }
+      
+      showNotification('تم حذف المقال', 'success');
+      
+      // Reload current view
+      setTimeout(() => {
+        if (articlesSection.style.display === 'block') {
+          loadArticles();
+        } else if (myArticlesSection.style.display === 'block') {
+          openMyArticles();
+        }
+      }, 300);
+      
+    } catch (error) {
+      showNotification('حدث خطأ أثناء حذف المقال', 'error');
+    }
+  };
+  
+  /* =====================================================
+     TOGGLE FEATURED ARTICLE
+  ===================================================== */
+  window.toggleFeatured = async (articleId, isCurrentlyFeatured) => {
+    if (!currentUser) return;
+    
+    try {
+      const articleRef = ref(db, `articles/${articleId}`);
+      await update(articleRef, { featured: !isCurrentlyFeatured });
+      
+      showNotification(isCurrentlyFeatured ? 'تم إلغاء تمييز المقال' : 'تم تمييز المقال كمميز', 'success');
+      
+      // إعادة تحميل عرض "مقالاتي"
+      setTimeout(() => {
+        if (myArticlesSection.style.display === 'block') {
+          openMyArticles();
+        }
+      }, 300);
+    } catch (error) {
+      showNotification('حدث خطأ أثناء تحديث حالة المقال', 'error');
+    }
+  };
+  
+  /* =====================================================
+     SHARE ARTICLE
+  ===================================================== */
+  window.shareArticle = (articleId, articleTitle) => {
+    const shareUrl = `${window.location.origin}${window.location.pathname}?article=${articleId}`;
+    const shareText = `اقرأ مقال "${articleTitle}" على Red Pill Platform`;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: articleTitle,
+        text: shareText,
+        url: shareUrl
+      }).then(() => {
+        showNotification('تمت المشاركة بنجاح', 'success');
+      }).catch(() => {
+        // إذا ألغى المستخدم المشاركة، لا تفعل شيئًا
+      });
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        showNotification('تم نسخ رابط المقال', 'success');
+      }).catch(() => {
+        // Fallback أقدم
+        const tempInput = document.createElement('input');
+        tempInput.value = shareUrl;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        showNotification('تم نسخ رابط المقال', 'success');
+      });
+    }
+  };
+  
+  /* =====================================================
+     UTILITY FUNCTIONS
+  ===================================================== */
+  function formatDate(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    
+    // Less than a minute
+    if (diff < 60 * 1000) {
+      return 'الآن';
+    }
+    
+    // Less than an hour
+    if (diff < 60 * 60 * 1000) {
+      const minutes = Math.floor(diff / (60 * 1000));
+      return `منذ ${minutes} دقيقة`;
+    }
+    
+    // Less than a day
+    if (diff < 24 * 60 * 60 * 1000) {
+      const hours = Math.floor(diff / (60 * 60 * 1000));
+      return `منذ ${hours} ساعة`;
+    }
+    
+    // Less than a week
+    if (diff < 7 * 24 * 60 * 60 * 1000) {
+      const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+      return `منذ ${days} يوم`;
+    }
+    
+    // Otherwise, show full date
+    return date.toLocaleDateString('ar-SA', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+  
+  function showNotification(message, type = 'success') {
+    const icon = document.getElementById('notificationIcon');
+    const text = document.getElementById('notificationText');
+    
+    // Set icon based on type
+    if (type === 'success') {
+      icon.className = 'fas fa-check-circle';
+      notification.classList.add('success');
+      notification.classList.remove('error');
+    } else {
+      icon.className = 'fas fa-exclamation-circle';
+      notification.classList.add('error');
+      notification.classList.remove('success');
+    }
+    
+    text.textContent = message;
+    notification.style.display = 'flex';
+    
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+      notification.style.display = 'none';
+    }, 5000);
+  }
+  
+  async function updateStats() {
+    // تحديث عدد المستخدمين النشطين في الشريط الجانبي
+    const usersSnap = await get(ref(db, 'users'));
+    const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    let activeUsers = 0;
+    
+    if (usersSnap.exists()) {
+      usersSnap.forEach(user => {
+        if (user.val().lastLogin && user.val().lastLogin >= weekAgo) {
+          activeUsers++;
+        }
+      });
+    }
+    
+    activeUsersCount.textContent = activeUsers;
+    
+    // Update stats view if it's currently visible
+    if (statsSection.style.display === 'block') {
+      loadStats();
+    }
+  }
+  
+  // Close modals when clicking outside
+  window.addEventListener('click', (e) => {
+    if (e.target === publishModal) {
+      closePublishModal();
+    }
+    
+    if (e.target === commentModal) {
+      closeCommentModal();
+    }
+  });
+  
+  // Close notification when clicked
+  notification.addEventListener('click', () => {
+    notification.style.display = 'none';
+  });
+  
+  // Close sidebar when pressing ESC key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (sidebar.classList.contains('active')) {
+        toggleSidebar();
+      }
+      if (publishModal.style.display === 'flex') {
+        closePublishModal();
+      }
+      if (commentModal.style.display === 'flex') {
+        closeCommentModal();
+      }
+    }
+    
+    // إرسال التعليق بـ Ctrl+Enter
+    if (e.ctrlKey && e.key === 'Enter' && commentModal.style.display === 'flex') {
+      postComment();
+    }
+  });
+  
+  // إضافة تأثير التمرير السلس للروابط الداخلية
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+  
+  // تحديث تلقائي للإحصائيات كل دقيقة
+  setInterval(() => {
+    updateStats();
+  }, 60000);
+  
+  // Initial stats update
+  updateStats();
+  
+  // Load articles by default
+  window.showSection('articles');
+  
+  // إضافة تأثير تحميل أولي
+  window.addEventListener('load', () => {
+    document.body.style.opacity = '0';
+    document.body.style.transition = 'opacity 0.3s';
+    
+    setTimeout(() => {
+      document.body.style.opacity = '1';
+    }, 100);
+  });
+  </script>
+</body>
+</html>
