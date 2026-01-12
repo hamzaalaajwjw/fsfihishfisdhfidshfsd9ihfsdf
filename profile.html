@@ -91,15 +91,21 @@
         import { signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
         import { doc, getDoc, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-        // التحقق من تسجيل الدخول
-        if (!auth.currentUser) {
-            window.location.href = 'login.html';
-        }
-
         class ProfileManager {
             constructor() {
-                this.userId = new URLSearchParams(window.location.search).get('uid') || auth.currentUser?.uid;
+                this.userId = this.getUserId();
+                if (!this.userId) {
+                    window.location.href = 'login.html';
+                    return;
+                }
                 this.init();
+            }
+
+            getUserId() {
+                // الحصول على ID من رابط URL أو من المستخدم الحالي
+                const urlParams = new URLSearchParams(window.location.search);
+                const uid = urlParams.get('uid');
+                return uid || auth.currentUser?.uid;
             }
 
             async init() {
@@ -110,6 +116,12 @@
 
             async loadProfile() {
                 try {
+                    if (!this.userId) {
+                        this.showMessage('يجب تسجيل الدخول أولاً', 'error');
+                        setTimeout(() => window.location.href = 'login.html', 2000);
+                        return;
+                    }
+
                     const userDoc = await getDoc(doc(db, "users", this.userId));
                     
                     if (userDoc.exists()) {
@@ -244,8 +256,17 @@
             }
         }
 
-        // تهيئة مدير الملف الشخصي
-        new ProfileManager();
+        // تحميل الصفحة بعد التحقق من المصادقة
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user && !new URLSearchParams(window.location.search).get('uid')) {
+                window.location.href = 'login.html';
+            } else {
+                // تهيئة مدير الملف الشخصي
+                new ProfileManager();
+            }
+        });
     </script>
 </body>
 </html>
