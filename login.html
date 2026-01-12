@@ -75,13 +75,19 @@
     </div>
 
     <script type="module">
-        import { auth } from './js/firebase-config.js';
+        import { auth, db } from './js/firebase-config.js';
         import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+        import { doc, setDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
         const loginForm = document.getElementById('loginForm');
         const errorMessage = document.getElementById('errorMessage');
         const loginBtn = document.getElementById('loginBtn');
         const loginSpinner = document.getElementById('loginSpinner');
+
+        // إذا كان المستخدم مسجلاً بالفعل، توجيهه للرئيسية
+        if (auth.currentUser) {
+            window.location.href = 'index.html';
+        }
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -102,6 +108,37 @@
             
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // تحديث آخر تسجيل دخول في Firestore
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        await setDoc(doc(db, "users", user.uid), {
+                            lastLogin: serverTimestamp()
+                        }, { merge: true });
+                    } else {
+                        // إنشاء ملف المستخدم إذا لم يكن موجوداً
+                        await setDoc(doc(db, "users", user.uid), {
+                            uid: user.uid,
+                            username: user.displayName || 'مستخدم',
+                            email: user.email,
+                            displayName: user.displayName || 'مستخدم',
+                            photoURL: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=667eea&color=fff`,
+                            followers: [],
+                            following: [],
+                            articles: [],
+                            bio: '',
+                            role: 'user',
+                            isVerified: false,
+                            createdAt: serverTimestamp(),
+                            updatedAt: serverTimestamp(),
+                            lastLogin: serverTimestamp()
+                        });
+                    }
+                } catch (error) {
+                    console.error("خطأ في تحديث ملف المستخدم:", error);
+                }
                 
                 // نجاح تسجيل الدخول - الانتقال مباشرة
                 window.location.href = 'index.html';
@@ -142,14 +179,6 @@
                     field.classList.add('border-red-500');
                     setTimeout(() => field.classList.remove('border-red-500'), 1000);
                 });
-            }
-        });
-
-        // الانتقال التلقائي إذا كان المستخدم مسجلاً
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.location.href = 'index.html';
             }
         });
     </script>
