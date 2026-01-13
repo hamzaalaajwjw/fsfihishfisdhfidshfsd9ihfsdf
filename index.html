@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Red Pill Platform</title>
+  <title>منتدى الريدبيل</title>
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -531,6 +531,9 @@
     margin-bottom: 8px;
     line-height: 1.4;
     color: var(--text);
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
   }
   
   .article-content {
@@ -538,6 +541,10 @@
     line-height: 1.7;
     margin: 16px 0;
     color: var(--text-light);
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
   }
   
   .article-meta {
@@ -556,7 +563,7 @@
   
   .article-actions {
     display: flex;
-    gap: 20px;
+    gap: 10px;
     margin-top: 20px;
     font-size: 15px;
     flex-wrap: wrap;
@@ -570,13 +577,15 @@
     gap: 8px;
     cursor: pointer;
     transition: all 0.2s;
-    padding: 8px 16px;
+    padding: 10px 16px;
     user-select: none;
     border-radius: var(--radius-sm);
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid transparent;
-    min-width: 100px;
+    min-width: 110px;
     justify-content: center;
+    height: 42px;
+    box-sizing: border-box;
   }
   
   .action-btn:hover {
@@ -607,15 +616,6 @@
   .action-btn.comment:hover {
     border-color: rgba(142, 202, 230, 0.3);
     background: rgba(142, 202, 230, 0.1);
-  }
-  
-  .action-btn.share {
-    color: #80ed99;
-  }
-  
-  .action-btn.share:hover {
-    border-color: rgba(128, 237, 153, 0.3);
-    background: rgba(128, 237, 153, 0.1);
   }
   
   .action-btn:active {
@@ -786,6 +786,9 @@
     padding: 16px;
     margin-top: 16px;
     border-left: 3px solid var(--secondary);
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
   }
   
   .comment-header {
@@ -808,6 +811,9 @@
   .comment-content {
     font-size: 15px;
     line-height: 1.6;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
   }
   
   /* =====================================================
@@ -951,14 +957,15 @@
     }
     
     .article-actions {
-      gap: 10px;
+      gap: 8px;
       justify-content: center;
     }
     
     .action-btn {
-      min-width: 80px;
+      min-width: 90px;
       padding: 8px 12px;
       font-size: 14px;
+      height: 38px;
     }
     
     .action-btn span {
@@ -982,15 +989,17 @@
     }
     
     .article-actions {
-      gap: 8px;
+      gap: 5px;
       justify-content: space-around;
     }
     
     .action-btn {
-      min-width: 70px;
+      min-width: 80px;
       padding: 6px 10px;
       flex-direction: column;
       gap: 4px;
+      height: 60px;
+      min-height: 60px;
     }
     
     .action-btn i {
@@ -1049,7 +1058,7 @@
   <header>
     <div class="logo">
       <i class="fas fa-pills"></i>
-      <span>Red Pill Platform</span>
+      <span>منتدى الريدبيل</span>
     </div>
     
     <button class="menu-toggle" id="menuToggle">
@@ -1080,27 +1089,10 @@
             <span>مقالاتي</span>
           </button>
           
-          <button class="menu-item" onclick="showSection('stats')">
-            <i class="fas fa-chart-bar"></i>
-            <span>الإحصائيات</span>
-          </button>
-          
           <button class="menu-item" onclick="openPublishModal()">
             <i class="fas fa-pen-fancy"></i>
             <span>نشر مقال جديد</span>
           </button>
-        </div>
-      </div>
-      
-      <div class="card">
-        <h4><i class="fas fa-info-circle"></i> معلومات المنصة</h4>
-        <div class="muted" style="margin-top: 10px; line-height: 1.8;">
-          <p>مرحبًا بكم في منصة Red Pill للكتابة والمقالات الحصرية.</p>
-          <p style="margin-top: 10px;">شارك أفكارك واقرأ مقالات الآخرين في مجتمع متكامل.</p>
-          <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border);">
-            <p><i class="fas fa-users"></i> <strong>المستخدمون النشطون:</strong> <span id="activeUsersCount">0</span></p>
-            <p style="margin-top: 8px;"><i class="fas fa-fire"></i> <strong>مقال اليوم:</strong> <span id="todayArticlesCount">0</span></p>
-          </div>
         </div>
       </div>
     </div>
@@ -1122,9 +1114,6 @@
             </button>
             <button class="filter-btn" onclick="filterArticles('recent')">
               <i class="fas fa-clock"></i> الأحدث
-            </button>
-            <button class="filter-btn" onclick="filterArticles('featured')">
-              <i class="fas fa-star"></i> المميزة
             </button>
           </div>
         </div>
@@ -1166,27 +1155,6 @@
         
         <div id="myArticlesView"></div>
       </div>
-      
-      <!-- الإحصائيات Section -->
-      <div id="statsSection" class="content-section" style="display: none;">
-        <div class="section-header">
-          <h2 class="section-title"><i class="fas fa-chart-bar"></i> إحصائيات المنصة</h2>
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <button class="btn small" onclick="refreshStats()">
-              <i class="fas fa-redo"></i> تحديث
-            </button>
-            <button class="btn small ghost" onclick="showSection('articles')">
-              <i class="fas fa-arrow-right"></i> العودة
-            </button>
-          </div>
-        </div>
-        
-        <div id="statsView" class="card highlight">
-          <div class="loading" id="loadingStats">
-            <div class="spinner"></div>
-          </div>
-        </div>
-      </div>
     </main>
   </div>
   
@@ -1219,14 +1187,9 @@
           <div>
             <label>التصنيف</label>
             <select id="articleCategory">
-              <option value="عام">عام</option>
-              <option value="تكنولوجيا">تكنولوجيا</option>
-              <option value="فلسفة">فلسفة</option>
-              <option value="أدب">أدب</option>
-              <option value="علم">علم</option>
-              <option value="تطوير ذاتي">تطوير ذاتي</option>
-              <option value="سياسة">سياسة</option>
-              <option value="ثقافة">ثقافة</option>
+              <option value="ريدبيل">ريدبيل</option>
+              <option value="بلاك بيل">بلاك بيل</option>
+              <option value="غير مصنف">غير مصنف</option>
             </select>
           </div>
           
@@ -1240,13 +1203,6 @@
               <option value="15">١٥ دقيقة</option>
             </select>
           </div>
-        </div>
-        
-        <div style="margin-top: 20px;">
-          <label style="display: flex; align-items: center; gap: 8px;">
-            <input type="checkbox" id="articleFeatured" style="width: auto;">
-            <span>تمييز المقال كمميز</span>
-          </label>
         </div>
         
         <div style="display: flex; gap: 10px; margin-top: 30px;">
@@ -1340,15 +1296,12 @@
   const articlesDiv = document.getElementById('articles');
   const profileView = document.getElementById('profileView');
   const myArticlesView = document.getElementById('myArticlesView');
-  const statsView = document.getElementById('statsView');
   const publishModal = document.getElementById('publishModal');
   const commentModal = document.getElementById('commentModal');
   const notification = document.getElementById('notification');
   const menuToggle = document.getElementById('menuToggle');
   const sidebar = document.getElementById('sidebar');
   const sidebarOverlay = document.getElementById('sidebarOverlay');
-  const activeUsersCount = document.getElementById('activeUsersCount');
-  const todayArticlesCount = document.getElementById('todayArticlesCount');
   const paginationDiv = document.getElementById('pagination');
   
   // Character counters
@@ -1360,7 +1313,6 @@
   const articlesSection = document.getElementById('articlesSection');
   const profileSection = document.getElementById('profileSection');
   const myArticlesSection = document.getElementById('myArticlesSection');
-  const statsSection = document.getElementById('statsSection');
   
   // Global variables - محسّنة
   let currentUser = null;
@@ -1624,7 +1576,6 @@
     articlesSection.style.display = 'none';
     profileSection.style.display = 'none';
     myArticlesSection.style.display = 'none';
-    statsSection.style.display = 'none';
     
     document.querySelectorAll('.menu-item').forEach(item => {
       item.classList.remove('active');
@@ -1645,11 +1596,6 @@
         myArticlesSection.style.display = 'block';
         document.querySelector('.menu-item:nth-child(3)').classList.add('active');
         openMyArticles();
-        break;
-      case 'stats':
-        statsSection.style.display = 'block';
-        document.querySelector('.menu-item:nth-child(4)').classList.add('active');
-        loadStats();
         break;
     }
     
@@ -1690,7 +1636,6 @@
       };
       
       initProfile(user.uid);
-      updateStats();
     } else {
       authBox.innerHTML = `
         <h3 style="margin-bottom: 15px; color: var(--text-light);">
@@ -1791,7 +1736,7 @@
       if (!snap.exists()) {
         set(userRef, {
           username: `مستخدم_${Math.floor(Math.random() * 1000)}`,
-          bio: 'مرحبًا! أنا مستخدم جديد في Red Pill Platform.',
+          bio: 'مرحبًا! أنا مستخدم جديد في منتدى الريدبيل.',
           joinDate: Date.now(),
           lastLogin: Date.now(),
           articlesCount: 0,
@@ -1983,7 +1928,7 @@
           <div class="empty-state fade-in">
             <i class="fas fa-newspaper"></i>
             <h3>لا توجد مقالات بعد</h3>
-            <p>كن أول من ينشر مقالًا على المنصة!</p>
+            <p>كن أول من ينشر مقالًا على المنتدى!</p>
             ${currentUser ? `
             <button class="btn" onclick="openPublishModal()" style="margin-top: 20px; width: auto;">
               <i class="fas fa-pen-fancy"></i> نشر أول مقال
@@ -2012,9 +1957,6 @@
         filteredArticles.sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0));
       } else if (currentFilter === 'recent') {
         filteredArticles.sort((a, b) => b.created - a.created);
-      } else if (currentFilter === 'featured') {
-        filteredArticles = filteredArticles.filter(article => article.featured === true);
-        filteredArticles.sort((a, b) => b.created - a.created);
       } else {
         filteredArticles.sort((a, b) => b.created - a.created);
       }
@@ -2033,9 +1975,6 @@
       
       await displayArticlesPage(filteredArticles, currentPage);
       updatePagination(totalPages, filteredArticles);
-      
-      updateStats();
-      updateTodayArticlesCount();
     } catch (error) {
       console.error('Error loading articles:', error);
       showNotification('حدث خطأ في تحميل المقالات', 'error');
@@ -2247,10 +2186,6 @@
       tagsHTML += '<span class="tag new">🆕 جديد</span>';
     }
     
-    if (article.featured) {
-      tagsHTML += '<span class="tag" style="background: rgba(255, 193, 7, 0.15); color: #ffd166;">⭐ مميز</span>';
-    }
-    
     if (article.category) {
       tagsHTML += `<span class="tag">${article.category}</span>`;
     }
@@ -2299,20 +2234,10 @@
       <div class="article-actions">
         ${likeButton}
         ${commentButton}
-        <div class="action-btn share" onclick="shareArticle('${article.id}', '${article.title}')">
-          <i class="far fa-share-square"></i>
-          <span>مشاركة</span>
-        </div>
         ${isAuthor ? `
         <div class="action-btn" style="color: #ff6b6b;" onclick="deleteArticle('${article.id}')">
           <i class="far fa-trash-alt"></i>
           <span>حذف</span>
-        </div>
-        ` : ''}
-        ${isAuthor && article.featured ? `
-        <div class="action-btn" style="color: #ffc107;">
-          <i class="fas fa-star"></i>
-          <span>مميز</span>
         </div>
         ` : ''}
       </div>
@@ -2344,7 +2269,7 @@
     myArticlesView.innerHTML = `
       <div class="card highlight fade-in">
         <h3><i class="fas fa-newspaper"></i> مقالاتي</h3>
-        <p class="muted" style="margin-top: 10px;">إدارة مقالاتك المنشورة على المنصة</p>
+        <p class="muted" style="margin-top: 10px;">إدارة مقالاتك المنشورة على المنتدى</p>
         <div id="myArticlesList" style="margin-top: 20px;"></div>
       </div>
     `;
@@ -2388,17 +2313,14 @@
       articleEl.style.marginBottom = '15px';
       articleEl.style.padding = '20px';
       
-      const isFeatured = article.featured ? '<span style="color: #ffc107; margin-right: 5px;"><i class="fas fa-star"></i></span>' : '';
-      
       articleEl.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
           <div style="flex: 1; min-width: 200px;">
             <div style="display: flex; align-items: center; gap: 8px;">
-              ${isFeatured}
               <strong>${article.title}</strong>
             </div>
             <div class="muted" style="margin-top: 5px;">
-              ${formatDate(article.created)} • ${article.category || 'عام'} • ${article.readTime || '1'} دقيقة قراءة
+              ${formatDate(article.created)} • ${article.category || 'غير مصنف'} • ${article.readTime || '1'} دقيقة قراءة
             </div>
             <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 14px;">
               <span><i class="far fa-heart"></i> ${article.likesCount || 0} إعجاب</span>
@@ -2407,10 +2329,6 @@
             </div>
           </div>
           <div style="display: flex; gap: 8px;">
-            <button class="btn small" onclick="toggleFeatured('${article.id}', ${article.featured || false})">
-              ${article.featured ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>'}
-              ${article.featured ? 'إلغاء التميز' : 'تمييز'}
-            </button>
             <button class="btn small danger" onclick="deleteArticle('${article.id}')">
               <i class="far fa-trash-alt"></i> حذف
             </button>
@@ -2420,156 +2338,6 @@
       
       myArticlesList.appendChild(articleEl);
     });
-  }
-  
-  /* =====================================================
-     STATS VIEW
-  ===================================================== */
-  async function loadStats() {
-    statsView.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-    
-    const articlesSnap = await get(ref(db, 'articles'));
-    const articlesCount = articlesSnap.exists() ? articlesSnap.size : 0;
-    
-    const usersSnap = await get(ref(db, 'users'));
-    const usersCount = usersSnap.exists() ? usersSnap.size : 0;
-    
-    let totalLikes = 0;
-    let totalFeatured = 0;
-    if (articlesSnap.exists()) {
-      articlesSnap.forEach(article => {
-        totalLikes += article.val().likesCount || 0;
-        if (article.val().featured) {
-          totalFeatured++;
-        }
-      });
-    }
-    
-    let totalComments = 0;
-    const commentsSnap = await get(ref(db, 'comments'));
-    if (commentsSnap.exists()) {
-      commentsSnap.forEach(commentSection => {
-        totalComments += commentSection.size || 0;
-      });
-    }
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayTimestamp = today.getTime();
-    let todayArticles = 0;
-    if (articlesSnap.exists()) {
-      articlesSnap.forEach(article => {
-        if (article.val().created >= todayTimestamp) {
-          todayArticles++;
-        }
-      });
-    }
-    
-    const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-    let activeUsers = 0;
-    if (usersSnap.exists()) {
-      usersSnap.forEach(user => {
-        if (user.val().lastLogin && user.val().lastLogin >= weekAgo) {
-          activeUsers++;
-        }
-      });
-    }
-    
-    statsView.innerHTML = `
-      <div class="fade-in">
-        <div class="profile-stats">
-          <div class="stat">
-            <div class="stat-value">${articlesCount}</div>
-            <div class="stat-label">مقالات</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value">${usersCount}</div>
-            <div class="stat-label">مستخدمين</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value">${totalLikes}</div>
-            <div class="stat-label">إعجابات</div>
-          </div>
-          <div class="stat">
-            <div class="stat-value">${totalComments}</div>
-            <div class="stat-label">تعليقات</div>
-          </div>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 30px 0;">
-          <div style="background: rgba(30, 30, 36, 0.5); padding: 20px; border-radius: var(--radius);">
-            <h4><i class="fas fa-chart-line"></i> النشاط اليومي</h4>
-            <div style="margin-top: 10px;">
-              <div class="stat-value">${todayArticles}</div>
-              <div class="stat-label">مقالات اليوم</div>
-            </div>
-          </div>
-          
-          <div style="background: rgba(30, 30, 36, 0.5); padding: 20px; border-radius: var(--radius);">
-            <h4><i class="fas fa-users"></i> المستخدمون</h4>
-            <div style="margin-top: 10px;">
-              <div class="stat-value">${activeUsers}</div>
-              <div class="stat-label">نشطون هذا الأسبوع</div>
-            </div>
-          </div>
-          
-          <div style="background: rgba(30, 30, 36, 0.5); padding: 20px; border-radius: var(--radius);">
-            <h4><i class="fas fa-star"></i> المحتوى المميز</h4>
-            <div style="margin-top: 10px;">
-              <div class="stat-value">${totalFeatured}</div>
-              <div class="stat-label">مقالات مميزة</div>
-            </div>
-          </div>
-        </div>
-        
-        <h4 style="margin-top: 30px;"><i class="fas fa-chart-bar"></i> إحصائيات مفصلة</h4>
-        <div class="muted" style="margin-top: 15px; line-height: 1.8;">
-          <p><i class="fas fa-file-alt"></i> <strong>إجمالي المقالات:</strong> ${articlesCount} مقال</p>
-          <p><i class="fas fa-user-friends"></i> <strong>المستخدمون المسجلون:</strong> ${usersCount} مستخدم</p>
-          <p><i class="fas fa-heart"></i> <strong>إجمالي الإعجابات:</strong> ${totalLikes} إعجاب</p>
-          <p><i class="fas fa-comments"></i> <strong>إجمالي التعليقات:</strong> ${totalComments} تعليق</p>
-          <p><i class="fas fa-star"></i> <strong>المقالات المميزة:</strong> ${totalFeatured} مقال</p>
-          <p><i class="fas fa-calendar-day"></i> <strong>مقالات اليوم:</strong> ${todayArticles} مقال</p>
-          <p><i class="fas fa-user-check"></i> <strong>المستخدمون النشطون:</strong> ${activeUsers} مستخدم</p>
-        </div>
-        
-        <div style="display: flex; gap: 10px; margin-top: 30px;">
-          <button class="btn small" onclick="refreshStats()">
-            <i class="fas fa-redo"></i> تحديث الإحصائيات
-          </button>
-          <button class="btn small ghost" onclick="showSection('articles')">
-            <i class="fas fa-arrow-right"></i> تصفح المقالات
-          </button>
-        </div>
-      </div>
-    `;
-  }
-  
-  window.refreshStats = () => {
-    loadStats();
-    showNotification('تم تحديث الإحصائيات', 'success');
-  };
-  
-  /* =====================================================
-     UPDATE TODAY ARTICLES COUNT
-  ===================================================== */
-  async function updateTodayArticlesCount() {
-    const articlesSnap = await get(ref(db, 'articles'));
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayTimestamp = today.getTime();
-    let todayArticles = 0;
-    
-    if (articlesSnap.exists()) {
-      articlesSnap.forEach(article => {
-        if (article.val().created >= todayTimestamp) {
-          todayArticles++;
-        }
-      });
-    }
-    
-    todayArticlesCount.textContent = todayArticles;
   }
   
   /* =====================================================
@@ -2596,9 +2364,8 @@
     publishModal.style.display = 'none';
     document.getElementById('articleTitle').value = '';
     document.getElementById('articleContent').value = '';
-    document.getElementById('articleCategory').value = 'عام';
+    document.getElementById('articleCategory').value = 'ريدبيل';
     document.getElementById('articleReadTime').value = '3';
-    document.getElementById('articleFeatured').checked = false;
     
     titleCounter.textContent = '0/70';
     contentCounter.textContent = '0/2000';
@@ -2622,7 +2389,6 @@
     const content = document.getElementById('articleContent').value.trim();
     const category = document.getElementById('articleCategory').value;
     const readTime = document.getElementById('articleReadTime').value;
-    const featured = document.getElementById('articleFeatured').checked;
     
     if (!title || !content) {
       showNotification('يرجى ملء جميع الحقول', 'error');
@@ -2657,8 +2423,7 @@
       created: Date.now(),
       likesCount: 0,
       commentsCount: 0,
-      readTime: readTime,
-      featured: featured
+      readTime: readTime
     };
     
     push(ref(db, 'articles'), articleData).then((result) => {
@@ -2670,12 +2435,6 @@
       showNotification('تم نشر المقال بنجاح', 'success');
       closePublishModal();
       showSection('articles');
-      
-      if (featured) {
-        setTimeout(() => {
-          showNotification('تم نشر مقال مميز جديد!', 'success');
-        }, 1000);
-      }
     }).catch(error => {
       showNotification(error.message, 'error');
     });
@@ -2976,60 +2735,6 @@
   };
   
   /* =====================================================
-     TOGGLE FEATURED ARTICLE
-  ===================================================== */
-  window.toggleFeatured = async (articleId, isCurrentlyFeatured) => {
-    if (!currentUser) return;
-    
-    try {
-      const articleRef = ref(db, `articles/${articleId}`);
-      await update(articleRef, { featured: !isCurrentlyFeatured });
-      
-      showNotification(isCurrentlyFeatured ? 'تم إلغاء تمييز المقال' : 'تم تمييز المقال كمميز', 'success');
-      
-      setTimeout(() => {
-        if (myArticlesSection.style.display === 'block') {
-          openMyArticles();
-        }
-      }, 300);
-    } catch (error) {
-      showNotification('حدث خطأ أثناء تحديث حالة المقال', 'error');
-    }
-  };
-  
-  /* =====================================================
-     SHARE ARTICLE
-  ===================================================== */
-  window.shareArticle = (articleId, articleTitle) => {
-    const shareUrl = `${window.location.origin}${window.location.pathname}?article=${articleId}`;
-    const shareText = `اقرأ مقال "${articleTitle}" على Red Pill Platform`;
-    
-    if (navigator.share) {
-      navigator.share({
-        title: articleTitle,
-        text: shareText,
-        url: shareUrl
-      }).then(() => {
-        showNotification('تمت المشاركة بنجاح', 'success');
-      }).catch(() => {
-        // User cancelled share
-      });
-    } else {
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        showNotification('تم نسخ رابط المقال', 'success');
-      }).catch(() => {
-        const tempInput = document.createElement('input');
-        tempInput.value = shareUrl;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempInput);
-        showNotification('تم نسخ رابط المقال', 'success');
-      });
-    }
-  };
-  
-  /* =====================================================
      UTILITY FUNCTIONS
   ===================================================== */
   function formatDate(timestamp) {
@@ -3089,26 +2794,6 @@
     }, 5000);
   }
   
-  async function updateStats() {
-    const usersSnap = await get(ref(db, 'users'));
-    const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-    let activeUsers = 0;
-    
-    if (usersSnap.exists()) {
-      usersSnap.forEach(user => {
-        if (user.val().lastLogin && user.val().lastLogin >= weekAgo) {
-          activeUsers++;
-        }
-      });
-    }
-    
-    activeUsersCount.textContent = activeUsers;
-    
-    if (statsSection.style.display === 'block') {
-      loadStats();
-    }
-  }
-  
   window.addEventListener('click', (e) => {
     if (e.target === publishModal) {
       closePublishModal();
@@ -3143,12 +2828,6 @@
       }
     }
   });
-  
-  setInterval(() => {
-    updateStats();
-  }, 60000);
-  
-  updateStats();
   
   window.showSection('articles');
   
