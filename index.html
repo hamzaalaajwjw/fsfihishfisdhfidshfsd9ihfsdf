@@ -1302,12 +1302,14 @@
   const myArticlesSection = document.getElementById('myArticlesSection');
   const statsSection = document.getElementById('statsSection');
   
-  // Global variables
+  // Global variables - محسّنة
   let currentUser = null;
   let currentArticleId = null;
   let currentFilter = 'all';
   let allArticles = [];
   let userLikes = new Map();
+  let usersCache = new Map(); // ذاكرة تخزين مؤقت لبيانات المستخدمين
+  let articlesLoading = false; // علم لمنع التحميل المزدوج
   
   // Pagination variables
   let currentPage = 1;
@@ -1418,6 +1420,9 @@
       document.getElementById('logout').onclick = () => {
         signOut(auth).then(() => {
           showNotification('تم تسجيل الخروج بنجاح', 'success');
+          // مسح الذاكرة المؤقتة عند تسجيل الخروج
+          usersCache.clear();
+          userLikes.clear();
         });
       };
       
@@ -1456,7 +1461,10 @@
       }
     }
     
-    loadArticles();
+    // لا تحميل المقالات هنا لمنع التحميل المزدوج
+    if (articlesSection.style.display === 'block') {
+      loadArticles();
+    }
   });
   
   function login() {
@@ -1654,6 +1662,8 @@
       bio: bio,
       updated: Date.now()
     }).then(() => {
+      // تحديث الذاكرة المؤقتة
+      usersCache.set(currentUser.uid, { username: username, bio: bio });
       showNotification('تم تحديث الملف الشخصي', 'success');
       openProfile();
     }).catch(error => {
@@ -1662,9 +1672,12 @@
   };
   
   /* =====================================================
-     ARTICLES SYSTEM WITH PAGINATION
+     ARTICLES SYSTEM WITH PAGINATION - محسّنة
   ===================================================== */
   async function loadArticles() {
+    if (articlesLoading) return;
+    articlesLoading = true;
+    
     articlesDiv.innerHTML = `
       <div class="loading" id="loadingArticles">
         <div class="spinner"></div>
@@ -1672,8 +1685,10 @@
     `;
     paginationDiv.style.display = 'none';
     
-    const articlesRef = ref(db, 'articles');
-    onValue(articlesRef, async (snap) => {
+    try {
+      const articlesRef = ref(db, 'articles');
+      const snap = await get(articlesRef);
+      
       articlesDiv.innerHTML = '';
       allArticles = [];
       
@@ -1688,6 +1703,7 @@
             </button>
           </div>
         `;
+        articlesLoading = false;
         return;
       }
       
@@ -1719,12 +1735,17 @@
       totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
       currentPage = 1;
       
-      displayArticlesPage(filteredArticles, currentPage);
+      await displayArticlesPage(filteredArticles, currentPage);
       updatePagination(totalPages, filteredArticles);
       
       updateStats();
       updateTodayArticlesCount();
-    });
+    } catch (error) {
+      console.error('Error loading articles:', error);
+      showNotification('حدث خطأ في تحميل المقالات', 'error');
+    } finally {
+      articlesLoading = false;
+    }
   }
   
   async function displayArticlesPage(articles, page) {
@@ -1734,10 +1755,6 @@
     
     articlesDiv.innerHTML = '';
     
-    for (const article of pageArticles) {
-      await renderArticle(article);
-    }
-    
     if (pageArticles.length === 0) {
       articlesDiv.innerHTML = `
         <div class="empty-state fade-in">
@@ -1746,7 +1763,50 @@
           <p>جرب صفحة أخرى أو قم بتغيير عامل التصفية</p>
         </div>
       `;
+      return;
     }
+    
+    // تحميل بيانات المؤلفين دفعة واحدة لتحسين الأداء
+    const authorIds = [...new Set(pageArticles.map(article => article.author).filter(Boolean))];
+    await loadUsersBatch(authorIds);
+    
+    for (const article of pageArticles) {
+      await renderArticle(article);
+    }
+  }
+  
+  // دالة محسنة لتحميل مستخدمين متعددين دفعة واحدة
+  async function loadUsersBatch(userIds) {
+    const uncachedIds = userIds.filter(id => !usersCache.has(id));
+    
+    if (uncachedIds.length === 0) return;
+    
+    const promises = uncachedIds.map(async (userId) => {
+      const userSnap = await get(ref(db, 'users/' + userId));
+      if (userSnap.exists()) {
+        usersCache.set(userId, userSnap.val());
+      }
+    });
+    
+    await Promise.all(promises);
+  }
+  
+  // الحصول على بيانات مستخدم من الذاكرة المؤقتة
+  async function getUserData(userId) {
+    if (!userId) return null;
+    
+    if (usersCache.has(userId)) {
+      return usersCache.get(userId);
+    }
+    
+    const userSnap = await get(ref(db, 'users/' + userId));
+    if (userSnap.exists()) {
+      const userData = userSnap.val();
+      usersCache.set(userId, userData);
+      return userData;
+    }
+    
+    return null;
   }
   
   function updatePagination(totalPages, articles) {
@@ -1849,9 +1909,9 @@
     let authorInitial = '?';
     
     if (article.author) {
-      const authorSnap = await get(ref(db, 'users/' + article.author));
-      if (authorSnap.exists()) {
-        authorName = authorSnap.val().username || 'مستخدم';
+      const userData = await getUserData(article.author);
+      if (userData) {
+        authorName = userData.username || 'مستخدم';
         authorInitial = authorName.charAt(0);
       }
     }
@@ -2263,9 +2323,10 @@
   };
   
   /* =====================================================
-     LIKES SYSTEM - FIXED SCROLL ISSUE
+     LIKES SYSTEM - محسّنة تمامًا
   ===================================================== */
   window.toggleLike = async (event, articleId, liked) => {
+    // منع السلوك الافتراضي للزر - هذا يحل مشكلة العودة لبداية الصفحة
     event.preventDefault();
     event.stopPropagation();
     
@@ -2274,54 +2335,61 @@
       return;
     }
     
-    const likeBtn = event.target.closest('.action-btn');
+    const likeBtn = event.currentTarget;
     const likeIcon = likeBtn.querySelector('i');
     const likeCountSpan = likeBtn.querySelector(`.like-count-${articleId}`);
     
     if (likeBtn.classList.contains('processing')) return;
     likeBtn.classList.add('processing');
     
+    // تحديث الواجهة أولاً (تحديث تفاؤلي)
+    const currentCount = parseInt(likeCountSpan.textContent) || 0;
+    let newCount;
+    
+    if (liked) {
+      newCount = Math.max(0, currentCount - 1);
+      likeBtn.classList.remove('active');
+      likeIcon.className = 'far fa-heart';
+    } else {
+      newCount = currentCount + 1;
+      likeBtn.classList.add('active');
+      likeIcon.className = 'fas fa-heart';
+      
+      // تأثير بسيط للإعجاب
+      likeBtn.style.transform = 'scale(1.1)';
+      setTimeout(() => {
+        likeBtn.style.transform = 'scale(1)';
+      }, 200);
+    }
+    
+    likeCountSpan.textContent = newCount;
+    
+    // تحديث قاعدة البيانات
     const likeRef = ref(db, `likes/${articleId}/${currentUser.uid}`);
     const articleRef = ref(db, `articles/${articleId}`);
     
     try {
       if (liked) {
         await remove(likeRef);
-        
-        const articleSnap = await get(articleRef);
-        const articleData = articleSnap.val();
-        const newLikesCount = Math.max(0, (articleData.likesCount || 1) - 1);
-        
-        await update(articleRef, { likesCount: newLikesCount });
-        
-        likeBtn.classList.remove('active');
-        likeIcon.className = 'far fa-heart';
-        if (likeCountSpan) likeCountSpan.textContent = newLikesCount;
-        
+        await update(articleRef, { likesCount: newCount });
         userLikes.delete(articleId);
-        
       } else {
         await set(likeRef, true);
-        
-        const articleSnap = await get(articleRef);
-        const articleData = articleSnap.val();
-        const newLikesCount = (articleData.likesCount || 0) + 1;
-        
-        await update(articleRef, { likesCount: newLikesCount });
-        
-        likeBtn.classList.add('active');
-        likeIcon.className = 'fas fa-heart';
-        if (likeCountSpan) likeCountSpan.textContent = newLikesCount;
-        
+        await update(articleRef, { likesCount: newCount });
         userLikes.set(articleId, true);
-        
-        likeBtn.style.transform = 'scale(1.2)';
-        setTimeout(() => {
-          likeBtn.style.transform = 'scale(1)';
-        }, 200);
       }
     } catch (error) {
+      // في حالة الخطأ، نرجع التغيير
       showNotification('حدث خطأ أثناء تحديث الإعجاب', 'error');
+      if (liked) {
+        likeBtn.classList.add('active');
+        likeIcon.className = 'fas fa-heart';
+        likeCountSpan.textContent = currentCount;
+      } else {
+        likeBtn.classList.remove('active');
+        likeIcon.className = 'far fa-heart';
+        likeCountSpan.textContent = currentCount;
+      }
     } finally {
       setTimeout(() => {
         likeBtn.classList.remove('processing');
@@ -2400,15 +2468,19 @@
       commentsList.innerHTML = '';
     }
     
+    // تحميل بيانات المؤلفين دفعة واحدة
+    const authorIds = pageComments.map(comment => comment.author).filter(Boolean);
+    await loadUsersBatch(authorIds);
+    
     for (const comment of pageComments) {
       const commentEl = document.createElement('div');
       commentEl.className = 'comment fade-in';
       
       let authorName = 'مجهول';
       if (comment.author) {
-        const authorSnap = await get(ref(db, 'users/' + comment.author));
-        if (authorSnap.exists()) {
-          authorName = authorSnap.val().username || 'مستخدم';
+        const userData = await getUserData(comment.author);
+        if (userData) {
+          authorName = userData.username || 'مستخدم';
         }
       }
       
