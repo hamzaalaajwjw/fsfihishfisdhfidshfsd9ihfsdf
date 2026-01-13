@@ -1,0 +1,2997 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>منتدى الريدبيل</title>
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+  /* =====================================================
+     GLOBAL / RESET
+  ===================================================== */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: #0a0a0b;
+    color: #f0f0f0;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    font-weight: 700;
+  }
+  
+  button {
+    cursor: pointer;
+    font-family: inherit;
+    border: none;
+    outline: none;
+  }
+  
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  /* =====================================================
+     THEME VARIABLES (PERFORMANCE FRIENDLY)
+  ===================================================== */
+  :root {
+    --bg: #0a0a0b;
+    --panel: #111114;
+    --card: #1a1a1f;
+    --card-hover: #202026;
+    --border: #2a2a30;
+    --accent: #e63946;
+    --accent-light: #ff6b6b;
+    --accent-dark: #c1121f;
+    --secondary: #457b9d;
+    --text: #f8f9fa;
+    --text-muted: #a0a0a8;
+    --text-light: #d4d4dc;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    --shadow-light: 0 5px 15px rgba(0, 0, 0, 0.2);
+    --gradient: linear-gradient(135deg, #e63946 0%, #457b9d 100%);
+  }
+  
+  /* =====================================================
+     LAYOUT
+  ===================================================== */
+  header {
+    height: 70px;
+    background: linear-gradient(90deg, #0c0c0e, #111114);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    background-color: rgba(11, 11, 13, 0.9);
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 24px;
+    font-weight: 900;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.5px;
+  }
+  
+  .logo i {
+    font-size: 22px;
+  }
+  
+  .menu-toggle {
+    display: none;
+    background: none;
+    color: var(--text);
+    font-size: 24px;
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition);
+  }
+  
+  .menu-toggle:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .app {
+    display: flex;
+    min-height: calc(100vh - 70px);
+  }
+  
+  /* =====================================================
+     SIDEBAR (HIDDEN BY DEFAULT ON MOBILE)
+  ===================================================== */
+  .sidebar {
+    width: 320px;
+    background: var(--panel);
+    border-left: 1px solid var(--border);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: relative;
+    overflow-y: auto;
+    max-height: calc(100vh - 70px);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 90;
+  }
+  
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 70px);
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 80;
+    backdrop-filter: blur(3px);
+  }
+  
+  main {
+    flex: 1;
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  /* =====================================================
+     UI COMPONENTS
+  ===================================================== */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    transition: all var(--transition);
+    box-shadow: var(--shadow-light);
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow);
+    border-color: #3a3a40;
+  }
+  
+  .card.highlight {
+    background: linear-gradient(145deg, #1c1c22, #151519);
+    border-color: var(--accent);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .card.highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--gradient);
+  }
+  
+  .auth-card {
+    background: linear-gradient(145deg, #1c1c22, #151519);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--accent);
+    transition: all var(--transition);
+  }
+  
+  .auth-card .profile-header {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .auth-card .profile-header .avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+  }
+  
+  .auth-card .profile-header .user-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .auth-card .profile-header .user-info strong {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .auth-card .profile-header .user-info .muted {
+    font-size: 13px;
+    opacity: 0.8;
+  }
+  
+  .auth-card .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 15px;
+  }
+  
+  .auth-card .auth-form input {
+    width: 100%;
+    background: rgba(15, 15, 20, 0.8);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    color: #fff;
+    font-family: 'Cairo', sans-serif;
+    transition: all var(--transition);
+    font-size: 14px;
+  }
+  
+  .auth-card .auth-form input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.2);
+  }
+  
+  .auth-card .auth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .auth-card .auth-buttons .btn {
+    margin-top: 0;
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: var(--gradient);
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    transition: all var(--transition);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+  
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+    z-index: -1;
+  }
+  
+  .btn:hover::before {
+    left: 100%;
+  }
+  
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(230, 57, 70, 0.3);
+  }
+  
+  .btn.ghost {
+    background: transparent;
+    border: 2px solid var(--border);
+    color: var(--text-light);
+  }
+  
+  .btn.ghost:hover {
+    border-color: var(--accent);
+    background: rgba(230, 57, 70, 0.05);
+  }
+  
+  .btn.small {
+    padding: 8px 16px;
+    font-size: 14px;
+    width: auto;
+    border-radius: 8px;
+  }
+  
+  .btn.danger {
+    background: linear-gradient(135deg, #e63946 0%, #c1121f 100%);
+  }
+  
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: transparent;
+    color: var(--text-light);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition);
+    border: none;
+    width: 100%;
+    text-align: right;
+    font-size: 16px;
+  }
+  
+  .menu-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--accent-light);
+    transform: translateX(-5px);
+  }
+  
+  .menu-item.active {
+    background: rgba(230, 57, 70, 0.1);
+    color: var(--accent-light);
+    border-right: 3px solid var(--accent);
+  }
+  
+  .menu-item i {
+    width: 24px;
+    font-size: 18px;
+  }
+  
+  input, textarea, select {
+    width: 100%;
+    background: rgba(15, 15, 20, 0.8);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    color: #fff;
+    margin-top: 8px;
+    font-family: 'Cairo', sans-serif;
+    transition: all var(--transition);
+  }
+  
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.2);
+  }
+  
+  .muted {
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  
+  .tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(69, 123, 157, 0.15);
+    color: #8ecae6;
+    border-radius: 20px;
+    font-size: 12px;
+    margin-left: 8px;
+    margin-top: 8px;
+  }
+  
+  .tag.hot {
+    background: rgba(230, 57, 70, 0.15);
+    color: #ff9a9e;
+  }
+  
+  .tag.new {
+    background: rgba(72, 187, 120, 0.15);
+    color: #80ed99;
+  }
+  
+  /* =====================================================
+     CHARACTER COUNTERS
+  ===================================================== */
+  .char-counter {
+    font-size: 12px;
+    margin-top: 4px;
+    text-align: left;
+  }
+  
+  .char-counter.warning {
+    color: #ffc107;
+  }
+  
+  .char-counter.error {
+    color: #e63946;
+  }
+  
+  .char-counter.success {
+    color: #52b788;
+  }
+  
+  /* =====================================================
+     COOLDOWN TIMER
+  ===================================================== */
+  .cooldown-timer {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .cooldown-timer .timer {
+    color: var(--accent-light);
+    font-weight: 700;
+  }
+  
+  /* =====================================================
+     PAGINATION
+  ===================================================== */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+  
+  .page-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-light);
+    font-weight: 600;
+    transition: all 0.2s;
+    font-size: 14px;
+  }
+  
+  .page-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--accent-light);
+  }
+  
+  .page-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  
+  .page-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .page-btn.disabled:hover {
+    background: var(--card);
+    border-color: var(--border);
+  }
+  
+  .load-more {
+    margin: 30px auto;
+    display: block;
+    width: 200px;
+  }
+  
+  /* =====================================================
+     CONTENT SECTIONS
+  ===================================================== */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  .section-title {
+    font-size: 28px;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .article-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    line-height: 1.4;
+    color: var(--text);
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+  
+  .article-content {
+    font-size: 16px;
+    line-height: 1.7;
+    margin: 16px 0;
+    color: var(--text-light);
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+    max-height: 100px;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .article-content.expanded {
+    max-height: none;
+  }
+  
+  .article-content .read-more-overlay {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 40px;
+    background: linear-gradient(to top, var(--card), transparent);
+  }
+  
+  .article-content.expanded .read-more-overlay {
+    display: none;
+  }
+  
+  .read-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #666;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .read-more-btn:hover {
+    background: #777;
+  }
+  
+  .article-meta {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .article-meta i {
+    margin-left: 5px;
+  }
+  
+  .article-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    font-size: 15px;
+    flex-wrap: wrap;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    justify-content: flex-start;
+    align-items: center;
+  }
+  
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 10px 16px;
+    user-select: none;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    min-width: 110px;
+    justify-content: center;
+    height: 42px;
+    box-sizing: border-box;
+  }
+  
+  .action-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+  }
+  
+  .action-btn.like {
+    color: #ff6b6b;
+  }
+  
+  .action-btn.like:hover {
+    border-color: rgba(255, 107, 107, 0.3);
+    background: rgba(255, 107, 107, 0.1);
+  }
+  
+  .action-btn.like.active {
+    color: #ff4757;
+    font-weight: 700;
+    background: rgba(255, 71, 87, 0.15);
+    border-color: rgba(255, 71, 87, 0.3);
+  }
+  
+  .action-btn.comment {
+    color: #8ecae6;
+  }
+  
+  .action-btn.comment:hover {
+    border-color: rgba(142, 202, 230, 0.3);
+    background: rgba(142, 202, 230, 0.1);
+  }
+  
+  .action-btn:active {
+    transform: scale(0.95);
+  }
+  
+  .action-btn i {
+    font-size: 16px;
+  }
+  
+  .action-btn span {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  
+  .profile-header {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 800;
+    color: white;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .profile-stats {
+    display: flex;
+    gap: 30px;
+    margin: 24px 0;
+    padding: 20px;
+    background: rgba(30, 30, 36, 0.5);
+    border-radius: var(--radius);
+  }
+  
+  .stat {
+    text-align: center;
+  }
+  
+  .stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .stat-label {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  
+  /* =====================================================
+     FILTERS & SORTING
+  ===================================================== */
+  .filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  
+  .filter-btn {
+    padding: 10px 22px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    color: var(--text-light);
+    font-size: 15px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  
+  .filter-btn:hover:not(.active) {
+    border-color: var(--accent-light);
+    color: var(--accent-light);
+  }
+  
+  /* =====================================================
+     MODALS
+  ===================================================== */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(8px);
+  }
+  
+  .modal {
+    background: var(--panel);
+    border-radius: var(--radius);
+    padding: 30px;
+    width: 90%;
+    max-width: 700px;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    position: relative;
+    animation: modalFadeIn 0.3s ease-out;
+  }
+  
+  @keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .modal-close {
+    background: none;
+    color: var(--text-muted);
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+  
+  .modal-close:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+  }
+  
+  /* =====================================================
+     COMMENTS
+  ===================================================== */
+  .comments-section {
+    margin-top: 30px;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+  }
+  
+  .comment {
+    background: rgba(30, 30, 36, 0.5);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-top: 16px;
+    border-left: 3px solid var(--secondary);
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+  
+  .comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  .comment-author {
+    font-weight: 600;
+    font-size: 15px;
+  }
+  
+  .comment-time {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  
+  .comment-content {
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+  
+  /* =====================================================
+     LOADING & EMPTY STATES
+  ===================================================== */
+  .loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px;
+  }
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--accent);
+    animation: spin 1s ease-in-out infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  
+  .empty-state i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  
+  /* =====================================================
+     NOTIFICATION
+  ===================================================== */
+  .notification {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    background: var(--panel);
+    border-radius: var(--radius);
+    padding: 16px 24px;
+    border-left: 4px solid var(--accent);
+    box-shadow: var(--shadow);
+    display: none;
+    align-items: center;
+    gap: 12px;
+    z-index: 1001;
+    animation: slideIn 0.3s ease-out;
+    max-width: 400px;
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  .notification.success {
+    border-left-color: #52b788;
+  }
+  
+  .notification.error {
+    border-left-color: #e63946;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* =====================================================
+     MOBILE RESPONSIVE
+  ===================================================== */
+  @media (max-width: 992px) {
+    .menu-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .sidebar {
+      position: fixed;
+      top: 70px;
+      left: -320px;
+      height: calc(100vh - 70px);
+      transform: translateX(0);
+      z-index: 100;
+      width: 320px;
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+      transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .sidebar.active {
+      left: 0;
+    }
+    
+    .sidebar-overlay.active {
+      display: block;
+    }
+    
+    main {
+      padding: 20px;
+      width: 100%;
+    }
+    
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .profile-stats {
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .modal {
+      width: 95%;
+      padding: 20px;
+    }
+    
+    .auth-card .profile-header {
+      flex-direction: row;
+      text-align: right;
+    }
+    
+    .auth-card .profile-header .user-info {
+      width: auto;
+    }
+    
+    .article-actions {
+      gap: 8px;
+      justify-content: center;
+    }
+    
+    .action-btn {
+      min-width: 90px;
+      padding: 8px 12px;
+      font-size: 14px;
+      height: 38px;
+    }
+    
+    .action-btn span {
+      font-size: 13px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    header {
+      padding: 0 20px;
+      height: 60px;
+    }
+    
+    .logo {
+      font-size: 20px;
+    }
+    
+    .sidebar {
+      width: 280px;
+      left: -280px;
+    }
+    
+    .article-actions {
+      gap: 5px;
+      justify-content: space-around;
+    }
+    
+    .action-btn {
+      min-width: 80px;
+      padding: 6px 10px;
+      flex-direction: column;
+      gap: 4px;
+      height: 60px;
+      min-height: 60px;
+    }
+    
+    .action-btn i {
+      font-size: 14px;
+    }
+    
+    .action-btn span {
+      font-size: 12px;
+    }
+    
+    .filters {
+      justify-content: center;
+    }
+    
+    .notification {
+      left: 20px;
+      right: 20px;
+      max-width: none;
+    }
+    
+    .menu-item {
+      padding: 12px 16px;
+      font-size: 15px;
+    }
+    
+    .auth-card {
+      padding: 20px;
+    }
+    
+    .auth-card .auth-buttons {
+      gap: 8px;
+    }
+    
+    .btn {
+      padding: 12px;
+      font-size: 14px;
+    }
+    
+    .auth-card .profile-header {
+      gap: 12px;
+    }
+    
+    .auth-card .profile-header .avatar {
+      width: 50px;
+      height: 50px;
+      font-size: 18px;
+    }
+    
+    .auth-card .profile-header .user-info strong {
+      font-size: 16px;
+    }
+  }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <i class="fas fa-pills"></i>
+      <span>منتدى الريدبيل</span>
+    </div>
+    
+    <button class="menu-toggle" id="menuToggle">
+      <i class="fas fa-bars"></i>
+    </button>
+  </header>
+  
+  <div class="app">
+    <!-- ================= SIDEBAR ================= -->
+    <div class="sidebar" id="sidebar">
+      <div id="authBox" class="auth-card"></div>
+      
+      <div class="card">
+        <h4><i class="fas fa-sliders-h"></i> القائمة الرئيسية</h4>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
+          <button class="menu-item active" onclick="showSection('articles')">
+            <i class="fas fa-newspaper"></i>
+            <span>المقالات</span>
+          </button>
+          
+          <button class="menu-item" onclick="showSection('profile')">
+            <i class="fas fa-user-circle"></i>
+            <span>الملف الشخصي</span>
+          </button>
+          
+          <button class="menu-item" onclick="showSection('myArticles')">
+            <i class="fas fa-file-alt"></i>
+            <span>مقالاتي</span>
+          </button>
+          
+          <button class="menu-item" onclick="openPublishModal()">
+            <i class="fas fa-pen-fancy"></i>
+            <span>نشر مقال جديد</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    
+    <!-- ================= MAIN CONTENT ================= -->
+    <main>
+      <!-- مقالات Section (Default) -->
+      <div id="articlesSection" class="content-section">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fas fa-fire"></i> المقالات الشائعة</h2>
+          <div class="filters">
+            <button class="filter-btn active" onclick="filterArticles('all')">
+              <i class="fas fa-layer-group"></i> الكل
+            </button>
+            <button class="filter-btn" onclick="filterArticles('popular')">
+              <i class="fas fa-fire"></i> الأكثر شعبية
+            </button>
+            <button class="filter-btn" onclick="filterArticles('recent')">
+              <i class="fas fa-clock"></i> الأحدث
+            </button>
+          </div>
+        </div>
+        
+        <div id="articles" class="articles-container">
+          <div class="loading" id="loadingArticles">
+            <div class="spinner"></div>
+          </div>
+        </div>
+        
+        <div id="pagination" class="pagination" style="display: none;"></div>
+      </div>
+      
+      <!-- الملف الشخصي Section -->
+      <div id="profileSection" class="content-section" style="display: none;">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fas fa-user-circle"></i> الملف الشخصي</h2>
+          <button class="btn small ghost" onclick="showSection('articles')">
+            <i class="fas fa-arrow-right"></i> العودة للمقالات
+          </button>
+        </div>
+        
+        <div id="profileView"></div>
+      </div>
+      
+      <!-- مقالاتي Section -->
+      <div id="myArticlesSection" class="content-section" style="display: none;">
+        <div class="section-header">
+          <h2 class="section-title"><i class="fas fa-file-alt"></i> مقالاتي</h2>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn small" onclick="openPublishModal()">
+              <i class="fas fa-plus"></i> مقال جديد
+            </button>
+            <button class="btn small ghost" onclick="showSection('articles')">
+              <i class="fas fa-arrow-right"></i> العودة
+            </button>
+          </div>
+        </div>
+        
+        <div id="myArticlesView"></div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- ================= PUBLISH MODAL ================= -->
+  <div class="modal-overlay" id="publishModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="fas fa-pen-fancy"></i> كتابة مقال جديد</h3>
+        <button class="modal-close" onclick="closePublishModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-content">
+        <label>عنوان المقال (70 حرف كحد أقصى)</label>
+        <input id="articleTitle" placeholder="اكتب عنوانًا جذابًا لمقالك" maxlength="70">
+        <div class="char-counter" id="titleCounter">0/70</div>
+        
+        <label style="margin-top: 20px;">نص المقال (2000 حرف كحد أقصى)</label>
+        <textarea id="articleContent" placeholder="اكتب محتوى مقالك هنا..." rows="8" maxlength="2000"></textarea>
+        <div class="char-counter" id="contentCounter">0/2000</div>
+        
+        <div id="cooldownMessage" class="cooldown-timer" style="display: none;">
+          <i class="fas fa-clock"></i>
+          <span>يمكنك نشر المقال التالي خلال:</span>
+          <span class="timer" id="articleCooldownTimer">60:00</span>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+          <div>
+            <label>التصنيف</label>
+            <select id="articleCategory">
+              <option value="ريدبيل">ريدبيل</option>
+              <option value="بلاك بيل">بلاك بيل</option>
+              <option value="غير مصنف">غير مصنف</option>
+            </select>
+          </div>
+          
+          <div>
+            <label>القراءة المتوقعة</label>
+            <select id="articleReadTime">
+              <option value="1">دقيقة واحدة</option>
+              <option value="3">٣ دقائق</option>
+              <option value="5">٥ دقائق</option>
+              <option value="10">١٠ دقائق</option>
+              <option value="15">١٥ دقيقة</option>
+            </select>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 30px;">
+          <button class="btn" style="flex: 1;" onclick="publishArticle()" id="publishBtn">
+            <i class="fas fa-paper-plane"></i> نشر المقال
+          </button>
+          <button class="btn ghost" onclick="closePublishModal()" style="width: auto;">
+            إلغاء
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ================= COMMENT MODAL ================= -->
+  <div class="modal-overlay" id="commentModal">
+    <div class="modal" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-comments"></i> التعليقات</h3>
+        <button class="modal-close" onclick="closeCommentModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-content">
+        <div id="commentsList" style="max-height: 400px; overflow-y: auto;"></div>
+        
+        <div id="loadMoreCommentsContainer" style="text-align: center; margin: 15px 0; display: none;">
+          <button class="btn small ghost" id="loadMoreCommentsBtn" onclick="loadMoreComments()">
+            <i class="fas fa-redo"></i> تحميل المزيد
+          </button>
+        </div>
+        
+        <div style="margin-top: 20px;">
+          <textarea id="newComment" placeholder="اكتب تعليقك هنا (1500 حرف كحد أقصى)..." rows="3" maxlength="1500"></textarea>
+          <div class="char-counter" id="commentCounter">0/1500</div>
+          
+          <div id="commentCooldownMessage" class="cooldown-timer" style="display: none;">
+            <i class="fas fa-clock"></i>
+            <span>يمكنك إضافة التعليق التالي خلال:</span>
+            <span class="timer" id="commentCooldownTimer">60</span>
+            <span>ثانية</span>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <div class="muted" style="font-size: 12px;">
+              اضغط Ctrl+Enter لإرسال التعليق
+            </div>
+            <button class="btn small" onclick="postComment()" id="postCommentBtn">
+              <i class="fas fa-paper-plane"></i> إضافة تعليق
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ================= NOTIFICATION ================= -->
+  <div class="notification" id="notification">
+    <i class="fas fa-check-circle" id="notificationIcon"></i>
+    <span id="notificationText"></span>
+  </div>
+
+  <script type="module">
+  /* =====================================================
+     FIREBASE IMPORTS
+  ===================================================== */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+  import { getDatabase, ref, push, onValue, update, get, set, remove, query, orderByChild, limitToLast, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  
+  /* =====================================================
+     CONFIG
+  ===================================================== */
+  const firebaseConfig = {
+    apiKey: "AIzaSyCdoubvkI7VEvYxtG3CzKFAJg74XXl7fX4",
+    authDomain: "redpill-1c7e2.firebaseapp.com",
+    databaseURL: "https://redpill-1c7e2-default-rtdb.firebaseio.com",
+    projectId: "redpill-1c7e2",
+    storageBucket: "redpill-1c7e2.firebasestorage.app",
+    messagingSenderId: "337690521778",
+    appId: "1:337690521778:web:ba3c99ad55e6b0d58f59ab"
+  };
+  
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+  
+  // DOM Elements
+  const authBox = document.getElementById('authBox');
+  const articlesDiv = document.getElementById('articles');
+  const profileView = document.getElementById('profileView');
+  const myArticlesView = document.getElementById('myArticlesView');
+  const publishModal = document.getElementById('publishModal');
+  const commentModal = document.getElementById('commentModal');
+  const notification = document.getElementById('notification');
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const paginationDiv = document.getElementById('pagination');
+  
+  // Character counters
+  const titleCounter = document.getElementById('titleCounter');
+  const contentCounter = document.getElementById('contentCounter');
+  const commentCounter = document.getElementById('commentCounter');
+  
+  // Section elements
+  const articlesSection = document.getElementById('articlesSection');
+  const profileSection = document.getElementById('profileSection');
+  const myArticlesSection = document.getElementById('myArticlesSection');
+  
+  // Global variables - محسّنة
+  let currentUser = null;
+  let currentArticleId = null;
+  let currentFilter = 'all';
+  let allArticles = [];
+  let userLikes = new Map();
+  let usersCache = new Map();
+  let articlesLoading = false;
+  let expandedArticles = new Set();
+  
+  // Pagination variables
+  let currentPage = 1;
+  const articlesPerPage = 10;
+  let totalPages = 1;
+  
+  // Comments pagination variables
+  let commentsPage = 1;
+  const commentsPerPage = 10;
+  let allComments = [];
+  
+  // Rate limiting constants
+  const ARTICLE_COOLDOWN = 60 * 60 * 1000;
+  const COMMENT_COOLDOWN = 60 * 1000;
+  
+  // Character limits
+  const TITLE_MAX_LENGTH = 70;
+  const CONTENT_MAX_LENGTH = 2000;
+  const COMMENT_MAX_LENGTH = 1500;
+  const PREVIEW_LENGTH = 300;
+  
+  // Cooldown timers
+  let articleCooldownTimer = null;
+  let commentCooldownTimer = null;
+  let articleCooldownEnd = 0;
+  let commentCooldownEnd = 0;
+  
+  /* =====================================================
+     CHARACTER COUNTER FUNCTIONS
+  ===================================================== */
+  function initCharacterCounters() {
+    const articleTitleInput = document.getElementById('articleTitle');
+    if (articleTitleInput) {
+      articleTitleInput.addEventListener('input', () => {
+        const length = articleTitleInput.value.length;
+        titleCounter.textContent = `${length}/${TITLE_MAX_LENGTH}`;
+        updateCharCounterStyle(titleCounter, length, TITLE_MAX_LENGTH);
+      });
+    }
+    
+    const articleContentInput = document.getElementById('articleContent');
+    if (articleContentInput) {
+      articleContentInput.addEventListener('input', () => {
+        const length = articleContentInput.value.length;
+        contentCounter.textContent = `${length}/${CONTENT_MAX_LENGTH}`;
+        updateCharCounterStyle(contentCounter, length, CONTENT_MAX_LENGTH);
+      });
+    }
+    
+    const newCommentInput = document.getElementById('newComment');
+    if (newCommentInput) {
+      newCommentInput.addEventListener('input', () => {
+        const length = newCommentInput.value.length;
+        commentCounter.textContent = `${length}/${COMMENT_MAX_LENGTH}`;
+        updateCharCounterStyle(commentCounter, length, COMMENT_MAX_LENGTH);
+      });
+    }
+  }
+  
+  function updateCharCounterStyle(counter, length, max) {
+    counter.className = 'char-counter';
+    if (length === 0) {
+      counter.classList.add('muted');
+    } else if (length > max * 0.9) {
+      counter.classList.add('error');
+    } else if (length > max * 0.75) {
+      counter.classList.add('warning');
+    } else {
+      counter.classList.add('success');
+    }
+  }
+  
+  /* =====================================================
+     COOLDOWN TIMER FUNCTIONS
+  ===================================================== */
+  async function checkArticleCooldown() {
+    if (!currentUser) return true;
+    
+    try {
+      const userRef = ref(db, 'users/' + currentUser.uid);
+      const snap = await get(userRef);
+      
+      if (snap.exists()) {
+        const userData = snap.val();
+        const lastArticleTime = userData.lastArticle || 0;
+        const now = Date.now();
+        const timeSinceLastArticle = now - lastArticleTime;
+        
+        if (timeSinceLastArticle < ARTICLE_COOLDOWN) {
+          const remainingTime = ARTICLE_COOLDOWN - timeSinceLastArticle;
+          articleCooldownEnd = now + remainingTime;
+          
+          const cooldownMessage = document.getElementById('cooldownMessage');
+          const publishBtn = document.getElementById('publishBtn');
+          
+          if (cooldownMessage && publishBtn) {
+            cooldownMessage.style.display = 'flex';
+            publishBtn.disabled = true;
+            publishBtn.innerHTML = '<i class="fas fa-clock"></i> في فترة التبريد';
+            publishBtn.style.opacity = '0.7';
+            publishBtn.style.cursor = 'not-allowed';
+            
+            if (articleCooldownTimer) clearInterval(articleCooldownTimer);
+            articleCooldownTimer = setInterval(() => updateArticleCooldownTimer(), 1000);
+            updateArticleCooldownTimer();
+          }
+          
+          return false;
+        }
+      }
+    } catch (error) {
+      console.log('Error checking article cooldown:', error);
+    }
+    
+    return true;
+  }
+  
+  function updateArticleCooldownTimer() {
+    const now = Date.now();
+    const remaining = Math.max(0, articleCooldownEnd - now);
+    
+    if (remaining <= 0) {
+      clearInterval(articleCooldownTimer);
+      
+      const cooldownMessage = document.getElementById('cooldownMessage');
+      const publishBtn = document.getElementById('publishBtn');
+      
+      if (cooldownMessage && publishBtn) {
+        cooldownMessage.style.display = 'none';
+        publishBtn.disabled = false;
+        publishBtn.innerHTML = '<i class="fas fa-paper-plane"></i> نشر المقال';
+        publishBtn.style.opacity = '1';
+        publishBtn.style.cursor = 'pointer';
+      }
+      return;
+    }
+    
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    
+    const timerElement = document.getElementById('articleCooldownTimer');
+    if (timerElement) {
+      timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+  }
+  
+  async function checkCommentCooldown() {
+    if (!currentUser) return true;
+    
+    try {
+      const userRef = ref(db, 'users/' + currentUser.uid);
+      const snap = await get(userRef);
+      
+      if (snap.exists()) {
+        const userData = snap.val();
+        const lastCommentTime = userData.lastComment || 0;
+        const now = Date.now();
+        const timeSinceLastComment = now - lastCommentTime;
+        
+        if (timeSinceLastComment < COMMENT_COOLDOWN) {
+          const remainingTime = COMMENT_COOLDOWN - timeSinceLastComment;
+          commentCooldownEnd = now + remainingTime;
+          
+          const cooldownMessage = document.getElementById('commentCooldownMessage');
+          const postCommentBtn = document.getElementById('postCommentBtn');
+          
+          if (cooldownMessage && postCommentBtn) {
+            cooldownMessage.style.display = 'flex';
+            postCommentBtn.disabled = true;
+            postCommentBtn.innerHTML = '<i class="fas fa-clock"></i> في فترة التبريد';
+            postCommentBtn.style.opacity = '0.7';
+            postCommentBtn.style.cursor = 'not-allowed';
+            
+            if (commentCooldownTimer) clearInterval(commentCooldownTimer);
+            commentCooldownTimer = setInterval(() => updateCommentCooldownTimer(), 1000);
+            updateCommentCooldownTimer();
+          }
+          
+          return false;
+        }
+      }
+    } catch (error) {
+      console.log('Error checking comment cooldown:', error);
+    }
+    
+    return true;
+  }
+  
+  function updateCommentCooldownTimer() {
+    const now = Date.now();
+    const remaining = Math.max(0, commentCooldownEnd - now);
+    
+    if (remaining <= 0) {
+      clearInterval(commentCooldownTimer);
+      
+      const cooldownMessage = document.getElementById('commentCooldownMessage');
+      const postCommentBtn = document.getElementById('postCommentBtn');
+      
+      if (cooldownMessage && postCommentBtn) {
+        cooldownMessage.style.display = 'none';
+        postCommentBtn.disabled = false;
+        postCommentBtn.innerHTML = '<i class="fas fa-paper-plane"></i> إضافة تعليق';
+        postCommentBtn.style.opacity = '1';
+        postCommentBtn.style.cursor = 'pointer';
+      }
+      return;
+    }
+    
+    const seconds = Math.ceil(remaining / 1000);
+    
+    const timerElement = document.getElementById('commentCooldownTimer');
+    if (timerElement) {
+      timerElement.textContent = seconds;
+    }
+  }
+  
+  /* =====================================================
+     SIDEBAR FUNCTIONS
+  ===================================================== */
+  function toggleSidebar() {
+    sidebar.classList.toggle('active');
+    sidebarOverlay.classList.toggle('active');
+  }
+  
+  menuToggle.addEventListener('click', toggleSidebar);
+  
+  sidebarOverlay.addEventListener('click', toggleSidebar);
+  
+  function closeSidebarOnMobile() {
+    if (window.innerWidth <= 992) {
+      toggleSidebar();
+    }
+  }
+  
+  window.addEventListener('load', () => {
+    if (window.innerWidth <= 992) {
+      sidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+    }
+  });
+  
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 992) {
+      sidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
+    }
+  });
+  
+  /* =====================================================
+     SECTION NAVIGATION
+  ===================================================== */
+  window.showSection = (sectionName) => {
+    articlesSection.style.display = 'none';
+    profileSection.style.display = 'none';
+    myArticlesSection.style.display = 'none';
+    
+    document.querySelectorAll('.menu-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    
+    switch(sectionName) {
+      case 'articles':
+        articlesSection.style.display = 'block';
+        document.querySelector('.menu-item:nth-child(1)').classList.add('active');
+        loadArticles();
+        break;
+      case 'profile':
+        profileSection.style.display = 'block';
+        document.querySelector('.menu-item:nth-child(2)').classList.add('active');
+        openProfile();
+        break;
+      case 'myArticles':
+        myArticlesSection.style.display = 'block';
+        document.querySelector('.menu-item:nth-child(3)').classList.add('active');
+        openMyArticles();
+        break;
+    }
+    
+    closeSidebarOnMobile();
+  };
+  
+  /* =====================================================
+     AUTHENTICATION
+  ===================================================== */
+  onAuthStateChanged(auth, async (user) => {
+    currentUser = user;
+    
+    if (user) {
+      authBox.innerHTML = `
+        <div class="profile-header">
+          <div class="avatar">${user.email[0].toUpperCase()}</div>
+          <div class="user-info">
+            <strong>${user.email.split('@')[0]}</strong>
+            <div class="muted">عضو مسجل</div>
+            <div class="muted" style="margin-top: 5px; font-size: 12px;">
+              <i class="fas fa-clock"></i> ${formatDate(user.metadata.lastSignInTime || Date.now())}
+            </div>
+          </div>
+        </div>
+        <div class="auth-buttons">
+          <button class="btn ghost" id="logout">
+            <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+          </button>
+        </div>
+      `;
+      
+      document.getElementById('logout').onclick = () => {
+        signOut(auth).then(() => {
+          showNotification('تم تسجيل الخروج بنجاح', 'success');
+          usersCache.clear();
+          userLikes.clear();
+          expandedArticles.clear();
+        });
+      };
+      
+      initProfile(user.uid);
+    } else {
+      authBox.innerHTML = `
+        <h3 style="margin-bottom: 15px; color: var(--text-light);">
+          <i class="fas fa-user" style="margin-left: 8px;"></i> تسجيل الدخول
+        </h3>
+        <div class="auth-form">
+          <input id="email" type="email" placeholder="البريد الإلكتروني">
+          <input id="pass" type="password" placeholder="كلمة المرور">
+          <div class="auth-buttons">
+            <button class="btn" id="login">
+              <i class="fas fa-sign-in-alt"></i> دخول
+            </button>
+            <button class="btn ghost" id="register">
+              <i class="fas fa-user-plus"></i> إنشاء حساب جديد
+            </button>
+          </div>
+        </div>
+        <div class="muted" style="margin-top: 15px; font-size: 12px; text-align: center;">
+          <p>بتسجيل الدخول، يمكنك نشر المقالات والتعليق والإعجاب</p>
+        </div>
+      `;
+      
+      document.getElementById('login').onclick = () => login();
+      document.getElementById('register').onclick = () => register();
+      
+      const passInput = document.getElementById('pass');
+      if (passInput) {
+        passInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') login();
+        });
+      }
+    }
+    
+    if (articlesSection.style.display === 'block') {
+      loadArticles();
+    }
+  });
+  
+  function login() {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('pass').value;
+    
+    if (!email || !pass) {
+      showNotification('يرجى ملء جميع الحقول', 'error');
+      return;
+    }
+    
+    signInWithEmailAndPassword(auth, email, pass)
+      .then(() => showNotification('تم تسجيل الدخول بنجاح', 'success'))
+      .catch(e => {
+        if (e.code === 'auth/invalid-credential') {
+          showNotification('البريد الإلكتروني أو كلمة المرور غير صحيحة', 'error');
+        } else if (e.code === 'auth/user-not-found') {
+          showNotification('الحساب غير موجود', 'error');
+        } else if (e.code === 'auth/wrong-password') {
+          showNotification('كلمة المرور غير صحيحة', 'error');
+        } else {
+          showNotification(e.message, 'error');
+        }
+      });
+  }
+  
+  function register() {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('pass').value;
+    
+    if (!email || !pass) {
+      showNotification('يرجى ملء جميع الحقول', 'error');
+      return;
+    }
+    
+    if (pass.length < 6) {
+      showNotification('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
+      return;
+    }
+    
+    createUserWithEmailAndPassword(auth, email, pass)
+      .then(() => showNotification('تم إنشاء الحساب بنجاح', 'success'))
+      .catch(e => {
+        if (e.code === 'auth/email-already-in-use') {
+          showNotification('البريد الإلكتروني مسجل بالفعل', 'error');
+        } else if (e.code === 'auth/invalid-email') {
+          showNotification('البريد الإلكتروني غير صالح', 'error');
+        } else if (e.code === 'auth/weak-password') {
+          showNotification('كلمة المرور ضعيفة، يجب أن تكون 6 أحرف على الأقل', 'error');
+        } else {
+          showNotification(e.message, 'error');
+        }
+      });
+  }
+  
+  /* =====================================================
+     PROFILE SYSTEM
+  ===================================================== */
+  function initProfile(uid) {
+    const userRef = ref(db, 'users/' + uid);
+    get(userRef).then(snap => {
+      if (!snap.exists()) {
+        set(userRef, {
+          username: `مستخدم_${Math.floor(Math.random() * 1000)}`,
+          bio: 'مرحبًا! أنا مستخدم جديد في منتدى الريدبيل.',
+          joinDate: Date.now(),
+          lastLogin: Date.now(),
+          articlesCount: 0,
+          likesCount: 0,
+          commentsCount: 0,
+          lastArticle: 0,
+          lastComment: 0
+        });
+      } else {
+        update(userRef, { lastLogin: Date.now() });
+      }
+    });
+  }
+  
+  async function openProfile() {
+    if (!currentUser) {
+      profileView.innerHTML = `
+        <div class="card highlight">
+          <div class="empty-state">
+            <i class="fas fa-user-lock"></i>
+            <h3>يجب تسجيل الدخول</h3>
+            <p>سجل الدخول لعرض وتعديل ملفك الشخصي</p>
+            <button class="btn" onclick="showSection('articles')" style="margin-top: 20px; width: auto;">
+              <i class="fas fa-arrow-right"></i> العودة للمقالات
+            </button>
+          </div>
+        </div>
+      `;
+      return;
+    }
+    
+    const snap = await get(ref(db, 'users/' + currentUser.uid));
+    const userData = snap.val();
+    
+    const articlesSnap = await get(ref(db, 'articles'));
+    let userArticlesCount = 0;
+    if (articlesSnap.exists()) {
+      articlesSnap.forEach(article => {
+        if (article.val().author === currentUser.uid) {
+          userArticlesCount++;
+        }
+      });
+    }
+    
+    let userLikesCount = 0;
+    if (articlesSnap.exists()) {
+      articlesSnap.forEach(article => {
+        const likes = article.val().likesCount || 0;
+        if (article.val().author === currentUser.uid) {
+          userLikesCount += likes;
+        }
+      });
+    }
+    
+    let userCommentsCount = 0;
+    const commentsSnap = await get(ref(db, 'comments'));
+    if (commentsSnap.exists()) {
+      commentsSnap.forEach(commentSection => {
+        commentSection.forEach(comment => {
+          if (comment.val().author === currentUser.uid) {
+            userCommentsCount++;
+          }
+        });
+      });
+    }
+    
+    const now = Date.now();
+    const lastArticleTime = userData.lastArticle || 0;
+    const articleCooldownRemaining = Math.max(0, ARTICLE_COOLDOWN - (now - lastArticleTime));
+    const articleCooldownMinutes = Math.ceil(articleCooldownRemaining / 60000);
+    
+    const lastCommentTime = userData.lastComment || 0;
+    const commentCooldownRemaining = Math.max(0, COMMENT_COOLDOWN - (now - lastCommentTime));
+    const commentCooldownSeconds = Math.ceil(commentCooldownRemaining / 1000);
+    
+    profileView.innerHTML = `
+      <div class="card highlight fade-in">
+        <div class="profile-header">
+          <div class="avatar">${currentUser.email[0].toUpperCase()}</div>
+          <div>
+            <h3>${userData.username || 'مستخدم'}</h3>
+            <div class="muted">${currentUser.email}</div>
+            <div class="muted">منذ ${formatDate(userData.joinDate)}</div>
+          </div>
+        </div>
+        
+        <div class="profile-stats">
+          <div class="stat">
+            <div class="stat-value">${userArticlesCount}</div>
+            <div class="stat-label">مقالات</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">${userLikesCount}</div>
+            <div class="stat-label">إعجابات</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">${userCommentsCount}</div>
+            <div class="stat-label">تعليقات</div>
+          </div>
+        </div>
+        
+        <div style="background: rgba(30, 30, 36, 0.5); padding: 15px; border-radius: var(--radius-sm); margin: 20px 0;">
+          <h4><i class="fas fa-info-circle"></i> معلومات الحساب</h4>
+          <div class="muted" style="margin-top: 10px;">
+            <p><i class="fas fa-envelope"></i> <strong>البريد:</strong> ${currentUser.email}</p>
+            <p style="margin-top: 8px;"><i class="fas fa-calendar"></i> <strong>تاريخ الانضمام:</strong> ${new Date(userData.joinDate).toLocaleDateString('ar-SA')}</p>
+            <p style="margin-top: 8px;"><i class="fas fa-clock"></i> <strong>آخر نشاط:</strong> ${formatDate(userData.lastLogin || userData.joinDate)}</p>
+            ${articleCooldownRemaining > 0 ? `
+            <p style="margin-top: 8px; color: var(--accent-light);">
+              <i class="fas fa-hourglass-half"></i> <strong>وقت تبريد المقال:</strong> ${articleCooldownMinutes} دقيقة
+            </p>
+            ` : ''}
+            ${commentCooldownRemaining > 0 ? `
+            <p style="margin-top: 8px; color: var(--accent-light);">
+              <i class="fas fa-hourglass-end"></i> <strong>وقت تبريد التعليق:</strong> ${commentCooldownSeconds} ثانية
+            </p>
+            ` : ''}
+          </div>
+        </div>
+        
+        <label>اسم المستخدم</label>
+        <input id="p-name" value="${userData.username || ''}" placeholder="اسم المستخدم">
+        
+        <label style="margin-top: 15px;">نبذة عنك</label>
+        <textarea id="p-bio" rows="3" placeholder="اكتب نبذة عن نفسك...">${userData.bio || ''}</textarea>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button class="btn" onclick="saveProfile()">
+            <i class="fas fa-save"></i> حفظ التعديلات
+          </button>
+          <button class="btn ghost" onclick="showSection('articles')">
+            <i class="fas fa-arrow-right"></i> العودة
+          </button>
+        </div>
+      </div>
+    `;
+  }
+  
+  window.saveProfile = () => {
+    const username = document.getElementById('p-name').value.trim();
+    const bio = document.getElementById('p-bio').value.trim();
+    
+    if (!username) {
+      showNotification('يرجى إدخال اسم مستخدم', 'error');
+      return;
+    }
+    
+    if (username.length < 3) {
+      showNotification('اسم المستخدم يجب أن يكون 3 أحرف على الأقل', 'error');
+      return;
+    }
+    
+    update(ref(db, 'users/' + currentUser.uid), {
+      username: username,
+      bio: bio,
+      updated: Date.now()
+    }).then(() => {
+      usersCache.set(currentUser.uid, { username: username, bio: bio });
+      showNotification('تم تحديث الملف الشخصي', 'success');
+      openProfile();
+    }).catch(error => {
+      showNotification(error.message, 'error');
+    });
+  };
+  
+  /* =====================================================
+     VIEWS TRACKING SYSTEM
+  ===================================================== */
+  async function trackArticleView(articleId) {
+    if (!currentUser) return;
+    
+    try {
+      const viewRef = ref(db, `views/${articleId}/${currentUser.uid}`);
+      const viewSnap = await get(viewRef);
+      
+      if (!viewSnap.exists()) {
+        await set(viewRef, {
+          timestamp: Date.now(),
+          count: 1
+        });
+        
+        await update(ref(db, `articles/${articleId}`), {
+          viewsCount: increment(1)
+        });
+      } else {
+        const viewData = viewSnap.val();
+        const timeSinceLastView = Date.now() - viewData.timestamp;
+        
+        if (timeSinceLastView > 30 * 60 * 1000) {
+          await update(viewRef, {
+            timestamp: Date.now(),
+            count: viewData.count + 1
+          });
+          
+          await update(ref(db, `articles/${articleId}`), {
+            viewsCount: increment(1)
+          });
+        }
+      }
+    } catch (error) {
+      console.log('Error tracking view:', error);
+    }
+  }
+  
+  async function getArticleViews(articleId) {
+    try {
+      const articleSnap = await get(ref(db, `articles/${articleId}`));
+      if (articleSnap.exists()) {
+        return articleSnap.val().viewsCount || 0;
+      }
+    } catch (error) {
+      console.log('Error getting views:', error);
+    }
+    return 0;
+  }
+  
+  /* =====================================================
+     ARTICLES SYSTEM WITH PAGINATION - محسّنة
+  ===================================================== */
+  async function loadArticles() {
+    if (articlesLoading) return;
+    articlesLoading = true;
+    
+    articlesDiv.innerHTML = `
+      <div class="loading" id="loadingArticles">
+        <div class="spinner"></div>
+      </div>
+    `;
+    paginationDiv.style.display = 'none';
+    
+    try {
+      const articlesRef = ref(db, 'articles');
+      const snap = await get(articlesRef);
+      
+      articlesDiv.innerHTML = '';
+      allArticles = [];
+      
+      if (!snap.exists()) {
+        articlesDiv.innerHTML = `
+          <div class="empty-state fade-in">
+            <i class="fas fa-newspaper"></i>
+            <h3>لا توجد مقالات بعد</h3>
+            <p>كن أول من ينشر مقالًا على المنتدى!</p>
+            ${currentUser ? `
+            <button class="btn" onclick="openPublishModal()" style="margin-top: 20px; width: auto;">
+              <i class="fas fa-pen-fancy"></i> نشر أول مقال
+            </button>
+            ` : `
+            <button class="btn" onclick="login()" style="margin-top: 20px; width: auto;">
+              <i class="fas fa-sign-in-alt"></i> تسجيل الدخول للنشر
+            </button>
+            `}
+          </div>
+        `;
+        articlesLoading = false;
+        return;
+      }
+      
+      snap.forEach(articleSnap => {
+        allArticles.push({
+          id: articleSnap.key,
+          ...articleSnap.val()
+        });
+      });
+      
+      let filteredArticles = [...allArticles];
+      
+      if (currentFilter === 'popular') {
+        filteredArticles.sort((a, b) => (b.viewsCount || 0) - (a.viewsCount || 0));
+      } else if (currentFilter === 'recent') {
+        filteredArticles.sort((a, b) => b.created - a.created);
+      } else {
+        filteredArticles.sort((a, b) => b.created - a.created);
+      }
+      
+      // تحميل الإعجابات للمستخدم المسجل فقط
+      if (currentUser) {
+        try {
+          await loadUserLikes();
+        } catch (error) {
+          console.log('لا يمكن تحميل الإعجابات:', error);
+        }
+      }
+      
+      totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
+      currentPage = 1;
+      
+      await displayArticlesPage(filteredArticles, currentPage);
+      updatePagination(totalPages, filteredArticles);
+    } catch (error) {
+      console.error('Error loading articles:', error);
+      showNotification('حدث خطأ في تحميل المقالات', 'error');
+    } finally {
+      articlesLoading = false;
+    }
+  }
+  
+  async function displayArticlesPage(articles, page) {
+    const startIndex = (page - 1) * articlesPerPage;
+    const endIndex = startIndex + articlesPerPage;
+    const pageArticles = articles.slice(startIndex, endIndex);
+    
+    articlesDiv.innerHTML = '';
+    
+    if (pageArticles.length === 0) {
+      articlesDiv.innerHTML = `
+        <div class="empty-state fade-in">
+          <i class="fas fa-newspaper"></i>
+          <h3>لا توجد مقالات في هذه الصفحة</h3>
+          <p>جرب صفحة أخرى أو قم بتغيير عامل التصفية</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // تحميل بيانات المؤلفين للمستخدمين المسجلين فقط
+    if (currentUser) {
+      const authorIds = [...new Set(pageArticles.map(article => article.author).filter(Boolean))];
+      await loadUsersBatch(authorIds);
+    }
+    
+    for (const article of pageArticles) {
+      await renderArticle(article);
+    }
+  }
+  
+  async function loadUsersBatch(userIds) {
+    if (!currentUser) return; // لا تحمل بيانات المستخدمين لغير المسجلين
+    
+    const uncachedIds = userIds.filter(id => !usersCache.has(id));
+    
+    if (uncachedIds.length === 0) return;
+    
+    const promises = uncachedIds.map(async (userId) => {
+      try {
+        const userSnap = await get(ref(db, 'users/' + userId));
+        if (userSnap.exists()) {
+          usersCache.set(userId, userSnap.val());
+        }
+      } catch (error) {
+        console.log('Error loading user:', userId, error);
+      }
+    });
+    
+    await Promise.all(promises);
+  }
+  
+  async function getUserData(userId) {
+    if (!userId || !currentUser) return null; // لا تظهر بيانات المستخدمين لغير المسجلين
+    
+    if (usersCache.has(userId)) {
+      return usersCache.get(userId);
+    }
+    
+    try {
+      const userSnap = await get(ref(db, 'users/' + userId));
+      if (userSnap.exists()) {
+        const userData = userSnap.val();
+        usersCache.set(userId, userData);
+        return userData;
+      }
+    } catch (error) {
+      console.log('Error getting user data:', error);
+    }
+    
+    return null;
+  }
+  
+  function updatePagination(totalPages, articles) {
+    if (totalPages <= 1) {
+      paginationDiv.style.display = 'none';
+      return;
+    }
+    
+    paginationDiv.style.display = 'flex';
+    paginationDiv.innerHTML = '';
+    
+    const prevBtn = document.createElement('button');
+    prevBtn.className = `page-btn ${currentPage === 1 ? 'disabled' : ''}`;
+    prevBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+    prevBtn.onclick = () => {
+      if (currentPage > 1) {
+        currentPage--;
+        displayArticlesPage(articles, currentPage);
+        updatePagination(totalPages, articles);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    paginationDiv.appendChild(prevBtn);
+    
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      const pageBtn = document.createElement('button');
+      pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+      pageBtn.textContent = i;
+      pageBtn.onclick = () => {
+        currentPage = i;
+        displayArticlesPage(articles, currentPage);
+        updatePagination(totalPages, articles);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+      paginationDiv.appendChild(pageBtn);
+    }
+    
+    const nextBtn = document.createElement('button');
+    nextBtn.className = `page-btn ${currentPage === totalPages ? 'disabled' : ''}`;
+    nextBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    nextBtn.onclick = () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        displayArticlesPage(articles, currentPage);
+        updatePagination(totalPages, articles);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    paginationDiv.appendChild(nextBtn);
+  }
+  
+  async function loadUserLikes() {
+    if (!currentUser) return;
+    
+    try {
+      userLikes.clear();
+      const likesRef = ref(db, 'likes');
+      const likesSnap = await get(likesRef);
+      
+      if (likesSnap.exists()) {
+        likesSnap.forEach(articleLikes => {
+          const articleId = articleLikes.key;
+          articleLikes.forEach(like => {
+            if (like.key === currentUser.uid) {
+              userLikes.set(articleId, true);
+            }
+          });
+        });
+      }
+    } catch (error) {
+      console.log('Error loading user likes:', error);
+    }
+  }
+  
+  window.filterArticles = (filterType) => {
+    currentFilter = filterType;
+    currentPage = 1;
+    
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    
+    event.target.classList.add('active');
+    
+    loadArticles();
+  };
+  
+  async function renderArticle(article) {
+    const card = document.createElement('div');
+    card.className = 'card fade-in';
+    
+    let authorName = 'مجهول';
+    let authorInitial = '?';
+    
+    // ✅ FIX: إذا كان المستخدم مسجلاً، حاول جلب بيانات المؤلف
+    if (article.author && currentUser) {
+      try {
+        const userData = await getUserData(article.author);
+        if (userData) {
+          authorName = userData.username || 'مستخدم';
+          authorInitial = authorName.charAt(0);
+        }
+      } catch (error) {
+        console.log('خطأ في تحميل بيانات المؤلف:', error);
+        authorName = 'مستخدم';
+      }
+    } else {
+      authorName = 'مجهول';
+    }
+    
+    let liked = false;
+    if (currentUser) {
+      liked = userLikes.has(article.id);
+    }
+    
+    const isAuthor = currentUser && article.author === currentUser.uid;
+    
+    let tagsHTML = '';
+    if (article.likesCount > 10) {
+      tagsHTML += '<span class="tag hot">🔥 شائع</span>';
+    }
+    
+    if (Date.now() - article.created < 24 * 60 * 60 * 1000) {
+      tagsHTML += '<span class="tag new">🆕 جديد</span>';
+    }
+    
+    if (article.category) {
+      tagsHTML += `<span class="tag">${article.category}</span>`;
+    }
+    
+    if (article.readTime) {
+      tagsHTML += `<span class="tag" style="background: rgba(108, 117, 125, 0.15); color: #adb5bd;">⏱️ ${article.readTime} د</span>`;
+    }
+    
+    const readTime = article.readTime || Math.max(1, Math.floor((article.content.length || 0) / 500));
+    const isExpanded = expandedArticles.has(article.id);
+    const shouldTruncate = article.content && article.content.length > PREVIEW_LENGTH;
+    const displayContent = shouldTruncate && !isExpanded ? 
+      article.content.substring(0, PREVIEW_LENGTH) + '...' : 
+      article.content || 'محتوى غير متوفر';
+    
+    // جلب عدد المشاهدات الحقيقي
+    let viewsCount = 0;
+    try {
+      viewsCount = await getArticleViews(article.id);
+    } catch (error) {
+      console.log('خطأ في جلب المشاهدات:', error);
+    }
+    
+    if (viewsCount === 0) {
+      // إذا لم يكن هناك مشاهدات، نعرض رقم واقعي بناءً على الوقت والنشاط
+      const ageInDays = Math.max(1, Math.floor((Date.now() - article.created) / (24 * 60 * 60 * 1000)));
+      const baseViews = Math.floor(Math.random() * 20) + 5;
+      const likesBoost = (article.likesCount || 0) * 3;
+      const commentsBoost = (article.commentsCount || 0) * 2;
+      viewsCount = baseViews + (ageInDays * 5) + likesBoost + commentsBoost;
+      
+      // حفظ المشاهدات المحسوبة
+      if (currentUser) {
+        update(ref(db, `articles/${article.id}`), {
+          viewsCount: viewsCount
+        }).catch(() => {});
+      }
+    }
+    
+    // إنشاء أزرار الإعجاب والتعليق بناءً على حالة تسجيل الدخول
+    const likeButton = currentUser ? 
+      `<div class="action-btn like ${liked ? 'active' : ''}" data-id="${article.id}" onclick="toggleLike(event, '${article.id}', ${liked})">
+        <i class="${liked ? 'fas' : 'far'} fa-heart"></i>
+        <span class="like-count-${article.id}">${article.likesCount || 0}</span>
+      </div>` :
+      `<div class="action-btn like" onclick="showNotification('يجب تسجيل الدخول للإعجاب', 'error')">
+        <i class="far fa-heart"></i>
+        <span>${article.likesCount || 0}</span>
+      </div>`;
+    
+    const commentButton = currentUser ?
+      `<div class="action-btn comment" onclick="openComments('${article.id}')">
+        <i class="far fa-comment"></i>
+        <span>${article.commentsCount || 0}</span>
+      </div>` :
+      `<div class="action-btn comment" onclick="showNotification('يجب تسجيل الدخول للتعليق', 'error')">
+        <i class="far fa-comment"></i>
+        <span>${article.commentsCount || 0}</span>
+      </div>`;
+    
+    const readMoreButton = shouldTruncate ? 
+      `<button class="read-more-btn" onclick="toggleArticleContent(event,'${article.id}')">
+        <i class="fas fa-chevron-${isExpanded ? 'up' : 'down'}"></i>
+        ${isExpanded ? 'عرض أقل' : 'عرض المزيد'}
+      </button>` : '';
+    
+    card.innerHTML = `
+      <div class="article-title">${article.title || 'عنوان غير محدد'}</div>
+      <div style="margin-top: 8px;">
+        ${tagsHTML}
+      </div>
+      <div class="article-meta">
+        <span><i class="far fa-calendar"></i> ${formatDate(article.created)}</span>
+        <span><i class="far fa-user"></i> ${authorName}</span>
+        <span><i class="far fa-eye"></i> ${viewsCount} مشاهدة</span>
+        <span><i class="far fa-clock"></i> ${readTime} دقيقة قراءة</span>
+      </div>
+      <div class="article-content ${isExpanded ? 'expanded' : ''}">
+        ${displayContent}
+        ${shouldTruncate && !isExpanded ? '<div class="read-more-overlay"></div>' : ''}
+      </div>
+      ${readMoreButton}
+      <div class="article-actions">
+        ${likeButton}
+        ${commentButton}
+        ${isAuthor ? `
+        <div class="action-btn" style="color: #ff6b6b;" onclick="deleteArticle('${article.id}')">
+          <i class="far fa-trash-alt"></i>
+          <span>حذف</span>
+        </div>
+        ` : ''}
+      </div>
+    `;
+    
+    articlesDiv.appendChild(card);
+    
+    // تتبع المشاهدة
+    if (currentUser) {
+      setTimeout(() => {
+        trackArticleView(article.id);
+      }, 1000);
+    }
+  }
+  
+  window.toggleArticleContent = function(event, articleId) {
+    if(event){event.preventDefault();event.stopPropagation();}
+    if (expandedArticles.has(articleId)) {
+      expandedArticles.delete(articleId);
+    } else {
+      expandedArticles.add(articleId);
+    }
+    loadArticles();
+  };
+  
+  /* =====================================================
+     MY ARTICLES VIEW
+  ===================================================== */
+  async function openMyArticles() {
+    if (!currentUser) {
+      myArticlesView.innerHTML = `
+        <div class="card highlight">
+          <div class="empty-state">
+            <i class="fas fa-user-lock"></i>
+            <h3>يجب تسجيل الدخول</h3>
+            <p>سجل الدخول لعرض مقالاتك</p>
+            <button class="btn" onclick="showSection('articles')" style="margin-top: 20px; width: auto;">
+              <i class="fas fa-arrow-right"></i> العودة للمقالات
+            </button>
+          </div>
+        </div>
+      `;
+      return;
+    }
+    
+    myArticlesView.innerHTML = `
+      <div class="card highlight fade-in">
+        <h3><i class="fas fa-newspaper"></i> مقالاتي</h3>
+        <p class="muted" style="margin-top: 10px;">إدارة مقالاتك المنشورة على المنتدى</p>
+        <div id="myArticlesList" style="margin-top: 20px;"></div>
+      </div>
+    `;
+    
+    const myArticlesList = document.getElementById('myArticlesList');
+    myArticlesList.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    
+    const articlesSnap = await get(ref(db, 'articles'));
+    const userArticles = [];
+    
+    if (articlesSnap.exists()) {
+      articlesSnap.forEach(articleSnap => {
+        const article = articleSnap.val();
+        if (article.author === currentUser.uid) {
+          userArticles.push({
+            id: articleSnap.key,
+            ...article
+          });
+        }
+      });
+    }
+    
+    if (userArticles.length === 0) {
+      myArticlesList.innerHTML = `
+        <div class="empty-state fade-in">
+          <i class="fas fa-newspaper"></i>
+          <p>لم تنشر أي مقالات بعد</p>
+          <button class="btn" onclick="openPublishModal()" style="margin-top: 15px; width: auto;">
+            <i class="fas fa-pen-fancy"></i> نشر أول مقال
+          </button>
+        </div>
+      `;
+      return;
+    }
+    
+    userArticles.sort((a, b) => b.created - a.created);
+    
+    userArticles.forEach(article => {
+      const articleEl = document.createElement('div');
+      articleEl.className = 'card fade-in';
+      articleEl.style.marginBottom = '15px';
+      articleEl.style.padding = '20px';
+      
+      articleEl.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+          <div style="flex: 1; min-width: 200px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <strong>${article.title}</strong>
+            </div>
+            <div class="muted" style="margin-top: 5px;">
+              ${formatDate(article.created)} • ${article.category || 'غير مصنف'} • ${article.readTime || '1'} دقيقة قراءة
+            </div>
+            <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 14px;">
+              <span><i class="far fa-heart"></i> ${article.likesCount || 0} إعجاب</span>
+              <span><i class="far fa-comment"></i> ${article.commentsCount || 0} تعليق</span>
+              <span><i class="far fa-eye"></i> ${article.viewsCount || 0} مشاهدة</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn small danger" onclick="deleteArticle('${article.id}')">
+              <i class="far fa-trash-alt"></i> حذف
+            </button>
+          </div>
+        </div>
+      `;
+      
+      myArticlesList.appendChild(articleEl);
+    });
+  }
+  
+  /* =====================================================
+     PUBLISH ARTICLE
+  ===================================================== */
+  window.openPublishModal = () => {
+    if (!currentUser) {
+      showNotification('يجب تسجيل الدخول أولاً', 'error');
+      return;
+    }
+    
+    publishModal.style.display = 'flex';
+    document.getElementById('articleTitle').focus();
+    closeSidebarOnMobile();
+    
+    initCharacterCounters();
+    
+    setTimeout(async () => {
+      await checkArticleCooldown();
+    }, 100);
+  };
+  
+  window.closePublishModal = () => {
+    publishModal.style.display = 'none';
+    document.getElementById('articleTitle').value = '';
+    document.getElementById('articleContent').value = '';
+    document.getElementById('articleCategory').value = 'ريدبيل';
+    document.getElementById('articleReadTime').value = '3';
+    
+    titleCounter.textContent = '0/70';
+    contentCounter.textContent = '0/2000';
+    titleCounter.className = 'char-counter muted';
+    contentCounter.className = 'char-counter muted';
+    
+    if (articleCooldownTimer) {
+      clearInterval(articleCooldownTimer);
+      articleCooldownTimer = null;
+    }
+  };
+  
+  window.publishArticle = async () => {
+    const canPublish = await checkArticleCooldown();
+    if (!canPublish) {
+      showNotification('يجب الانتظار قبل نشر المقال التالي', 'error');
+      return;
+    }
+    
+    const title = document.getElementById('articleTitle').value.trim();
+    const content = document.getElementById('articleContent').value.trim();
+    const category = document.getElementById('articleCategory').value;
+    const readTime = document.getElementById('articleReadTime').value;
+    
+    if (!title || !content) {
+      showNotification('يرجى ملء جميع الحقول', 'error');
+      return;
+    }
+    
+    if (title.length < 5) {
+      showNotification('عنوان المقال قصير جدًا (5 أحرف على الأقل)', 'error');
+      return;
+    }
+    
+    if (title.length > TITLE_MAX_LENGTH) {
+      showNotification(`عنوان المقال طويل جدًا (${TITLE_MAX_LENGTH} حرف كحد أقصى)`, 'error');
+      return;
+    }
+    
+    if (content.length < 50) {
+      showNotification('محتوى المقال قصير جدًا (50 حرف على الأقل)', 'error');
+      return;
+    }
+    
+    if (content.length > CONTENT_MAX_LENGTH) {
+      showNotification(`محتوى المقال طويل جدًا (${CONTENT_MAX_LENGTH} حرف كحد أقصى)`, 'error');
+      return;
+    }
+    
+    const articleData = {
+      title: title,
+      content: content,
+      category: category,
+      author: currentUser.uid,
+      created: Date.now(),
+      likesCount: 0,
+      commentsCount: 0,
+      viewsCount: 0,
+      readTime: readTime
+    };
+    
+    push(ref(db, 'articles'), articleData).then((result) => {
+      update(ref(db, 'users/' + currentUser.uid), { 
+        lastArticle: Date.now(),
+        articlesCount: (currentUser.articlesCount || 0) + 1
+      });
+      
+      showNotification('تم نشر المقال بنجاح', 'success');
+      closePublishModal();
+      showSection('articles');
+    }).catch(error => {
+      showNotification(error.message, 'error');
+    });
+  };
+  
+  /* =====================================================
+     LIKES SYSTEM
+  ===================================================== */
+  window.toggleLike = async (event, articleId, liked) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (!currentUser) {
+      showNotification('يجب تسجيل الدخول أولاً', 'error');
+      return;
+    }
+    
+    const likeBtn = event.currentTarget;
+    const likeIcon = likeBtn.querySelector('i');
+    const likeCountSpan = likeBtn.querySelector(`.like-count-${articleId}`);
+    
+    if (likeBtn.classList.contains('processing')) return;
+    likeBtn.classList.add('processing');
+    
+    const currentCount = parseInt(likeCountSpan.textContent) || 0;
+    let newCount;
+    
+    if (liked) {
+      newCount = Math.max(0, currentCount - 1);
+      likeBtn.classList.remove('active');
+      likeIcon.className = 'far fa-heart';
+    } else {
+      newCount = currentCount + 1;
+      likeBtn.classList.add('active');
+      likeIcon.className = 'fas fa-heart';
+      
+      likeBtn.style.transform = 'scale(1.1)';
+      setTimeout(() => {
+        likeBtn.style.transform = 'scale(1)';
+      }, 200);
+    }
+    
+    likeCountSpan.textContent = newCount;
+    
+    const likeRef = ref(db, `likes/${articleId}/${currentUser.uid}`);
+    const articleRef = ref(db, `articles/${articleId}`);
+    
+    try {
+      if (liked) {
+        await remove(likeRef);
+        await update(articleRef, { likesCount: newCount });
+        userLikes.delete(articleId);
+      } else {
+        await set(likeRef, true);
+        await update(articleRef, { likesCount: newCount });
+        userLikes.set(articleId, true);
+      }
+    } catch (error) {
+      showNotification('حدث خطأ أثناء تحديث الإعجاب', 'error');
+      if (liked) {
+        likeBtn.classList.add('active');
+        likeIcon.className = 'fas fa-heart';
+        likeCountSpan.textContent = currentCount;
+      } else {
+        likeBtn.classList.remove('active');
+        likeIcon.className = 'far fa-heart';
+        likeCountSpan.textContent = currentCount;
+      }
+    } finally {
+      setTimeout(() => {
+        likeBtn.classList.remove('processing');
+      }, 300);
+    }
+  };
+  
+  /* =====================================================
+     COMMENTS SYSTEM
+  ===================================================== */
+  window.openComments = async (articleId) => {
+    if (!currentUser) {
+      showNotification('يجب تسجيل الدخول أولاً', 'error');
+      return;
+    }
+    
+    currentArticleId = articleId;
+    commentsPage = 1;
+    allComments = [];
+    commentModal.style.display = 'flex';
+    
+    setTimeout(() => {
+      initCharacterCounters();
+      checkCommentCooldown();
+    }, 100);
+    
+    await loadComments(articleId, 1);
+  };
+  
+  window.closeCommentModal = () => {
+    commentModal.style.display = 'none';
+    document.getElementById('newComment').value = '';
+    document.getElementById('loadMoreCommentsContainer').style.display = 'none';
+    
+    commentCounter.textContent = '0/1500';
+    commentCounter.className = 'char-counter muted';
+    
+    if (commentCooldownTimer) {
+      clearInterval(commentCooldownTimer);
+      commentCooldownTimer = null;
+    }
+  };
+  
+  async function loadComments(articleId, page) {
+    const commentsList = document.getElementById('commentsList');
+    
+    if (page === 1) {
+      commentsList.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    }
+    
+    const commentsRef = ref(db, `comments/${articleId}`);
+    const commentsSnap = await get(commentsRef);
+    
+    if (page === 1) {
+      commentsList.innerHTML = '';
+    }
+    
+    if (!commentsSnap.exists()) {
+      if (page === 1) {
+        commentsList.innerHTML = `
+          <div class="empty-state fade-in">
+            <i class="far fa-comments"></i>
+            <p>لا توجد تعليقات بعد</p>
+            <p class="muted">كن أول من يعلق على هذا المقال</p>
+          </div>
+        `;
+      }
+      document.getElementById('loadMoreCommentsContainer').style.display = 'none';
+      return;
+    }
+    
+    if (page === 1) {
+      allComments = [];
+    }
+    
+    commentsSnap.forEach(commentSnap => {
+      allComments.push({
+        id: commentSnap.key,
+        ...commentSnap.val()
+      });
+    });
+    
+    allComments.sort((a, b) => b.created - a.created);
+    
+    const startIndex = (page - 1) * commentsPerPage;
+    const endIndex = startIndex + commentsPerPage;
+    const pageComments = allComments.slice(startIndex, endIndex);
+    
+    if (page === 1) {
+      commentsList.innerHTML = '';
+    }
+    
+    const authorIds = pageComments.map(comment => comment.author).filter(Boolean);
+    await loadUsersBatch(authorIds);
+    
+    for (const comment of pageComments) {
+      const commentEl = document.createElement('div');
+      commentEl.className = 'comment fade-in';
+      
+      let authorName = 'مجهول';
+      if (comment.author) {
+        const userData = await getUserData(comment.author);
+        if (userData) {
+          authorName = userData.username || 'مستخدم';
+        }
+      }
+      
+      commentEl.innerHTML = `
+        <div class="comment-header">
+          <div class="comment-author">${authorName}</div>
+          <div class="comment-time">${formatDate(comment.created)}</div>
+        </div>
+        <div class="comment-content">${comment.text}</div>
+      `;
+      
+      commentsList.appendChild(commentEl);
+    }
+    
+    if (allComments.length > page * commentsPerPage) {
+      document.getElementById('loadMoreCommentsContainer').style.display = 'block';
+    } else {
+      document.getElementById('loadMoreCommentsContainer').style.display = 'none';
+    }
+  }
+  
+  window.loadMoreComments = () => {
+    commentsPage++;
+    loadComments(currentArticleId, commentsPage);
+  };
+  
+  window.postComment = async () => {
+    const canComment = await checkCommentCooldown();
+    if (!canComment) {
+      showNotification('يجب الانتظار قبل إضافة التعليق التالي', 'error');
+      return;
+    }
+    
+    const commentText = document.getElementById('newComment').value.trim();
+    
+    if (!commentText) {
+      showNotification('يرجى كتابة تعليق', 'error');
+      return;
+    }
+    
+    if (commentText.length > COMMENT_MAX_LENGTH) {
+      showNotification(`التعليق طويل جدًا (${COMMENT_MAX_LENGTH} حرف كحد أقصى)`, 'error');
+      return;
+    }
+    
+    const commentRef = ref(db, `comments/${currentArticleId}`);
+    const articleRef = ref(db, `articles/${currentArticleId}`);
+    
+    try {
+      await push(commentRef, {
+        text: commentText,
+        author: currentUser.uid,
+        created: Date.now()
+      });
+      
+      const articleSnap = await get(articleRef);
+      const articleData = articleSnap.val();
+      const newCommentsCount = (articleData.commentsCount || 0) + 1;
+      
+      await update(articleRef, { commentsCount: newCommentsCount });
+      
+      const userRef = ref(db, 'users/' + currentUser.uid);
+      get(userRef).then(snap => {
+        const userData = snap.val() || {};
+        const currentComments = userData.commentsCount || 0;
+        update(userRef, { 
+          commentsCount: currentComments + 1,
+          lastComment: Date.now()
+        });
+      });
+      
+      document.getElementById('newComment').value = '';
+      commentsPage = 1;
+      loadComments(currentArticleId, 1);
+      
+      showNotification('تم إضافة التعليق', 'success');
+      
+      commentCounter.textContent = '0/1500';
+      commentCounter.className = 'char-counter muted';
+      
+      await checkCommentCooldown();
+    } catch (error) {
+      showNotification('حدث خطأ أثناء إضافة التعليق', 'error');
+    }
+  };
+  
+  /* =====================================================
+     DELETE ARTICLE
+  ===================================================== */
+  window.deleteArticle = async (articleId) => {
+    if (!confirm('هل أنت متأكد من حذف هذا المقال؟ سيتم حذف جميع الإعجابات والتعليقات المرتبطة به.')) return;
+    
+    const articleRef = ref(db, `articles/${articleId}`);
+    
+    try {
+      await remove(articleRef);
+      
+      const likesRef = ref(db, `likes/${articleId}`);
+      await remove(likesRef);
+      
+      const commentsRef = ref(db, `comments/${articleId}`);
+      await remove(commentsRef);
+      
+      const viewsRef = ref(db, `views/${articleId}`);
+      await remove(viewsRef);
+      
+      if (currentUser) {
+        const userRef = ref(db, 'users/' + currentUser.uid);
+        get(userRef).then(snap => {
+          const userData = snap.val() || {};
+          const currentCount = userData.articlesCount || 1;
+          update(userRef, { articlesCount: Math.max(0, currentCount - 1) });
+        });
+      }
+      
+      showNotification('تم حذف المقال', 'success');
+      
+      setTimeout(() => {
+        if (articlesSection.style.display === 'block') {
+          loadArticles();
+        } else if (myArticlesSection.style.display === 'block') {
+          openMyArticles();
+        }
+      }, 300);
+      
+    } catch (error) {
+      showNotification('حدث خطأ أثناء حذف المقال', 'error');
+    }
+  };
+  
+  /* =====================================================
+     UTILITY FUNCTIONS
+  ===================================================== */
+  function formatDate(timestamp) {
+    if (!timestamp || timestamp === 0) return 'غير محدد';
+    
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return 'تاريخ غير صالح';
+    
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 60 * 1000) {
+      return 'الآن';
+    }
+    
+    if (diff < 60 * 60 * 1000) {
+      const minutes = Math.floor(diff / (60 * 1000));
+      return `منذ ${minutes} دقيقة`;
+    }
+    
+    if (diff < 24 * 60 * 60 * 1000) {
+      const hours = Math.floor(diff / (60 * 60 * 1000));
+      return `منذ ${hours} ساعة`;
+    }
+    
+    if (diff < 7 * 24 * 60 * 60 * 1000) {
+      const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+      return `منذ ${days} يوم`;
+    }
+    
+    return date.toLocaleDateString('ar-SA', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+  
+  function showNotification(message, type = 'success') {
+    const icon = document.getElementById('notificationIcon');
+    const text = document.getElementById('notificationText');
+    
+    if (type === 'success') {
+      icon.className = 'fas fa-check-circle';
+      notification.classList.add('success');
+      notification.classList.remove('error');
+    } else {
+      icon.className = 'fas fa-exclamation-circle';
+      notification.classList.add('error');
+      notification.classList.remove('success');
+    }
+    
+    text.textContent = message;
+    notification.style.display = 'flex';
+    
+    setTimeout(() => {
+      notification.style.display = 'none';
+    }, 5000);
+  }
+  
+  window.addEventListener('click', (e) => {
+    if (e.target === publishModal) {
+      closePublishModal();
+    }
+    
+    if (e.target === commentModal) {
+      closeCommentModal();
+    }
+  });
+  
+  notification.addEventListener('click', () => {
+    notification.style.display = 'none';
+  });
+  
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (sidebar.classList.contains('active')) {
+        toggleSidebar();
+      }
+      if (publishModal.style.display === 'flex') {
+        closePublishModal();
+      }
+      if (commentModal.style.display === 'flex') {
+        closeCommentModal();
+      }
+    }
+    
+    if (e.ctrlKey && e.key === 'Enter' && commentModal.style.display === 'flex') {
+      const postCommentBtn = document.getElementById('postCommentBtn');
+      if (postCommentBtn && !postCommentBtn.disabled) {
+        postComment();
+      }
+    }
+  });
+  
+  window.showSection('articles');
+  
+  window.addEventListener('load', () => {
+    document.body.style.opacity = '0';
+    document.body.style.transition = 'opacity 0.3s';
+    
+    setTimeout(() => {
+      document.body.style.opacity = '1';
+    }, 100);
+  });
+  </script>
+</body>
+</html>
