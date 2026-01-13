@@ -416,6 +416,44 @@
   }
   
   /* =====================================================
+     CHARACTER COUNTERS
+  ===================================================== */
+  .char-counter {
+    font-size: 12px;
+    margin-top: 4px;
+    text-align: left;
+  }
+  
+  .char-counter.warning {
+    color: #ffc107;
+  }
+  
+  .char-counter.error {
+    color: #e63946;
+  }
+  
+  .char-counter.success {
+    color: #52b788;
+  }
+  
+  /* =====================================================
+     COOLDOWN TIMER
+  ===================================================== */
+  .cooldown-timer {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .cooldown-timer .timer {
+    color: var(--accent-light);
+    font-weight: 700;
+  }
+  
+  /* =====================================================
      PAGINATION
   ===================================================== */
   .pagination {
@@ -1163,11 +1201,19 @@
       </div>
       
       <div class="modal-content">
-        <label>عنوان المقال</label>
-        <input id="articleTitle" placeholder="اكتب عنوانًا جذابًا لمقالك">
+        <label>عنوان المقال (70 حرف كحد أقصى)</label>
+        <input id="articleTitle" placeholder="اكتب عنوانًا جذابًا لمقالك" maxlength="70">
+        <div class="char-counter" id="titleCounter">0/70</div>
         
-        <label style="margin-top: 20px;">نص المقال</label>
-        <textarea id="articleContent" placeholder="اكتب محتوى مقالك هنا..." rows="8"></textarea>
+        <label style="margin-top: 20px;">نص المقال (2000 حرف كحد أقصى)</label>
+        <textarea id="articleContent" placeholder="اكتب محتوى مقالك هنا..." rows="8" maxlength="2000"></textarea>
+        <div class="char-counter" id="contentCounter">0/2000</div>
+        
+        <div id="cooldownMessage" class="cooldown-timer" style="display: none;">
+          <i class="fas fa-clock"></i>
+          <span>يمكنك نشر المقال التالي خلال:</span>
+          <span class="timer" id="articleCooldownTimer">60:00</span>
+        </div>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
           <div>
@@ -1204,7 +1250,7 @@
         </div>
         
         <div style="display: flex; gap: 10px; margin-top: 30px;">
-          <button class="btn" style="flex: 1;" onclick="publishArticle()">
+          <button class="btn" style="flex: 1;" onclick="publishArticle()" id="publishBtn">
             <i class="fas fa-paper-plane"></i> نشر المقال
           </button>
           <button class="btn ghost" onclick="closePublishModal()" style="width: auto;">
@@ -1235,12 +1281,21 @@
         </div>
         
         <div style="margin-top: 20px;">
-          <textarea id="newComment" placeholder="اكتب تعليقك هنا..." rows="3"></textarea>
+          <textarea id="newComment" placeholder="اكتب تعليقك هنا (1500 حرف كحد أقصى)..." rows="3" maxlength="1500"></textarea>
+          <div class="char-counter" id="commentCounter">0/1500</div>
+          
+          <div id="commentCooldownMessage" class="cooldown-timer" style="display: none;">
+            <i class="fas fa-clock"></i>
+            <span>يمكنك إضافة التعليق التالي خلال:</span>
+            <span class="timer" id="commentCooldownTimer">60</span>
+            <span>ثانية</span>
+          </div>
+          
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
             <div class="muted" style="font-size: 12px;">
               اضغط Ctrl+Enter لإرسال التعليق
             </div>
-            <button class="btn small" onclick="postComment()">
+            <button class="btn small" onclick="postComment()" id="postCommentBtn">
               <i class="fas fa-paper-plane"></i> إضافة تعليق
             </button>
           </div>
@@ -1261,7 +1316,7 @@
   ===================================================== */
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-  import { getDatabase, ref, push, onValue, update, get, set, remove, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  import { getDatabase, ref, push, onValue, update, get, set, remove, query, orderByChild, limitToLast, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
   
   /* =====================================================
      CONFIG
@@ -1296,6 +1351,11 @@
   const todayArticlesCount = document.getElementById('todayArticlesCount');
   const paginationDiv = document.getElementById('pagination');
   
+  // Character counters
+  const titleCounter = document.getElementById('titleCounter');
+  const contentCounter = document.getElementById('contentCounter');
+  const commentCounter = document.getElementById('commentCounter');
+  
   // Section elements
   const articlesSection = document.getElementById('articlesSection');
   const profileSection = document.getElementById('profileSection');
@@ -1320,6 +1380,209 @@
   let commentsPage = 1;
   const commentsPerPage = 10;
   let allComments = [];
+  
+  // Rate limiting constants - التقييد الزمني
+  const ARTICLE_COOLDOWN = 60 * 60 * 1000; // 1 ساعة بين المقالات (3600000 مللي ثانية)
+  const COMMENT_COOLDOWN = 60 * 1000; // 1 دقيقة بين التعليقات (60000 مللي ثانية)
+  
+  // Character limits - حدود الأحرف
+  const TITLE_MAX_LENGTH = 70;
+  const CONTENT_MAX_LENGTH = 2000;
+  const COMMENT_MAX_LENGTH = 1500;
+  
+  // Cooldown timers
+  let articleCooldownTimer = null;
+  let commentCooldownTimer = null;
+  let articleCooldownEnd = 0;
+  let commentCooldownEnd = 0;
+  
+  /* =====================================================
+     CHARACTER COUNTER FUNCTIONS
+  ===================================================== */
+  function initCharacterCounters() {
+    // عنوان المقال
+    const articleTitleInput = document.getElementById('articleTitle');
+    if (articleTitleInput) {
+      articleTitleInput.addEventListener('input', () => {
+        const length = articleTitleInput.value.length;
+        titleCounter.textContent = `${length}/${TITLE_MAX_LENGTH}`;
+        updateCharCounterStyle(titleCounter, length, TITLE_MAX_LENGTH);
+      });
+    }
+    
+    // محتوى المقال
+    const articleContentInput = document.getElementById('articleContent');
+    if (articleContentInput) {
+      articleContentInput.addEventListener('input', () => {
+        const length = articleContentInput.value.length;
+        contentCounter.textContent = `${length}/${CONTENT_MAX_LENGTH}`;
+        updateCharCounterStyle(contentCounter, length, CONTENT_MAX_LENGTH);
+      });
+    }
+    
+    // التعليق
+    const newCommentInput = document.getElementById('newComment');
+    if (newCommentInput) {
+      newCommentInput.addEventListener('input', () => {
+        const length = newCommentInput.value.length;
+        commentCounter.textContent = `${length}/${COMMENT_MAX_LENGTH}`;
+        updateCharCounterStyle(commentCounter, length, COMMENT_MAX_LENGTH);
+      });
+    }
+  }
+  
+  function updateCharCounterStyle(counter, length, max) {
+    counter.className = 'char-counter';
+    if (length === 0) {
+      counter.classList.add('muted');
+    } else if (length > max * 0.9) {
+      counter.classList.add('error');
+    } else if (length > max * 0.75) {
+      counter.classList.add('warning');
+    } else {
+      counter.classList.add('success');
+    }
+  }
+  
+  /* =====================================================
+     COOLDOWN TIMER FUNCTIONS
+  ===================================================== */
+  async function checkArticleCooldown() {
+    if (!currentUser) return true;
+    
+    const userRef = ref(db, 'users/' + currentUser.uid);
+    const snap = await get(userRef);
+    
+    if (snap.exists()) {
+      const userData = snap.val();
+      const lastArticleTime = userData.lastArticle || 0;
+      const now = Date.now();
+      const timeSinceLastArticle = now - lastArticleTime;
+      
+      if (timeSinceLastArticle < ARTICLE_COOLDOWN) {
+        const remainingTime = ARTICLE_COOLDOWN - timeSinceLastArticle;
+        articleCooldownEnd = now + remainingTime;
+        
+        // تحديث رسالة التبريد
+        const cooldownMessage = document.getElementById('cooldownMessage');
+        const publishBtn = document.getElementById('publishBtn');
+        
+        if (cooldownMessage && publishBtn) {
+          cooldownMessage.style.display = 'flex';
+          publishBtn.disabled = true;
+          publishBtn.innerHTML = '<i class="fas fa-clock"></i> في فترة التبريد';
+          publishBtn.style.opacity = '0.7';
+          publishBtn.style.cursor = 'not-allowed';
+          
+          // بدء مؤقت العد التنازلي
+          if (articleCooldownTimer) clearInterval(articleCooldownTimer);
+          articleCooldownTimer = setInterval(() => updateArticleCooldownTimer(), 1000);
+          updateArticleCooldownTimer();
+        }
+        
+        return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  function updateArticleCooldownTimer() {
+    const now = Date.now();
+    const remaining = Math.max(0, articleCooldownEnd - now);
+    
+    if (remaining <= 0) {
+      clearInterval(articleCooldownTimer);
+      
+      const cooldownMessage = document.getElementById('cooldownMessage');
+      const publishBtn = document.getElementById('publishBtn');
+      
+      if (cooldownMessage && publishBtn) {
+        cooldownMessage.style.display = 'none';
+        publishBtn.disabled = false;
+        publishBtn.innerHTML = '<i class="fas fa-paper-plane"></i> نشر المقال';
+        publishBtn.style.opacity = '1';
+        publishBtn.style.cursor = 'pointer';
+      }
+      return;
+    }
+    
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    
+    const timerElement = document.getElementById('articleCooldownTimer');
+    if (timerElement) {
+      timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+  }
+  
+  async function checkCommentCooldown() {
+    if (!currentUser) return true;
+    
+    const userRef = ref(db, 'users/' + currentUser.uid);
+    const snap = await get(userRef);
+    
+    if (snap.exists()) {
+      const userData = snap.val();
+      const lastCommentTime = userData.lastComment || 0;
+      const now = Date.now();
+      const timeSinceLastComment = now - lastCommentTime;
+      
+      if (timeSinceLastComment < COMMENT_COOLDOWN) {
+        const remainingTime = COMMENT_COOLDOWN - timeSinceLastComment;
+        commentCooldownEnd = now + remainingTime;
+        
+        // تحديث رسالة التبريد
+        const cooldownMessage = document.getElementById('commentCooldownMessage');
+        const postCommentBtn = document.getElementById('postCommentBtn');
+        
+        if (cooldownMessage && postCommentBtn) {
+          cooldownMessage.style.display = 'flex';
+          postCommentBtn.disabled = true;
+          postCommentBtn.innerHTML = '<i class="fas fa-clock"></i> في فترة التبريد';
+          postCommentBtn.style.opacity = '0.7';
+          postCommentBtn.style.cursor = 'not-allowed';
+          
+          // بدء مؤقت العد التنازلي
+          if (commentCooldownTimer) clearInterval(commentCooldownTimer);
+          commentCooldownTimer = setInterval(() => updateCommentCooldownTimer(), 1000);
+          updateCommentCooldownTimer();
+        }
+        
+        return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  function updateCommentCooldownTimer() {
+    const now = Date.now();
+    const remaining = Math.max(0, commentCooldownEnd - now);
+    
+    if (remaining <= 0) {
+      clearInterval(commentCooldownTimer);
+      
+      const cooldownMessage = document.getElementById('commentCooldownMessage');
+      const postCommentBtn = document.getElementById('postCommentBtn');
+      
+      if (cooldownMessage && postCommentBtn) {
+        cooldownMessage.style.display = 'none';
+        postCommentBtn.disabled = false;
+        postCommentBtn.innerHTML = '<i class="fas fa-paper-plane"></i> إضافة تعليق';
+        postCommentBtn.style.opacity = '1';
+        postCommentBtn.style.cursor = 'pointer';
+      }
+      return;
+    }
+    
+    const seconds = Math.ceil(remaining / 1000);
+    
+    const timerElement = document.getElementById('commentCooldownTimer');
+    if (timerElement) {
+      timerElement.textContent = seconds;
+    }
+  }
   
   /* =====================================================
      SIDEBAR FUNCTIONS
@@ -1534,7 +1797,9 @@
           lastLogin: Date.now(),
           articlesCount: 0,
           likesCount: 0,
-          commentsCount: 0
+          commentsCount: 0,
+          lastArticle: 0,
+          lastComment: 0
         });
       } else {
         update(userRef, { lastLogin: Date.now() });
@@ -1590,6 +1855,17 @@
       });
     }
     
+    // حساب الوقت المتبقي للنشر
+    const now = Date.now();
+    const lastArticleTime = userData.lastArticle || 0;
+    const articleCooldownRemaining = Math.max(0, ARTICLE_COOLDOWN - (now - lastArticleTime));
+    const articleCooldownMinutes = Math.ceil(articleCooldownRemaining / 60000);
+    
+    // حساب الوقت المتبقي للتعليق
+    const lastCommentTime = userData.lastComment || 0;
+    const commentCooldownRemaining = Math.max(0, COMMENT_COOLDOWN - (now - lastCommentTime));
+    const commentCooldownSeconds = Math.ceil(commentCooldownRemaining / 1000);
+    
     profileView.innerHTML = `
       <div class="card highlight fade-in">
         <div class="profile-header">
@@ -1622,6 +1898,16 @@
             <p><i class="fas fa-envelope"></i> <strong>البريد:</strong> ${currentUser.email}</p>
             <p style="margin-top: 8px;"><i class="fas fa-calendar"></i> <strong>تاريخ الانضمام:</strong> ${new Date(userData.joinDate).toLocaleDateString('ar-SA')}</p>
             <p style="margin-top: 8px;"><i class="fas fa-clock"></i> <strong>آخر نشاط:</strong> ${formatDate(userData.lastLogin || userData.joinDate)}</p>
+            ${articleCooldownRemaining > 0 ? `
+            <p style="margin-top: 8px; color: var(--accent-light);">
+              <i class="fas fa-hourglass-half"></i> <strong>وقت تبريد المقال:</strong> ${articleCooldownMinutes} دقيقة
+            </p>
+            ` : ''}
+            ${commentCooldownRemaining > 0 ? `
+            <p style="margin-top: 8px; color: var(--accent-light);">
+              <i class="fas fa-hourglass-end"></i> <strong>وقت تبريد التعليق:</strong> ${commentCooldownSeconds} ثانية
+            </p>
+            ` : ''}
           </div>
         </div>
         
@@ -2241,7 +2527,7 @@
   }
   
   /* =====================================================
-     PUBLISH ARTICLE
+     PUBLISH ARTICLE - محسّنة مع التقييد الزمني
   ===================================================== */
   window.openPublishModal = () => {
     if (!currentUser) {
@@ -2252,6 +2538,14 @@
     publishModal.style.display = 'flex';
     document.getElementById('articleTitle').focus();
     closeSidebarOnMobile();
+    
+    // تهيئة العدادات
+    initCharacterCounters();
+    
+    // التحقق من فترة التبريد
+    setTimeout(async () => {
+      await checkArticleCooldown();
+    }, 100);
   };
   
   window.closePublishModal = () => {
@@ -2261,27 +2555,57 @@
     document.getElementById('articleCategory').value = 'عام';
     document.getElementById('articleReadTime').value = '3';
     document.getElementById('articleFeatured').checked = false;
+    
+    // إعادة تعيين العدادات
+    titleCounter.textContent = '0/70';
+    contentCounter.textContent = '0/2000';
+    titleCounter.className = 'char-counter muted';
+    contentCounter.className = 'char-counter muted';
+    
+    // إيقاف مؤقت التبريد
+    if (articleCooldownTimer) {
+      clearInterval(articleCooldownTimer);
+      articleCooldownTimer = null;
+    }
   };
   
-  window.publishArticle = () => {
+  window.publishArticle = async () => {
+    // التحقق من فترة التبريد أولاً
+    const canPublish = await checkArticleCooldown();
+    if (!canPublish) {
+      showNotification('يجب الانتظار قبل نشر المقال التالي', 'error');
+      return;
+    }
+    
     const title = document.getElementById('articleTitle').value.trim();
     const content = document.getElementById('articleContent').value.trim();
     const category = document.getElementById('articleCategory').value;
     const readTime = document.getElementById('articleReadTime').value;
     const featured = document.getElementById('articleFeatured').checked;
     
+    // التحقق من الشروط
     if (!title || !content) {
       showNotification('يرجى ملء جميع الحقول', 'error');
       return;
     }
     
     if (title.length < 5) {
-      showNotification('عنوان المقال قصير جدًا', 'error');
+      showNotification('عنوان المقال قصير جدًا (5 أحرف على الأقل)', 'error');
+      return;
+    }
+    
+    if (title.length > TITLE_MAX_LENGTH) {
+      showNotification(`عنوان المقال طويل جدًا (${TITLE_MAX_LENGTH} حرف كحد أقصى)`, 'error');
       return;
     }
     
     if (content.length < 50) {
-      showNotification('محتوى المقال قصير جدًا', 'error');
+      showNotification('محتوى المقال قصير جدًا (50 حرف على الأقل)', 'error');
+      return;
+    }
+    
+    if (content.length > CONTENT_MAX_LENGTH) {
+      showNotification(`محتوى المقال طويل جدًا (${CONTENT_MAX_LENGTH} حرف كحد أقصى)`, 'error');
       return;
     }
     
@@ -2298,19 +2622,15 @@
     };
     
     push(ref(db, 'articles'), articleData).then((result) => {
+      // تحديث وقت آخر مقال
+      update(ref(db, 'users/' + currentUser.uid), { 
+        lastArticle: Date.now(),
+        articlesCount: (currentUser.articlesCount || 0) + 1
+      });
+      
       showNotification('تم نشر المقال بنجاح', 'success');
       closePublishModal();
       showSection('articles');
-      
-      const userRef = ref(db, 'users/' + currentUser.uid);
-      get(userRef).then(snap => {
-        const userData = snap.val() || {};
-        const currentCount = userData.articlesCount || 0;
-        update(userRef, { 
-          articlesCount: currentCount + 1,
-          lastArticle: Date.now()
-        });
-      });
       
       if (featured) {
         setTimeout(() => {
@@ -2398,7 +2718,7 @@
   };
   
   /* =====================================================
-     COMMENTS SYSTEM WITH PAGINATION
+     COMMENTS SYSTEM WITH PAGINATION - محسّنة مع التقييد الزمني
   ===================================================== */
   window.openComments = async (articleId) => {
     if (!currentUser) {
@@ -2410,6 +2730,14 @@
     commentsPage = 1;
     allComments = [];
     commentModal.style.display = 'flex';
+    
+    // تهيئة العدادات
+    setTimeout(() => {
+      initCharacterCounters();
+      // التحقق من فترة التبريد
+      checkCommentCooldown();
+    }, 100);
+    
     await loadComments(articleId, 1);
   };
   
@@ -2417,6 +2745,16 @@
     commentModal.style.display = 'none';
     document.getElementById('newComment').value = '';
     document.getElementById('loadMoreCommentsContainer').style.display = 'none';
+    
+    // إعادة تعيين العداد
+    commentCounter.textContent = '0/1500';
+    commentCounter.className = 'char-counter muted';
+    
+    // إيقاف مؤقت التبريد
+    if (commentCooldownTimer) {
+      clearInterval(commentCooldownTimer);
+      commentCooldownTimer = null;
+    }
   };
   
   async function loadComments(articleId, page) {
@@ -2509,10 +2847,22 @@
   };
   
   window.postComment = async () => {
+    // التحقق من فترة التبريد أولاً
+    const canComment = await checkCommentCooldown();
+    if (!canComment) {
+      showNotification('يجب الانتظار قبل إضافة التعليق التالي', 'error');
+      return;
+    }
+    
     const commentText = document.getElementById('newComment').value.trim();
     
     if (!commentText) {
       showNotification('يرجى كتابة تعليق', 'error');
+      return;
+    }
+    
+    if (commentText.length > COMMENT_MAX_LENGTH) {
+      showNotification(`التعليق طويل جدًا (${COMMENT_MAX_LENGTH} حرف كحد أقصى)`, 'error');
       return;
     }
     
@@ -2532,11 +2882,15 @@
       
       await update(articleRef, { commentsCount: newCommentsCount });
       
+      // تحديث وقت آخر تعليق
       const userRef = ref(db, 'users/' + currentUser.uid);
       get(userRef).then(snap => {
         const userData = snap.val() || {};
         const currentComments = userData.commentsCount || 0;
-        update(userRef, { commentsCount: currentComments + 1 });
+        update(userRef, { 
+          commentsCount: currentComments + 1,
+          lastComment: Date.now()
+        });
       });
       
       document.getElementById('newComment').value = '';
@@ -2544,6 +2898,13 @@
       loadComments(currentArticleId, 1);
       
       showNotification('تم إضافة التعليق', 'success');
+      
+      // إعادة تعيين عداد الأحرف
+      commentCounter.textContent = '0/1500';
+      commentCounter.className = 'char-counter muted';
+      
+      // تفعيل فترة التبريد للتعليق
+      await checkCommentCooldown();
     } catch (error) {
       showNotification('حدث خطأ أثناء إضافة التعليق', 'error');
     }
@@ -2753,7 +3114,10 @@
     }
     
     if (e.ctrlKey && e.key === 'Enter' && commentModal.style.display === 'flex') {
-      postComment();
+      const postCommentBtn = document.getElementById('postCommentBtn');
+      if (postCommentBtn && !postCommentBtn.disabled) {
+        postComment();
+      }
     }
   });
   
