@@ -1397,6 +1397,22 @@
   let commentCooldownEnd = 0;
   
   /* =====================================================
+     INITIALIZATION
+  ===================================================== */
+  window.addEventListener('load', () => {
+    console.log('Notification system test: ready');
+    // يمكنك إلغاء التعليق عن السطر التالي لاختبار التوست
+    // setTimeout(() => showNotification('Test notification', 'success'), 1000);
+    
+    document.body.style.opacity = '0';
+    document.body.style.transition = 'opacity 0.3s';
+    
+    setTimeout(() => {
+      document.body.style.opacity = '1';
+    }, 100);
+  });
+  
+  /* =====================================================
      CHARACTER COUNTER FUNCTIONS
   ===================================================== */
   function initCharacterCounters() {
@@ -1602,13 +1618,6 @@
       toggleSidebar();
     }
   }
-  
-  window.addEventListener('load', () => {
-    if (window.innerWidth <= 992) {
-      sidebar.classList.remove('active');
-      sidebarOverlay.classList.remove('active');
-    }
-  });
   
   window.addEventListener('resize', () => {
     if (window.innerWidth > 992) {
@@ -2025,6 +2034,7 @@
           await loadUserLikes();
         } catch (error) {
           console.log('لا يمكن تحميل الإعجابات:', error);
+          // لا تعيق تحميل المقالات إذا فشل تحميل الإعجابات
         }
       }
       
@@ -2192,6 +2202,7 @@
       }
     } catch (error) {
       console.log('Error loading user likes:', error);
+      // لا تظهر رسالة خطأ للمستخدم، فقط سجلها في الكونسول
     }
   }
   
@@ -2215,7 +2226,7 @@
     let authorName = 'مجهول';
     let authorInitial = '?';
     
-    // ✅ FIX: إذا كان المستخدم مسجلاً، حاول جلب بيانات المؤلف
+    // إذا كان المستخدم مسجلاً، حاول جلب بيانات المؤلف
     if (article.author && currentUser) {
       try {
         const userData = await getUserData(article.author);
@@ -2271,7 +2282,7 @@
         <i class="far fa-heart"></i>
         <span>${article.likesCount || 0}</span>
       </div>`;
-    
+
     const commentButton = currentUser ?
       `<div class="action-btn comment" onclick="openComments('${article.id}')">
         <i class="far fa-comment"></i>
@@ -2682,14 +2693,14 @@
   };
   
   /* =====================================================
-     LIKES SYSTEM
+     LIKES SYSTEM - معدّلة
   ===================================================== */
   window.toggleLike = async (event, articleId, liked) => {
     event.preventDefault();
     event.stopPropagation();
     
     if (!currentUser) {
-      showNotification('يجب تسجيل الدخول أولاً', 'error');
+      showNotification('يجب تسجيل الدخول أولاً للإعجاب', 'error');
       return;
     }
     
@@ -2752,11 +2763,11 @@
   };
   
   /* =====================================================
-     COMMENTS SYSTEM
+     COMMENTS SYSTEM - معدّلة
   ===================================================== */
   window.openComments = async (articleId) => {
     if (!currentUser) {
-      showNotification('يجب تسجيل الدخول أولاً', 'error');
+      showNotification('يجب تسجيل الدخول أولاً للتعليق', 'error');
       return;
     }
     
@@ -3150,16 +3161,8 @@
   
   updateStats();
   
+  // Show articles section on load
   window.showSection('articles');
-  
-  window.addEventListener('load', () => {
-    document.body.style.opacity = '0';
-    document.body.style.transition = 'opacity 0.3s';
-    
-    setTimeout(() => {
-      document.body.style.opacity = '1';
-    }, 100);
-  });
   </script>
 </body>
 </html>
