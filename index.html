@@ -1368,8 +1368,8 @@
   let currentFilter = 'all';
   let allArticles = [];
   let userLikes = new Map();
-  let usersCache = new Map(); // ذاكرة تخزين مؤقت لبيانات المستخدمين
-  let articlesLoading = false; // علم لمنع التحميل المزدوج
+  let usersCache = new Map();
+  let articlesLoading = false;
   
   // Pagination variables
   let currentPage = 1;
@@ -1381,11 +1381,11 @@
   const commentsPerPage = 10;
   let allComments = [];
   
-  // Rate limiting constants - التقييد الزمني
-  const ARTICLE_COOLDOWN = 60 * 60 * 1000; // 1 ساعة بين المقالات (3600000 مللي ثانية)
-  const COMMENT_COOLDOWN = 60 * 1000; // 1 دقيقة بين التعليقات (60000 مللي ثانية)
+  // Rate limiting constants
+  const ARTICLE_COOLDOWN = 60 * 60 * 1000;
+  const COMMENT_COOLDOWN = 60 * 1000;
   
-  // Character limits - حدود الأحرف
+  // Character limits
   const TITLE_MAX_LENGTH = 70;
   const CONTENT_MAX_LENGTH = 2000;
   const COMMENT_MAX_LENGTH = 1500;
@@ -1400,7 +1400,6 @@
      CHARACTER COUNTER FUNCTIONS
   ===================================================== */
   function initCharacterCounters() {
-    // عنوان المقال
     const articleTitleInput = document.getElementById('articleTitle');
     if (articleTitleInput) {
       articleTitleInput.addEventListener('input', () => {
@@ -1410,7 +1409,6 @@
       });
     }
     
-    // محتوى المقال
     const articleContentInput = document.getElementById('articleContent');
     if (articleContentInput) {
       articleContentInput.addEventListener('input', () => {
@@ -1420,7 +1418,6 @@
       });
     }
     
-    // التعليق
     const newCommentInput = document.getElementById('newComment');
     if (newCommentInput) {
       newCommentInput.addEventListener('input', () => {
@@ -1450,38 +1447,40 @@
   async function checkArticleCooldown() {
     if (!currentUser) return true;
     
-    const userRef = ref(db, 'users/' + currentUser.uid);
-    const snap = await get(userRef);
-    
-    if (snap.exists()) {
-      const userData = snap.val();
-      const lastArticleTime = userData.lastArticle || 0;
-      const now = Date.now();
-      const timeSinceLastArticle = now - lastArticleTime;
+    try {
+      const userRef = ref(db, 'users/' + currentUser.uid);
+      const snap = await get(userRef);
       
-      if (timeSinceLastArticle < ARTICLE_COOLDOWN) {
-        const remainingTime = ARTICLE_COOLDOWN - timeSinceLastArticle;
-        articleCooldownEnd = now + remainingTime;
+      if (snap.exists()) {
+        const userData = snap.val();
+        const lastArticleTime = userData.lastArticle || 0;
+        const now = Date.now();
+        const timeSinceLastArticle = now - lastArticleTime;
         
-        // تحديث رسالة التبريد
-        const cooldownMessage = document.getElementById('cooldownMessage');
-        const publishBtn = document.getElementById('publishBtn');
-        
-        if (cooldownMessage && publishBtn) {
-          cooldownMessage.style.display = 'flex';
-          publishBtn.disabled = true;
-          publishBtn.innerHTML = '<i class="fas fa-clock"></i> في فترة التبريد';
-          publishBtn.style.opacity = '0.7';
-          publishBtn.style.cursor = 'not-allowed';
+        if (timeSinceLastArticle < ARTICLE_COOLDOWN) {
+          const remainingTime = ARTICLE_COOLDOWN - timeSinceLastArticle;
+          articleCooldownEnd = now + remainingTime;
           
-          // بدء مؤقت العد التنازلي
-          if (articleCooldownTimer) clearInterval(articleCooldownTimer);
-          articleCooldownTimer = setInterval(() => updateArticleCooldownTimer(), 1000);
-          updateArticleCooldownTimer();
+          const cooldownMessage = document.getElementById('cooldownMessage');
+          const publishBtn = document.getElementById('publishBtn');
+          
+          if (cooldownMessage && publishBtn) {
+            cooldownMessage.style.display = 'flex';
+            publishBtn.disabled = true;
+            publishBtn.innerHTML = '<i class="fas fa-clock"></i> في فترة التبريد';
+            publishBtn.style.opacity = '0.7';
+            publishBtn.style.cursor = 'not-allowed';
+            
+            if (articleCooldownTimer) clearInterval(articleCooldownTimer);
+            articleCooldownTimer = setInterval(() => updateArticleCooldownTimer(), 1000);
+            updateArticleCooldownTimer();
+          }
+          
+          return false;
         }
-        
-        return false;
       }
+    } catch (error) {
+      console.log('Error checking article cooldown:', error);
     }
     
     return true;
@@ -1519,38 +1518,40 @@
   async function checkCommentCooldown() {
     if (!currentUser) return true;
     
-    const userRef = ref(db, 'users/' + currentUser.uid);
-    const snap = await get(userRef);
-    
-    if (snap.exists()) {
-      const userData = snap.val();
-      const lastCommentTime = userData.lastComment || 0;
-      const now = Date.now();
-      const timeSinceLastComment = now - lastCommentTime;
+    try {
+      const userRef = ref(db, 'users/' + currentUser.uid);
+      const snap = await get(userRef);
       
-      if (timeSinceLastComment < COMMENT_COOLDOWN) {
-        const remainingTime = COMMENT_COOLDOWN - timeSinceLastComment;
-        commentCooldownEnd = now + remainingTime;
+      if (snap.exists()) {
+        const userData = snap.val();
+        const lastCommentTime = userData.lastComment || 0;
+        const now = Date.now();
+        const timeSinceLastComment = now - lastCommentTime;
         
-        // تحديث رسالة التبريد
-        const cooldownMessage = document.getElementById('commentCooldownMessage');
-        const postCommentBtn = document.getElementById('postCommentBtn');
-        
-        if (cooldownMessage && postCommentBtn) {
-          cooldownMessage.style.display = 'flex';
-          postCommentBtn.disabled = true;
-          postCommentBtn.innerHTML = '<i class="fas fa-clock"></i> في فترة التبريد';
-          postCommentBtn.style.opacity = '0.7';
-          postCommentBtn.style.cursor = 'not-allowed';
+        if (timeSinceLastComment < COMMENT_COOLDOWN) {
+          const remainingTime = COMMENT_COOLDOWN - timeSinceLastComment;
+          commentCooldownEnd = now + remainingTime;
           
-          // بدء مؤقت العد التنازلي
-          if (commentCooldownTimer) clearInterval(commentCooldownTimer);
-          commentCooldownTimer = setInterval(() => updateCommentCooldownTimer(), 1000);
-          updateCommentCooldownTimer();
+          const cooldownMessage = document.getElementById('commentCooldownMessage');
+          const postCommentBtn = document.getElementById('postCommentBtn');
+          
+          if (cooldownMessage && postCommentBtn) {
+            cooldownMessage.style.display = 'flex';
+            postCommentBtn.disabled = true;
+            postCommentBtn.innerHTML = '<i class="fas fa-clock"></i> في فترة التبريد';
+            postCommentBtn.style.opacity = '0.7';
+            postCommentBtn.style.cursor = 'not-allowed';
+            
+            if (commentCooldownTimer) clearInterval(commentCooldownTimer);
+            commentCooldownTimer = setInterval(() => updateCommentCooldownTimer(), 1000);
+            updateCommentCooldownTimer();
+          }
+          
+          return false;
         }
-        
-        return false;
       }
+    } catch (error) {
+      console.log('Error checking comment cooldown:', error);
     }
     
     return true;
@@ -1683,7 +1684,6 @@
       document.getElementById('logout').onclick = () => {
         signOut(auth).then(() => {
           showNotification('تم تسجيل الخروج بنجاح', 'success');
-          // مسح الذاكرة المؤقتة عند تسجيل الخروج
           usersCache.clear();
           userLikes.clear();
         });
@@ -1724,7 +1724,6 @@
       }
     }
     
-    // لا تحميل المقالات هنا لمنع التحميل المزدوج
     if (articlesSection.style.display === 'block') {
       loadArticles();
     }
@@ -1829,19 +1828,23 @@
     
     const articlesSnap = await get(ref(db, 'articles'));
     let userArticlesCount = 0;
-    articlesSnap.forEach(article => {
-      if (article.val().author === currentUser.uid) {
-        userArticlesCount++;
-      }
-    });
+    if (articlesSnap.exists()) {
+      articlesSnap.forEach(article => {
+        if (article.val().author === currentUser.uid) {
+          userArticlesCount++;
+        }
+      });
+    }
     
     let userLikesCount = 0;
-    articlesSnap.forEach(article => {
-      const likes = article.val().likesCount || 0;
-      if (article.val().author === currentUser.uid) {
-        userLikesCount += likes;
-      }
-    });
+    if (articlesSnap.exists()) {
+      articlesSnap.forEach(article => {
+        const likes = article.val().likesCount || 0;
+        if (article.val().author === currentUser.uid) {
+          userLikesCount += likes;
+        }
+      });
+    }
     
     let userCommentsCount = 0;
     const commentsSnap = await get(ref(db, 'comments'));
@@ -1855,13 +1858,11 @@
       });
     }
     
-    // حساب الوقت المتبقي للنشر
     const now = Date.now();
     const lastArticleTime = userData.lastArticle || 0;
     const articleCooldownRemaining = Math.max(0, ARTICLE_COOLDOWN - (now - lastArticleTime));
     const articleCooldownMinutes = Math.ceil(articleCooldownRemaining / 60000);
     
-    // حساب الوقت المتبقي للتعليق
     const lastCommentTime = userData.lastComment || 0;
     const commentCooldownRemaining = Math.max(0, COMMENT_COOLDOWN - (now - lastCommentTime));
     const commentCooldownSeconds = Math.ceil(commentCooldownRemaining / 1000);
@@ -1948,7 +1949,6 @@
       bio: bio,
       updated: Date.now()
     }).then(() => {
-      // تحديث الذاكرة المؤقتة
       usersCache.set(currentUser.uid, { username: username, bio: bio });
       showNotification('تم تحديث الملف الشخصي', 'success');
       openProfile();
@@ -1984,9 +1984,15 @@
             <i class="fas fa-newspaper"></i>
             <h3>لا توجد مقالات بعد</h3>
             <p>كن أول من ينشر مقالًا على المنصة!</p>
+            ${currentUser ? `
             <button class="btn" onclick="openPublishModal()" style="margin-top: 20px; width: auto;">
               <i class="fas fa-pen-fancy"></i> نشر أول مقال
             </button>
+            ` : `
+            <button class="btn" onclick="login()" style="margin-top: 20px; width: auto;">
+              <i class="fas fa-sign-in-alt"></i> تسجيل الدخول للنشر
+            </button>
+            `}
           </div>
         `;
         articlesLoading = false;
@@ -2013,11 +2019,15 @@
         filteredArticles.sort((a, b) => b.created - a.created);
       }
       
+      // تحميل الإعجابات للمستخدم المسجل فقط
       if (currentUser) {
-        await loadUserLikes();
+        try {
+          await loadUserLikes();
+        } catch (error) {
+          console.log('لا يمكن تحميل الإعجابات:', error);
+        }
       }
       
-      // Pagination logic
       totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
       currentPage = 1;
       
@@ -2052,44 +2062,54 @@
       return;
     }
     
-    // تحميل بيانات المؤلفين دفعة واحدة لتحسين الأداء
-    const authorIds = [...new Set(pageArticles.map(article => article.author).filter(Boolean))];
-    await loadUsersBatch(authorIds);
+    // تحميل بيانات المؤلفين للمستخدمين المسجلين فقط
+    if (currentUser) {
+      const authorIds = [...new Set(pageArticles.map(article => article.author).filter(Boolean))];
+      await loadUsersBatch(authorIds);
+    }
     
     for (const article of pageArticles) {
       await renderArticle(article);
     }
   }
   
-  // دالة محسنة لتحميل مستخدمين متعددين دفعة واحدة
   async function loadUsersBatch(userIds) {
+    if (!currentUser) return; // لا تحمل بيانات المستخدمين لغير المسجلين
+    
     const uncachedIds = userIds.filter(id => !usersCache.has(id));
     
     if (uncachedIds.length === 0) return;
     
     const promises = uncachedIds.map(async (userId) => {
-      const userSnap = await get(ref(db, 'users/' + userId));
-      if (userSnap.exists()) {
-        usersCache.set(userId, userSnap.val());
+      try {
+        const userSnap = await get(ref(db, 'users/' + userId));
+        if (userSnap.exists()) {
+          usersCache.set(userId, userSnap.val());
+        }
+      } catch (error) {
+        console.log('Error loading user:', userId, error);
       }
     });
     
     await Promise.all(promises);
   }
   
-  // الحصول على بيانات مستخدم من الذاكرة المؤقتة
   async function getUserData(userId) {
-    if (!userId) return null;
+    if (!userId || !currentUser) return null; // لا تظهر بيانات المستخدمين لغير المسجلين
     
     if (usersCache.has(userId)) {
       return usersCache.get(userId);
     }
     
-    const userSnap = await get(ref(db, 'users/' + userId));
-    if (userSnap.exists()) {
-      const userData = userSnap.val();
-      usersCache.set(userId, userData);
-      return userData;
+    try {
+      const userSnap = await get(ref(db, 'users/' + userId));
+      if (userSnap.exists()) {
+        const userData = userSnap.val();
+        usersCache.set(userId, userData);
+        return userData;
+      }
+    } catch (error) {
+      console.log('Error getting user data:', error);
     }
     
     return null;
@@ -2104,7 +2124,6 @@
     paginationDiv.style.display = 'flex';
     paginationDiv.innerHTML = '';
     
-    // Previous button
     const prevBtn = document.createElement('button');
     prevBtn.className = `page-btn ${currentPage === 1 ? 'disabled' : ''}`;
     prevBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
@@ -2118,7 +2137,6 @@
     };
     paginationDiv.appendChild(prevBtn);
     
-    // Page buttons
     const maxVisiblePages = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
@@ -2140,7 +2158,6 @@
       paginationDiv.appendChild(pageBtn);
     }
     
-    // Next button
     const nextBtn = document.createElement('button');
     nextBtn.className = `page-btn ${currentPage === totalPages ? 'disabled' : ''}`;
     nextBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
@@ -2158,19 +2175,23 @@
   async function loadUserLikes() {
     if (!currentUser) return;
     
-    userLikes.clear();
-    const likesRef = ref(db, 'likes');
-    const likesSnap = await get(likesRef);
-    
-    if (likesSnap.exists()) {
-      likesSnap.forEach(articleLikes => {
-        const articleId = articleLikes.key;
-        articleLikes.forEach(like => {
-          if (like.key === currentUser.uid) {
-            userLikes.set(articleId, true);
-          }
+    try {
+      userLikes.clear();
+      const likesRef = ref(db, 'likes');
+      const likesSnap = await get(likesRef);
+      
+      if (likesSnap.exists()) {
+        likesSnap.forEach(articleLikes => {
+          const articleId = articleLikes.key;
+          articleLikes.forEach(like => {
+            if (like.key === currentUser.uid) {
+              userLikes.set(articleId, true);
+            }
+          });
         });
-      });
+      }
+    } catch (error) {
+      console.log('Error loading user likes:', error);
     }
   }
   
@@ -2194,12 +2215,20 @@
     let authorName = 'مجهول';
     let authorInitial = '?';
     
-    if (article.author) {
-      const userData = await getUserData(article.author);
-      if (userData) {
-        authorName = userData.username || 'مستخدم';
-        authorInitial = authorName.charAt(0);
+    // ✅ FIX: إذا كان المستخدم مسجلاً، حاول جلب بيانات المؤلف
+    if (article.author && currentUser) {
+      try {
+        const userData = await getUserData(article.author);
+        if (userData) {
+          authorName = userData.username || 'مستخدم';
+          authorInitial = authorName.charAt(0);
+        }
+      } catch (error) {
+        console.log('خطأ في تحميل بيانات المؤلف:', error);
+        authorName = 'مستخدم';
       }
+    } else {
+      authorName = 'مجهول';
     }
     
     let liked = false;
@@ -2232,8 +2261,29 @@
     
     const readTime = article.readTime || Math.max(1, Math.floor((article.content.length || 0) / 500));
     
+    // إنشاء أزرار الإعجاب والتعليق بناءً على حالة تسجيل الدخول
+    const likeButton = currentUser ? 
+      `<div class="action-btn like ${liked ? 'active' : ''}" data-id="${article.id}" onclick="toggleLike(event, '${article.id}', ${liked})">
+        <i class="${liked ? 'fas' : 'far'} fa-heart"></i>
+        <span class="like-count-${article.id}">${article.likesCount || 0}</span>
+      </div>` :
+      `<div class="action-btn like" onclick="showNotification('يجب تسجيل الدخول للإعجاب', 'error')">
+        <i class="far fa-heart"></i>
+        <span>${article.likesCount || 0}</span>
+      </div>`;
+    
+    const commentButton = currentUser ?
+      `<div class="action-btn comment" onclick="openComments('${article.id}')">
+        <i class="far fa-comment"></i>
+        <span>${article.commentsCount || 0}</span>
+      </div>` :
+      `<div class="action-btn comment" onclick="showNotification('يجب تسجيل الدخول للتعليق', 'error')">
+        <i class="far fa-comment"></i>
+        <span>${article.commentsCount || 0}</span>
+      </div>`;
+    
     card.innerHTML = `
-      <div class="article-title">${article.title}</div>
+      <div class="article-title">${article.title || 'عنوان غير محدد'}</div>
       <div style="margin-top: 8px;">
         ${tagsHTML}
       </div>
@@ -2244,17 +2294,11 @@
         <span><i class="far fa-clock"></i> ${readTime} دقيقة قراءة</span>
       </div>
       <div class="article-content">
-        ${article.content.length > 250 ? article.content.substring(0, 250) + '...' : article.content}
+        ${(article.content && article.content.length > 250) ? article.content.substring(0, 250) + '...' : article.content || 'محتوى غير متوفر'}
       </div>
       <div class="article-actions">
-        <div class="action-btn like ${liked ? 'active' : ''}" data-id="${article.id}" onclick="toggleLike(event, '${article.id}', ${liked})">
-          <i class="${liked ? 'fas' : 'far'} fa-heart"></i>
-          <span class="like-count-${article.id}">${article.likesCount || 0}</span>
-        </div>
-        <div class="action-btn comment" onclick="openComments('${article.id}')">
-          <i class="far fa-comment"></i>
-          <span>${article.commentsCount || 0}</span>
-        </div>
+        ${likeButton}
+        ${commentButton}
         <div class="action-btn share" onclick="shareArticle('${article.id}', '${article.title}')">
           <i class="far fa-share-square"></i>
           <span>مشاركة</span>
@@ -2311,15 +2355,17 @@
     const articlesSnap = await get(ref(db, 'articles'));
     const userArticles = [];
     
-    articlesSnap.forEach(articleSnap => {
-      const article = articleSnap.val();
-      if (article.author === currentUser.uid) {
-        userArticles.push({
-          id: articleSnap.key,
-          ...article
-        });
-      }
-    });
+    if (articlesSnap.exists()) {
+      articlesSnap.forEach(articleSnap => {
+        const article = articleSnap.val();
+        if (article.author === currentUser.uid) {
+          userArticles.push({
+            id: articleSnap.key,
+            ...article
+          });
+        }
+      });
+    }
     
     if (userArticles.length === 0) {
       myArticlesList.innerHTML = `
@@ -2527,7 +2573,7 @@
   }
   
   /* =====================================================
-     PUBLISH ARTICLE - محسّنة مع التقييد الزمني
+     PUBLISH ARTICLE
   ===================================================== */
   window.openPublishModal = () => {
     if (!currentUser) {
@@ -2539,10 +2585,8 @@
     document.getElementById('articleTitle').focus();
     closeSidebarOnMobile();
     
-    // تهيئة العدادات
     initCharacterCounters();
     
-    // التحقق من فترة التبريد
     setTimeout(async () => {
       await checkArticleCooldown();
     }, 100);
@@ -2556,13 +2600,11 @@
     document.getElementById('articleReadTime').value = '3';
     document.getElementById('articleFeatured').checked = false;
     
-    // إعادة تعيين العدادات
     titleCounter.textContent = '0/70';
     contentCounter.textContent = '0/2000';
     titleCounter.className = 'char-counter muted';
     contentCounter.className = 'char-counter muted';
     
-    // إيقاف مؤقت التبريد
     if (articleCooldownTimer) {
       clearInterval(articleCooldownTimer);
       articleCooldownTimer = null;
@@ -2570,7 +2612,6 @@
   };
   
   window.publishArticle = async () => {
-    // التحقق من فترة التبريد أولاً
     const canPublish = await checkArticleCooldown();
     if (!canPublish) {
       showNotification('يجب الانتظار قبل نشر المقال التالي', 'error');
@@ -2583,7 +2624,6 @@
     const readTime = document.getElementById('articleReadTime').value;
     const featured = document.getElementById('articleFeatured').checked;
     
-    // التحقق من الشروط
     if (!title || !content) {
       showNotification('يرجى ملء جميع الحقول', 'error');
       return;
@@ -2622,7 +2662,6 @@
     };
     
     push(ref(db, 'articles'), articleData).then((result) => {
-      // تحديث وقت آخر مقال
       update(ref(db, 'users/' + currentUser.uid), { 
         lastArticle: Date.now(),
         articlesCount: (currentUser.articlesCount || 0) + 1
@@ -2643,10 +2682,9 @@
   };
   
   /* =====================================================
-     LIKES SYSTEM - محسّنة تمامًا
+     LIKES SYSTEM
   ===================================================== */
   window.toggleLike = async (event, articleId, liked) => {
-    // منع السلوك الافتراضي للزر - هذا يحل مشكلة العودة لبداية الصفحة
     event.preventDefault();
     event.stopPropagation();
     
@@ -2662,7 +2700,6 @@
     if (likeBtn.classList.contains('processing')) return;
     likeBtn.classList.add('processing');
     
-    // تحديث الواجهة أولاً (تحديث تفاؤلي)
     const currentCount = parseInt(likeCountSpan.textContent) || 0;
     let newCount;
     
@@ -2675,7 +2712,6 @@
       likeBtn.classList.add('active');
       likeIcon.className = 'fas fa-heart';
       
-      // تأثير بسيط للإعجاب
       likeBtn.style.transform = 'scale(1.1)';
       setTimeout(() => {
         likeBtn.style.transform = 'scale(1)';
@@ -2684,7 +2720,6 @@
     
     likeCountSpan.textContent = newCount;
     
-    // تحديث قاعدة البيانات
     const likeRef = ref(db, `likes/${articleId}/${currentUser.uid}`);
     const articleRef = ref(db, `articles/${articleId}`);
     
@@ -2699,7 +2734,6 @@
         userLikes.set(articleId, true);
       }
     } catch (error) {
-      // في حالة الخطأ، نرجع التغيير
       showNotification('حدث خطأ أثناء تحديث الإعجاب', 'error');
       if (liked) {
         likeBtn.classList.add('active');
@@ -2718,7 +2752,7 @@
   };
   
   /* =====================================================
-     COMMENTS SYSTEM WITH PAGINATION - محسّنة مع التقييد الزمني
+     COMMENTS SYSTEM
   ===================================================== */
   window.openComments = async (articleId) => {
     if (!currentUser) {
@@ -2731,10 +2765,8 @@
     allComments = [];
     commentModal.style.display = 'flex';
     
-    // تهيئة العدادات
     setTimeout(() => {
       initCharacterCounters();
-      // التحقق من فترة التبريد
       checkCommentCooldown();
     }, 100);
     
@@ -2746,11 +2778,9 @@
     document.getElementById('newComment').value = '';
     document.getElementById('loadMoreCommentsContainer').style.display = 'none';
     
-    // إعادة تعيين العداد
     commentCounter.textContent = '0/1500';
     commentCounter.className = 'char-counter muted';
     
-    // إيقاف مؤقت التبريد
     if (commentCooldownTimer) {
       clearInterval(commentCooldownTimer);
       commentCooldownTimer = null;
@@ -2806,7 +2836,6 @@
       commentsList.innerHTML = '';
     }
     
-    // تحميل بيانات المؤلفين دفعة واحدة
     const authorIds = pageComments.map(comment => comment.author).filter(Boolean);
     await loadUsersBatch(authorIds);
     
@@ -2833,7 +2862,6 @@
       commentsList.appendChild(commentEl);
     }
     
-    // Show load more button if there are more comments
     if (allComments.length > page * commentsPerPage) {
       document.getElementById('loadMoreCommentsContainer').style.display = 'block';
     } else {
@@ -2847,7 +2875,6 @@
   };
   
   window.postComment = async () => {
-    // التحقق من فترة التبريد أولاً
     const canComment = await checkCommentCooldown();
     if (!canComment) {
       showNotification('يجب الانتظار قبل إضافة التعليق التالي', 'error');
@@ -2882,7 +2909,6 @@
       
       await update(articleRef, { commentsCount: newCommentsCount });
       
-      // تحديث وقت آخر تعليق
       const userRef = ref(db, 'users/' + currentUser.uid);
       get(userRef).then(snap => {
         const userData = snap.val() || {};
@@ -2899,11 +2925,9 @@
       
       showNotification('تم إضافة التعليق', 'success');
       
-      // إعادة تعيين عداد الأحرف
       commentCounter.textContent = '0/1500';
       commentCounter.className = 'char-counter muted';
       
-      // تفعيل فترة التبريد للتعليق
       await checkCommentCooldown();
     } catch (error) {
       showNotification('حدث خطأ أثناء إضافة التعليق', 'error');
@@ -3085,7 +3109,6 @@
     }
   }
   
-  // Close modals when clicking outside
   window.addEventListener('click', (e) => {
     if (e.target === publishModal) {
       closePublishModal();
