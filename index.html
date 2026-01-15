@@ -1752,7 +1752,7 @@
   };
   
   /* =====================================================
-     COMMENTS SYSTEM
+     COMMENTS SYSTEM - مع اسم المستخدم الحقيقي
   ===================================================== */
   window.openComments = async (articleId) => {
     if (!currentUser) {
@@ -1821,13 +1821,41 @@
       allComments = [];
     }
     
-    commentsSnap.forEach(commentSnap => {
-      allComments.push({
-        id: commentSnap.key,
-        ...commentSnap.val()
-      });
-    });
+    // جلب جميع التعليقات وأسماء المستخدمين
+    const commentsWithUsernames = [];
     
+    for (const commentSnap of commentsSnap.entries()) {
+      const commentData = commentSnap[1].val();
+      let username = 'مجهول';
+      
+      if (commentData.author) {
+        try {
+          // جلب اسم المستخدم من قاعدة البيانات
+          const userRef = ref(db, `users/${commentData.author}`);
+          const userSnap = await get(userRef);
+          if (userSnap.exists() && userSnap.val().username) {
+            username = userSnap.val().username;
+          } else {
+            // إذا لم يكن هناك اسم مستخدم، نستخدم جزء البريد الإلكتروني
+            if (commentData.author === currentUser?.uid) {
+              username = currentUser.email.split('@')[0];
+            } else {
+              username = `مستخدم_${commentData.author.substring(0, 5)}`;
+            }
+          }
+        } catch (error) {
+          console.log('Error fetching username:', error);
+        }
+      }
+      
+      commentsWithUsernames.push({
+        id: commentSnap[0],
+        ...commentData,
+        username: username
+      });
+    }
+    
+    allComments = commentsWithUsernames;
     allComments.sort((a, b) => b.created - a.created);
     
     const startIndex = (page - 1) * commentsPerPage;
@@ -1844,7 +1872,7 @@
       
       commentEl.innerHTML = `
         <div class="comment-header">
-          <div class="comment-author">${comment.author ? 'مستخدم' : 'مجهول'}</div>
+          <div class="comment-author">${comment.username}</div>
           <div class="comment-time">${formatDate(comment.created)}</div>
         </div>
         <div class="comment-content">${comment.text}</div>
@@ -1899,6 +1927,12 @@
       const newCommentsCount = (articleData.commentsCount || 0) + 1;
       
       await update(articleRef, { commentsCount: newCommentsCount });
+      
+      // تحديث آخر تعليق للمستخدم
+      await update(ref(db, 'users/' + currentUser.uid), {
+        lastComment: Date.now(),
+        commentsCount: increment(1)
+      });
       
       document.getElementById('newComment').value = '';
       commentsPage = 1;
@@ -2214,7 +2248,7 @@
     try {
       articleLikes.clear();
       const likesRef = ref(db, 'likes');
-      const likesSnap = await get(likesRef);
+      const likesSnap = await get(likesSnap);
       
       if (likesSnap.exists()) {
         likesSnap.forEach(articleLikesSnap => {
