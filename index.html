@@ -46,7 +46,7 @@
   }
   
   /* =====================================================
-     ENHANCED THEME VARIABLES
+     ENHANCED THEME VARIABLES - تغيير اللون إلى الأحمر الغامق
   ===================================================== */
   :root {
     --bg: #0a0a0b;
@@ -54,10 +54,10 @@
     --card: #1c1c24;
     --card-hover: #24242d;
     --border: rgba(255, 255, 255, 0.12);
-    --accent: #4a6fff;
-    --accent-light: #6d8bff;
-    --accent-dark: #2a4fd8;
-    --secondary: #00c9a7;
+    --accent: #d32f2f; /* الأحمر الغامق */
+    --accent-light: #ff5252; /* الأحمر الفاتح */
+    --accent-dark: #b71c1c; /* الأحمر الداكن */
+    --secondary: #ff8a80; /* الأحمر الفاتح الثانوي */
     --text: #ffffff;
     --text-muted: #a0a0b0;
     --text-light: #d4d4e0;
@@ -188,13 +188,13 @@
   .card:hover {
     transform: translateY(-8px);
     box-shadow: var(--shadow);
-    border-color: rgba(74, 111, 255, 0.3);
+    border-color: rgba(211, 47, 47, 0.3);
     background: linear-gradient(145deg, rgba(32, 32, 40, 0.9), rgba(28, 28, 36, 0.9));
   }
   
   .card.highlight {
     background: linear-gradient(145deg, #24242d, #1c1c24);
-    border: 1px solid rgba(74, 111, 255, 0.3);
+    border: 1px solid rgba(211, 47, 47, 0.3);
     position: relative;
     overflow: hidden;
   }
@@ -284,7 +284,7 @@
   .auth-card .auth-form input:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(74, 111, 255, 0.2);
+    box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.2);
     background: rgba(35, 35, 45, 0.9);
   }
   
@@ -311,12 +311,12 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    box-shadow: 0 8px 24px rgba(74, 111, 255, 0.2);
+    box-shadow: 0 8px 24px rgba(211, 47, 47, 0.2);
   }
   
   .btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(74, 111, 255, 0.3);
+    box-shadow: 0 12px 32px rgba(211, 47, 47, 0.3);
   }
   
   .btn:active {
@@ -332,7 +332,7 @@
   
   .btn.ghost:hover {
     border-color: var(--accent);
-    background: rgba(74, 111, 255, 0.05);
+    background: rgba(211, 47, 47, 0.05);
     transform: translateY(-3px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   }
@@ -371,7 +371,7 @@
   }
   
   .menu-item.active {
-    background: rgba(74, 111, 255, 0.1);
+    background: rgba(211, 47, 47, 0.1);
     color: var(--accent-light);
     border-right: 3px solid var(--accent);
   }
@@ -397,7 +397,7 @@
   input:focus, textarea:focus, select:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(74, 111, 255, 0.2);
+    box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.2);
     background: rgba(35, 35, 45, 0.9);
   }
   
@@ -409,14 +409,14 @@
   .tag {
     display: inline-block;
     padding: 6px 16px;
-    background: rgba(74, 111, 255, 0.15);
+    background: rgba(211, 47, 47, 0.15);
     color: var(--accent-light);
     border-radius: 20px;
     font-size: 13px;
     margin-left: 10px;
     margin-top: 10px;
     font-weight: 600;
-    border: 1px solid rgba(74, 111, 255, 0.3);
+    border: 1px solid rgba(211, 47, 47, 0.3);
   }
   
   .tag.hot {
@@ -426,9 +426,115 @@
   }
   
   .tag.new {
-    background: rgba(0, 201, 167, 0.15);
-    color: #00e6c3;
-    border-color: rgba(0, 230, 195, 0.3);
+    background: rgba(255, 138, 128, 0.15);
+    color: #ffcccb;
+    border-color: rgba(255, 204, 203, 0.3);
+  }
+  
+  /* =====================================================
+     ENHANCED ACTION BUTTONS - أزرار أوسع
+  ===================================================== */
+  .article-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+    font-size: 16px;
+    flex-wrap: wrap;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    justify-content: center;
+  }
+  
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 16px 28px;
+    user-select: none;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 140px;
+    justify-content: center;
+    height: 60px;
+    box-sizing: border-box;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+  
+  .action-btn.like {
+    color: #ff6b6b;
+    border-color: rgba(255, 107, 107, 0.3);
+    background: linear-gradient(135deg, rgba(211, 47, 47, 0.1), rgba(183, 28, 28, 0.05));
+  }
+  
+  .action-btn.like:hover {
+    background: linear-gradient(135deg, rgba(211, 47, 47, 0.2), rgba(183, 28, 28, 0.1));
+    color: #ff5252;
+    border-color: rgba(255, 82, 82, 0.4);
+  }
+  
+  .action-btn.like.active {
+    color: #ff5252;
+    font-weight: 800;
+    background: linear-gradient(135deg, rgba(211, 47, 47, 0.25), rgba(183, 28, 28, 0.15));
+    border-color: rgba(255, 82, 82, 0.5);
+    box-shadow: 0 5px 15px rgba(211, 47, 47, 0.2);
+    animation: pulse 0.5s ease-out;
+  }
+  
+  .action-btn.comment {
+    color: var(--accent-light);
+    border-color: rgba(211, 47, 47, 0.3);
+    background: linear-gradient(135deg, rgba(211, 47, 47, 0.1), rgba(183, 28, 28, 0.05));
+  }
+  
+  .action-btn.comment:hover {
+    background: linear-gradient(135deg, rgba(211, 47, 47, 0.2), rgba(183, 28, 28, 0.1));
+    color: var(--accent);
+    border-color: rgba(211, 47, 47, 0.4);
+  }
+  
+  .action-btn.delete {
+    color: #ff6b6b;
+    border-color: rgba(255, 107, 107, 0.3);
+    background: rgba(255, 107, 107, 0.1);
+  }
+  
+  .action-btn.delete:hover {
+    background: rgba(255, 107, 107, 0.2);
+    color: #ff4757;
+    border-color: rgba(255, 71, 87, 0.4);
+  }
+  
+  .action-btn i {
+    font-size: 22px;
+    transition: all 0.3s;
+  }
+  
+  .action-btn span {
+    font-weight: 700;
+    font-size: 17px;
+    transition: all 0.3s;
+  }
+  
+  /* تأثير النبض للقلب عند الإعجاب */
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
   }
   
   /* =====================================================
@@ -502,7 +608,7 @@
   }
   
   .page-btn:hover {
-    background: rgba(74, 111, 255, 0.1);
+    background: rgba(211, 47, 47, 0.1);
     border-color: var(--accent-light);
     transform: translateY(-2px);
   }
@@ -511,7 +617,7 @@
     background: var(--accent);
     border-color: var(--accent);
     color: white;
-    box-shadow: 0 4px 12px rgba(74, 111, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
   }
   
   .page-btn.disabled {
@@ -600,91 +706,6 @@
     margin-left: 6px;
   }
   
-  /* =====================================================
-     ENHANCED ARTICLE ACTIONS
-  ===================================================== */
-  .article-actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 24px;
-    font-size: 15px;
-    flex-wrap: wrap;
-    padding-top: 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    justify-content: space-around;
-  }
-  
-  .action-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-    padding: 12px 20px;
-    user-select: none;
-    border-radius: 30px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    min-width: 100px;
-    justify-content: center;
-    height: 44px;
-    box-sizing: border-box;
-    color: var(--text-muted);
-    font-weight: 600;
-  }
-  
-  .action-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    transform: translateY(-3px);
-    border-color: rgba(255, 255, 255, 0.12);
-  }
-  
-  .action-btn.like {
-    color: #ff6b81;
-    border-color: rgba(255, 107, 129, 0.2);
-  }
-  
-  .action-btn.like:hover {
-    background: rgba(255, 107, 129, 0.15);
-    color: #ff4757;
-  }
-  
-  .action-btn.like.active {
-    color: #ff4757;
-    font-weight: 700;
-    background: rgba(255, 71, 87, 0.1);
-    border-color: rgba(255, 71, 87, 0.3);
-  }
-  
-  .action-btn.comment {
-    color: var(--accent-light);
-    border-color: rgba(74, 111, 255, 0.2);
-  }
-  
-  .action-btn.comment:hover {
-    background: rgba(74, 111, 255, 0.15);
-    color: var(--accent);
-  }
-  
-  .action-btn.delete {
-    color: #ff6b6b;
-    border-color: rgba(255, 107, 107, 0.2);
-  }
-  
-  .action-btn.delete:hover {
-    background: rgba(255, 107, 107, 0.15);
-    color: #ff4757;
-  }
-  
-  .action-btn i {
-    font-size: 20px;
-  }
-  
-  .action-btn span {
-    font-weight: 600;
-    font-size: 15px;
-  }
-  
   .profile-header {
     display: flex;
     gap: 24px;
@@ -769,7 +790,7 @@
     background: var(--accent);
     border-color: var(--accent);
     color: white;
-    box-shadow: 0 4px 12px rgba(74, 111, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
   }
   
   .filter-btn:hover:not(.active) {
@@ -1020,7 +1041,7 @@
     display: inline-flex;
     align-items: center;
     padding: 4px 12px;
-    background: rgba(74, 111, 255, 0.1);
+    background: rgba(211, 47, 47, 0.1);
     border-radius: 20px;
     font-weight: 600;
   }
@@ -1110,19 +1131,19 @@
     }
     
     .article-actions {
-      gap: 8px;
-      justify-content: space-between;
+      gap: 12px;
+      justify-content: center;
     }
     
     .action-btn {
-      min-width: 90px;
-      padding: 10px 16px;
-      font-size: 14px;
-      height: 40px;
+      min-width: 120px;
+      padding: 14px 20px;
+      font-size: 15px;
+      height: 55px;
     }
     
     .action-btn span {
-      font-size: 14px;
+      font-size: 15px;
     }
   }
   
@@ -1142,26 +1163,26 @@
     }
     
     .article-actions {
-      gap: 6px;
-      justify-content: space-around;
+      gap: 10px;
+      justify-content: space-between;
     }
     
     .action-btn {
-      min-width: 80px;
-      padding: 8px 14px;
+      min-width: 100px;
+      padding: 12px 16px;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
       height: auto;
-      min-height: 60px;
-      border-radius: 16px;
+      min-height: 65px;
+      border-radius: 14px;
     }
     
     .action-btn i {
-      font-size: 18px;
+      font-size: 20px;
     }
     
     .action-btn span {
-      font-size: 12px;
+      font-size: 13px;
     }
     
     .filters {
@@ -1258,6 +1279,16 @@
     .filter-btn {
       padding: 12px 20px;
       font-size: 14px;
+    }
+    
+    .action-btn {
+      min-width: 80px;
+      padding: 10px 14px;
+      min-height: 60px;
+    }
+    
+    .action-btn span {
+      font-size: 12px;
     }
   }
   </style>
@@ -2479,7 +2510,7 @@
       }
     }
     
-    // إنشاء أزرار الإعجاب والتعليق (تصميم حديث يشبه المنصات الكبيرة)
+    // إنشاء أزرار الإعجاب والتعليق (تصميم حديث عريض)
     const likeButton = currentUser ? 
       `<div class="action-btn like ${liked ? 'active' : ''}" data-id="${article.id}" onclick="toggleLike(event, '${article.id}', ${liked})">
         <i class="${liked ? 'fas' : 'far'} fa-heart"></i>
@@ -2732,7 +2763,7 @@
   };
   
   /* =====================================================
-     LIKES SYSTEM
+     ENHANCED LIKES SYSTEM - منع التكرار
   ===================================================== */
   window.toggleLike = async (event, articleId, liked) => {
     event.preventDefault();
@@ -2744,11 +2775,17 @@
     }
     
     const likeBtn = event.currentTarget;
+    
+    // منع النقر المتكرر السريع
+    if (likeBtn.classList.contains('processing')) {
+      showNotification('يرجى الانتظار قليلاً', 'error');
+      return;
+    }
+    
+    likeBtn.classList.add('processing');
+    
     const likeIcon = likeBtn.querySelector('i');
     const likeCountSpan = likeBtn.querySelector(`.like-count-${articleId}`);
-    
-    if (likeBtn.classList.contains('processing')) return;
-    likeBtn.classList.add('processing');
     
     const currentCount = parseInt(likeCountSpan.textContent) || 0;
     let newCount;
@@ -2763,10 +2800,10 @@
       likeIcon.className = 'fas fa-heart';
       
       // تأثير القلب النابض
-      likeBtn.style.transform = 'scale(1.2)';
+      likeBtn.style.transform = 'scale(1.1)';
       setTimeout(() => {
         likeBtn.style.transform = 'scale(1)';
-      }, 200);
+      }, 300);
     }
     
     likeCountSpan.textContent = newCount;
@@ -2779,13 +2816,29 @@
         await remove(likeRef);
         await update(articleRef, { likesCount: newCount });
         userLikes.delete(articleId);
+        showNotification('تم إلغاء الإعجاب', 'success');
       } else {
-        await set(likeRef, true);
+        // التحقق من عدم وجود إعجاب مسبق
+        const likeSnap = await get(likeRef);
+        if (likeSnap.exists()) {
+          showNotification('لقد أعجبت بهذا المقال بالفعل', 'error');
+          likeBtn.classList.remove('processing');
+          return;
+        }
+        
+        await set(likeRef, {
+          userId: currentUser.uid,
+          timestamp: Date.now()
+        });
+        
         await update(articleRef, { likesCount: newCount });
         userLikes.set(articleId, true);
+        
+        showNotification('تم الإعجاب بالمقال', 'success');
       }
     } catch (error) {
       showNotification('حدث خطأ أثناء تحديث الإعجاب', 'error');
+      // التراجع عن التغييرات في الواجهة
       if (liked) {
         likeBtn.classList.add('active');
         likeIcon.className = 'fas fa-heart';
@@ -2798,7 +2851,7 @@
     } finally {
       setTimeout(() => {
         likeBtn.classList.remove('processing');
-      }, 300);
+      }, 500);
     }
   };
   
