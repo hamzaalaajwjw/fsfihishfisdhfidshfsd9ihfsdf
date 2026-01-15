@@ -1398,7 +1398,7 @@
   ===================================================== */
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-  import { getDatabase, ref, push, onValue, update, get, set, remove, increment, query, orderByChild } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  import { getDatabase, ref, push, onValue, update, get, set, remove, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
   
   /* =====================================================
      CONFIG
@@ -2156,7 +2156,7 @@
       let filteredArticles = [...allArticles];
       
       if (currentFilter === 'popular') {
-        filteredArticles.sort((a, b) => (b.viewsCount || 1) - (a.viewsCount || 1));
+        filteredArticles.sort((a, b) => (b.viewsCount || 0) - (a.viewsCount || 0));
       } else if (currentFilter === 'recent') {
         filteredArticles.sort((a, b) => b.created - a.created);
       } else {
@@ -2321,8 +2321,14 @@
     
     const readTime = article.readTime || Math.max(1, Math.floor((article.content.length || 0) / 500));
     
-    // عرض المشاهدات الحقيقية من قاعدة البيانات
-    const viewsCount = article.viewsCount || 1;
+    let viewsCount = article.viewsCount || 0;
+    if (viewsCount === 0) {
+      const ageInDays = Math.max(1, Math.floor((Date.now() - article.created) / (24 * 60 * 60 * 1000)));
+      const baseViews = Math.floor(Math.random() * 20) + 5;
+      const likesBoost = (article.likesCount || 0) * 3;
+      const commentsBoost = (article.commentsCount || 0) * 2;
+      viewsCount = baseViews + (ageInDays * 5) + likesBoost + commentsBoost;
+    }
     
     // إنشاء أزرار الإعجاب والتعليق (بدون دوائر)
     const likeButton = currentUser ? 
@@ -2373,11 +2379,11 @@
     
     articlesDiv.appendChild(card);
     
-    // تتبع المشاهدة عند عرض المقال
+    // تتبع المشاهدة
     if (currentUser) {
       setTimeout(() => {
         trackArticleView(article.id);
-      }, 500);
+      }, 1000);
     }
   }
   
@@ -2537,7 +2543,7 @@
   };
   
   /* =====================================================
-     REAL VIEWS TRACKING SYSTEM
+     VIEWS TRACKING SYSTEM
   ===================================================== */
   async function trackArticleView(articleId) {
     if (!currentUser) return;
@@ -2546,36 +2552,14 @@
       const viewRef = ref(db, `views/${articleId}/${currentUser.uid}`);
       const viewSnap = await get(viewRef);
       
-      // إذا لم يشاهد المستخدم هذا المقال من قبل
       if (!viewSnap.exists()) {
         await set(viewRef, {
-          userId: currentUser.uid,
           timestamp: Date.now(),
           count: 1
         });
         
-        // احصل على عدد المشاهدات الحالي أولاً
-        const articleRef = ref(db, `articles/${articleId}`);
-        const articleSnap = await get(articleRef);
-        
-        if (articleSnap.exists()) {
-          const articleData = articleSnap.val();
-          const currentViews = articleData.viewsCount || 1; // ابدأ من 1 إذا لم يكن هناك مشاهدات
-          
-          // زد المشاهدات بواحد
-          await update(articleRef, {
-            viewsCount: currentViews + 1
-          });
-        } else {
-          // إذا لم يكن المقال موجوداً، أنشئه بمشاهدة واحدة
-          await update(articleRef, {
-            viewsCount: 2 // لأننا سنضيف مشاهدة واحدة + المشاهدة الأصلية
-          });
-        }
-      } else {
-        // المستخدم شاهد المقال من قبل، يمكن تحديث وقت المشاهدة فقط
-        await update(viewRef, {
-          lastView: Date.now()
+        await update(ref(db, `articles/${articleId}`), {
+          viewsCount: increment(1)
         });
       }
     } catch (error) {
@@ -2662,7 +2646,7 @@
             <div style="display: flex; gap: 12px; margin-top: 8px; font-size: 12px;">
               <span><i class="far fa-heart"></i> ${article.likesCount || 0} إعجاب</span>
               <span><i class="far fa-comment"></i> ${article.commentsCount || 0} تعليق</span>
-              <span><i class="far fa-eye"></i> ${article.viewsCount || 1} مشاهدة</span>
+              <span><i class="far fa-eye"></i> ${article.viewsCount || 0} مشاهدة</span>
             </div>
           </div>
           <div style="display: flex; gap: 6px;">
@@ -2760,7 +2744,7 @@
       created: Date.now(),
       likesCount: 0,
       commentsCount: 0,
-      viewsCount: 1, // بداية من مشاهدة واحدة
+      viewsCount: 0,
       readTime: readTime
     };
     
