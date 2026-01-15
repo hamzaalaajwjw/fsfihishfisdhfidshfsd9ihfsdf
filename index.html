@@ -183,39 +183,52 @@
   }
   
   /* =====================================================
-     SIDEBAR - ORIGINAL DESIGN
+     SIDEBAR - MODERN DESIGN
   ===================================================== */
   .sidebar {
-    width: 320px;
-    background: var(--panel);
+    width: 300px;
+    background: rgba(17, 17, 20, 0.8);
     border-left: 1px solid var(--border);
-    padding: 24px;
+    padding: 30px 25px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
     position: relative;
     overflow-y: auto;
     max-height: calc(100vh - 80px);
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 90;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+  }
+  
+  .sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(230, 57, 70, 0.03) 0%, rgba(69, 123, 157, 0.03) 100%);
+    pointer-events: none;
   }
   
   .sidebar-overlay {
     display: none;
     position: fixed;
     top: 80px;
-    left: 0;
+    right: 0;
     width: 100%;
     height: calc(100vh - 80px);
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.8);
     z-index: 80;
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(5px);
   }
   
   main {
     flex: 1;
-    padding: 30px;
-    max-width: 1200px;
+    padding: 40px;
+    max-width: 1400px;
     margin: 0 auto;
     width: 100%;
   }
@@ -261,30 +274,33 @@
   }
   
   .card.highlight {
-    background: linear-gradient(145deg, #1c1c22, #151519);
+    background: linear-gradient(145deg, rgba(28, 28, 34, 0.9), rgba(21, 21, 25, 0.9));
     border-color: var(--accent);
     position: relative;
     overflow: hidden;
   }
   
-  .card.highlight::before {
+  .card.highlight::after {
     content: '';
     position: absolute;
     top: 0;
-    left: 0;
+    right: 0;
     width: 4px;
     height: 100%;
     background: var(--gradient);
+    border-radius: 0 var(--radius) var(--radius) 0;
   }
   
   .auth-card {
-    background: linear-gradient(145deg, #1c1c22, #151519);
+    background: linear-gradient(145deg, rgba(28, 28, 34, 0.9), rgba(21, 21, 25, 0.9));
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 25px;
     margin-bottom: 25px;
-    border-left: 4px solid var(--accent);
+    border-right: 4px solid var(--accent);
     transition: all var(--transition);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
   
   .auth-card:hover {
@@ -449,8 +465,8 @@
   .menu-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 14px 18px;
+    gap: 15px;
+    padding: 16px 20px;
     background: transparent;
     color: var(--text-light);
     border-radius: var(--radius-sm);
@@ -459,12 +475,29 @@
     width: 100%;
     text-align: right;
     font-size: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .menu-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-subtle);
+    transition: right 0.3s ease;
+    z-index: -1;
   }
   
   .menu-item:hover {
-    background: rgba(255, 255, 255, 0.05);
     color: var(--accent-light);
-    transform: translateX(-5px);
+    transform: translateX(-8px);
+  }
+  
+  .menu-item:hover::before {
+    right: 0;
   }
   
   .menu-item.active {
@@ -473,9 +506,18 @@
     border-right: 3px solid var(--accent);
   }
   
+  .menu-item.active::before {
+    right: 0;
+  }
+  
   .menu-item i {
     width: 24px;
     font-size: 18px;
+    transition: transform 0.3s ease;
+  }
+  
+  .menu-item:hover i {
+    transform: scale(1.1);
   }
   
   input, textarea, select {
@@ -506,24 +548,40 @@
   }
   
   .tag {
-    display: inline-block;
-    padding: 4px 12px;
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
     background: rgba(69, 123, 157, 0.15);
     color: #8ecae6;
     border-radius: 20px;
     font-size: 12px;
     margin-left: 8px;
     margin-top: 8px;
+    font-weight: 600;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(142, 202, 230, 0.2);
+    transition: all 0.3s ease;
+  }
+  
+  .tag:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(142, 202, 230, 0.2);
   }
   
   .tag.hot {
     background: rgba(230, 57, 70, 0.15);
     color: #ff9a9e;
+    border-color: rgba(255, 154, 158, 0.2);
   }
   
   .tag.new {
     background: rgba(72, 187, 120, 0.15);
     color: #80ed99;
+    border-color: rgba(128, 237, 153, 0.2);
+  }
+  
+  .tag i {
+    margin-left: 5px;
   }
   
   /* =====================================================
@@ -1218,7 +1276,36 @@
   /* =====================================================
      MOBILE RESPONSIVE
   ===================================================== */
+  @media (max-width: 1200px) {
+    .sidebar {
+      width: 280px;
+    }
+    
+    main {
+      padding: 30px;
+    }
+    
+    .modal {
+      padding: 30px;
+    }
+  }
+  
   @media (max-width: 992px) {
+    header {
+      padding: 0 25px;
+      height: 70px;
+    }
+    
+    .logo {
+      font-size: 24px;
+    }
+    
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+    }
+    
     .menu-toggle {
       display: flex;
       align-items: center;
@@ -1227,18 +1314,17 @@
     
     .sidebar {
       position: fixed;
-      top: 80px;
-      left: -320px;
-      height: calc(100vh - 80px);
-      transform: translateX(0);
-      z-index: 100;
-      width: 320px;
-      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
-      transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      top: 70px;
+      right: -280px;
+      height: calc(100vh - 70px);
+      width: 280px;
+      box-shadow: 10px 0 40px rgba(0, 0, 0, 0.6);
+      transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1000;
     }
     
     .sidebar.active {
-      left: 0;
+      right: 0;
     }
     
     .sidebar-overlay.active {
@@ -1246,7 +1332,7 @@
     }
     
     main {
-      padding: 20px;
+      padding: 25px;
       width: 100%;
     }
     
@@ -1260,115 +1346,201 @@
       flex-wrap: wrap;
     }
     
+    .stat::after {
+      display: none;
+    }
+    
     .modal {
       width: 95%;
-      padding: 20px;
-    }
-    
-    .auth-card .profile-header {
-      flex-direction: row;
-      text-align: right;
-    }
-    
-    .auth-card .profile-header .user-info {
-      width: auto;
+      padding: 25px;
     }
     
     .article-actions {
-      gap: 5px;
+      gap: 8px;
       justify-content: space-between;
     }
     
     .action-btn {
-      min-width: 70px;
-      padding: 6px 12px;
+      min-width: 85px;
+      padding: 10px 16px;
       font-size: 14px;
-      height: 34px;
+      height: 40px;
     }
     
     .action-btn span {
-      font-size: 13px;
+      font-size: 14px;
     }
   }
   
-  @media (max-width: 576px) {
-    header {
-      padding: 0 20px;
-      height: 70px;
+  @media (max-width: 768px) {
+    html {
+      font-size: 15px;
     }
     
-    .logo {
-      font-size: 20px;
+    .article-title {
+      font-size: 22px;
     }
     
-    .sidebar {
-      width: 280px;
-      left: -280px;
+    .section-title {
+      font-size: 26px;
+    }
+    
+    .card {
+      padding: 25px;
+    }
+    
+    .modal {
+      padding: 20px;
     }
     
     .article-actions {
-      gap: 5px;
-      justify-content: space-around;
+      flex-direction: column;
+      gap: 10px;
     }
     
     .action-btn {
-      min-width: 60px;
-      padding: 5px 10px;
-      flex-direction: column;
-      gap: 3px;
-      height: auto;
-      min-height: 50px;
-      border-radius: 12px;
-    }
-    
-    .action-btn i {
-      font-size: 16px;
-    }
-    
-    .action-btn span {
-      font-size: 11px;
-    }
-    
-    .filters {
-      justify-content: center;
+      width: 100%;
+      min-width: 100%;
     }
     
     .notification {
       left: 20px;
       right: 20px;
       max-width: none;
+      bottom: 20px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    header {
+      padding: 0 20px;
+      height: 65px;
     }
     
-    .menu-item {
-      padding: 12px 16px;
-      font-size: 15px;
+    .logo {
+      font-size: 20px;
+      gap: 10px;
     }
     
-    .auth-card {
+    .logo-icon {
+      width: 35px;
+      height: 35px;
+      font-size: 16px;
+    }
+    
+    .sidebar {
+      width: 260px;
+      right: -260px;
+    }
+    
+    .menu-toggle {
+      width: 45px;
+      height: 45px;
+    }
+    
+    main {
       padding: 20px;
     }
     
-    .auth-card .auth-buttons {
-      gap: 8px;
-    }
-    
-    .btn {
-      padding: 12px;
-      font-size: 14px;
+    .card {
+      padding: 20px;
+      border-radius: 18px;
     }
     
     .auth-card .profile-header {
-      gap: 12px;
+      flex-direction: column;
+      text-align: center;
+      gap: 15px;
+    }
+    
+    .auth-card .profile-header .user-info {
+      width: 100%;
     }
     
     .auth-card .profile-header .avatar {
-      width: 50px;
-      height: 50px;
-      font-size: 18px;
+      width: 70px;
+      height: 70px;
+      font-size: 24px;
     }
     
-    .auth-card .profile-header .user-info strong {
-      font-size: 16px;
+    .profile-header {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .avatar {
+      width: 80px;
+      height: 80px;
+      font-size: 28px;
+    }
+    
+    .btn {
+      padding: 14px;
+      font-size: 13px;
+    }
+    
+    .menu-item {
+      padding: 14px 16px;
+      font-size: 15px;
+    }
+    
+    .modal-header h3 {
+      font-size: 20px;
+    }
+    
+    .modal-close {
+      width: 40px;
+      height: 40px;
+    }
+    
+    .filters {
+      justify-content: center;
+    }
+    
+    .filter-btn {
+      padding: 10px 18px;
+      font-size: 14px;
+    }
+    
+    .article-meta {
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    
+    .profile-stats {
+      padding: 20px;
+      gap: 15px;
+    }
+    
+    .stat-value {
+      font-size: 26px;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+    }
+  }
+  
+  @media (max-width: 400px) {
+    .sidebar {
+      width: 100%;
+      right: -100%;
+    }
+    
+    .notification {
+      padding: 15px 20px;
+      font-size: 14px;
+    }
+    
+    .action-btn {
+      padding: 8px 12px;
+      min-width: auto;
+    }
+    
+    .tag {
+      padding: 5px 10px;
+      font-size: 11px;
     }
   }
   
@@ -1399,6 +1571,68 @@
     scrollbar-width: thin;
     scrollbar-color: #e63946 rgba(15, 15, 20, 0.5);
   }
+  
+  /* =====================================================
+     ANIMATIONS & EFFECTS
+  ===================================================== */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  /* Gradient text animation */
+  .gradient-text {
+    background: linear-gradient(45deg, #e63946, #ff6b6b, #8ecae6, #457b9d);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 5s ease infinite;
+  }
+  
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  
+  /* Ripple effect */
+  .ripple {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.6);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+  }
+  
+  .ripple:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
+  }
+  
+  @keyframes ripple {
+    0% {
+      transform: scale(0, 0);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(40, 40);
+      opacity: 0;
+    }
+  }
   </style>
 </head>
 <body>
@@ -1408,6 +1642,9 @@
         <i class="fas fa-pills"></i>
       </div>
       <span class="logo-gradient">منتدى الريدبيل</span>
+      <span style="font-size: 12px; color: var(--text-muted); font-weight: 300; margin-top: 5px; position: absolute; left: 0; bottom: -18px;">
+        Redpill Forum
+      </span>
     </div>
     
     <button class="menu-toggle" id="menuToggle">
@@ -1421,8 +1658,10 @@
       <div id="authBox" class="auth-card"></div>
       
       <div class="card">
-        <h4><i class="fas fa-sliders-h"></i> القائمة الرئيسية</h4>
-        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 15px;">
+        <h4 style="margin-bottom: 20px; color: var(--text-light);">
+          <i class="fas fa-sliders-h" style="margin-left: 10px;"></i> القائمة الرئيسية
+        </h4>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
           <button class="menu-item active" onclick="showSection('articles')">
             <i class="fas fa-newspaper"></i>
             <span>المقالات</span>
@@ -1442,6 +1681,36 @@
             <i class="fas fa-pen-fancy"></i>
             <span>نشر مقال جديد</span>
           </button>
+          
+          <button class="menu-item" onclick="showSection('articles')">
+            <i class="fas fa-fire"></i>
+            <span>الأكثر شعبية</span>
+          </button>
+          
+          <button class="menu-item" onclick="showSection('articles')">
+            <i class="fas fa-tags"></i>
+            <span>التصنيفات</span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="card" style="margin-top: 10px;">
+        <h4 style="margin-bottom: 15px; color: var(--text-light);">
+          <i class="fas fa-chart-line" style="margin-left: 10px;"></i> إحصائيات المنتدى
+        </h4>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border);">
+            <span class="muted">عدد المقالات</span>
+            <span id="statsArticles" style="font-weight: 700; color: var(--accent-light);">0</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border);">
+            <span class="muted">عدد الأعضاء</span>
+            <span id="statsUsers" style="font-weight: 700; color: var(--secondary-light);">0</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
+            <span class="muted">التفاعلات</span>
+            <span id="statsInteractions" style="font-weight: 700; color: var(--text-light);">0</span>
+          </div>
         </div>
       </div>
     </div>
@@ -1453,7 +1722,9 @@
       <!-- مقالات Section (Default) -->
       <div id="articlesSection" class="content-section">
         <div class="section-header">
-          <h2 class="section-title"><i class="fas fa-fire"></i> المقالات الشائعة</h2>
+          <h2 class="section-title">
+            <i class="fas fa-fire" style="margin-left: 10px;"></i> المقالات الشائعة
+          </h2>
           <div class="filters">
             <button class="filter-btn active" onclick="filterArticles('all')">
               <i class="fas fa-layer-group"></i> الكل
@@ -1463,6 +1734,9 @@
             </button>
             <button class="filter-btn" onclick="filterArticles('recent')">
               <i class="fas fa-clock"></i> الأحدث
+            </button>
+            <button class="filter-btn" onclick="filterArticles('trending')">
+              <i class="fas fa-chart-line"></i> المتداول
             </button>
           </div>
         </div>
@@ -1474,14 +1748,22 @@
         </div>
         
         <div id="pagination" class="pagination" style="display: none;"></div>
+        
+        <div style="text-align: center; margin-top: 50px;">
+          <button class="btn ghost" onclick="openPublishModal()" style="width: auto; padding: 15px 40px;">
+            <i class="fas fa-plus-circle" style="margin-left: 10px;"></i> أضف مقالك الآن
+          </button>
+        </div>
       </div>
       
       <!-- الملف الشخصي Section -->
       <div id="profileSection" class="content-section" style="display: none;">
         <div class="section-header">
-          <h2 class="section-title"><i class="fas fa-user-circle"></i> الملف الشخصي</h2>
+          <h2 class="section-title">
+            <i class="fas fa-user-circle" style="margin-left: 10px;"></i> الملف الشخصي
+          </h2>
           <button class="btn small ghost" onclick="showSection('articles')">
-            <i class="fas fa-arrow-right"></i> العودة للمقالات
+            <i class="fas fa-arrow-right" style="margin-left: 8px;"></i> العودة للمقالات
           </button>
         </div>
         
@@ -1491,13 +1773,15 @@
       <!-- مقالاتي Section -->
       <div id="myArticlesSection" class="content-section" style="display: none;">
         <div class="section-header">
-          <h2 class="section-title"><i class="fas fa-file-alt"></i> مقالاتي</h2>
-          <div style="display: flex; gap: 10px; align-items: center;">
+          <h2 class="section-title">
+            <i class="fas fa-file-alt" style="margin-left: 10px;"></i> مقالاتي
+          </h2>
+          <div style="display: flex; gap: 15px; align-items: center;">
             <button class="btn small" onclick="openPublishModal()">
-              <i class="fas fa-plus"></i> مقال جديد
+              <i class="fas fa-plus" style="margin-left: 8px;"></i> مقال جديد
             </button>
             <button class="btn small ghost" onclick="showSection('articles')">
-              <i class="fas fa-arrow-right"></i> العودة
+              <i class="fas fa-arrow-right" style="margin-left: 8px;"></i> العودة
             </button>
           </div>
         </div>
@@ -1511,7 +1795,9 @@
   <div class="modal-overlay" id="publishModal">
     <div class="modal">
       <div class="modal-header">
-        <h3><i class="fas fa-pen-fancy"></i> كتابة مقال جديد</h3>
+        <h3>
+          <i class="fas fa-pen-fancy" style="margin-left: 10px;"></i> كتابة مقال جديد
+        </h3>
         <button class="modal-close" onclick="closePublishModal()">
           <i class="fas fa-times"></i>
         </button>
@@ -1522,7 +1808,7 @@
         <input id="articleTitle" placeholder="اكتب عنوانًا جذابًا لمقالك" maxlength="70">
         <div class="char-counter" id="titleCounter">0/70</div>
         
-        <label style="margin-top: 20px;">نص المقال (2000 حرف كحد أقصى)</label>
+        <label style="margin-top: 25px;">نص المقال (2000 حرف كحد أقصى)</label>
         <textarea id="articleContent" placeholder="اكتب محتوى مقالك هنا..." rows="8" maxlength="2000"></textarea>
         <div class="char-counter" id="contentCounter">0/2000</div>
         
@@ -1532,12 +1818,15 @@
           <span class="timer" id="articleCooldownTimer">60:00</span>
         </div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 25px;">
           <div>
             <label>التصنيف</label>
             <select id="articleCategory">
               <option value="ريدبيل">ريدبيل</option>
               <option value="بلاك بيل">بلاك بيل</option>
+              <option value="علم النفس">علم النفس</option>
+              <option value="تطوير الذات">تطوير الذات</option>
+              <option value="الصحة">الصحة</option>
               <option value="غير مصنف">غير مصنف</option>
             </select>
           </div>
@@ -1546,7 +1835,7 @@
             <label>القراءة المتوقعة</label>
             <select id="articleReadTime">
               <option value="1">دقيقة واحدة</option>
-              <option value="3">٣ دقائق</option>
+              <option value="3" selected>٣ دقائق</option>
               <option value="5">٥ دقائق</option>
               <option value="10">١٠ دقائق</option>
               <option value="15">١٥ دقيقة</option>
@@ -1554,12 +1843,12 @@
           </div>
         </div>
         
-        <div style="display: flex; gap: 10px; margin-top: 30px;">
+        <div style="display: flex; gap: 15px; margin-top: 35px;">
           <button class="btn" style="flex: 1;" onclick="publishArticle()" id="publishBtn">
-            <i class="fas fa-paper-plane"></i> نشر المقال
+            <i class="fas fa-paper-plane" style="margin-left: 10px;"></i> نشر المقال
           </button>
           <button class="btn ghost" onclick="closePublishModal()" style="width: auto;">
-            إلغاء
+            <i class="fas fa-times" style="margin-left: 8px;"></i> إلغاء
           </button>
         </div>
       </div>
@@ -1568,24 +1857,26 @@
   
   <!-- ================= COMMENT MODAL ================= -->
   <div class="modal-overlay" id="commentModal">
-    <div class="modal" style="max-width: 600px;">
+    <div class="modal" style="max-width: 700px;">
       <div class="modal-header">
-        <h3><i class="fas fa-comments"></i> التعليقات</h3>
+        <h3>
+          <i class="fas fa-comments" style="margin-left: 10px;"></i> التعليقات
+        </h3>
         <button class="modal-close" onclick="closeCommentModal()">
           <i class="fas fa-times"></i>
         </button>
       </div>
       
       <div class="modal-content">
-        <div id="commentsList" style="max-height: 400px; overflow-y: auto;"></div>
+        <div id="commentsList" style="max-height: 400px; overflow-y: auto; padding: 10px;"></div>
         
-        <div id="loadMoreCommentsContainer" style="text-align: center; margin: 15px 0; display: none;">
+        <div id="loadMoreCommentsContainer" style="text-align: center; margin: 20px 0; display: none;">
           <button class="btn small ghost" id="loadMoreCommentsBtn" onclick="loadMoreComments()">
-            <i class="fas fa-redo"></i> تحميل المزيد
+            <i class="fas fa-redo" style="margin-left: 8px;"></i> تحميل المزيد
           </button>
         </div>
         
-        <div style="margin-top: 20px;">
+        <div style="margin-top: 25px;">
           <textarea id="newComment" placeholder="اكتب تعليقك هنا (1500 حرف كحد أقصى)..." rows="3" maxlength="1500"></textarea>
           <div class="char-counter" id="commentCounter">0/1500</div>
           
@@ -1596,12 +1887,12 @@
             <span>ثانية</span>
           </div>
           
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-            <div class="muted" style="font-size: 12px;">
-              اضغط Ctrl+Enter لإرسال التعليق
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+            <div class="muted" style="font-size: 13px;">
+              <i class="fas fa-keyboard" style="margin-left: 5px;"></i> اضغط Ctrl+Enter لإرسال التعليق
             </div>
             <button class="btn small" onclick="postComment()" id="postCommentBtn">
-              <i class="fas fa-paper-plane"></i> إضافة تعليق
+              <i class="fas fa-paper-plane" style="margin-left: 8px;"></i> إضافة تعليق
             </button>
           </div>
         </div>
@@ -1621,7 +1912,7 @@
   ===================================================== */
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-  import { getDatabase, ref, push, onValue, update, get, set, remove, increment, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  import { getDatabase, ref, push, onValue, update, get, set, remove, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
   
   /* =====================================================
      CONFIG
@@ -1653,6 +1944,11 @@
   const sidebarOverlay = document.getElementById('sidebarOverlay');
   const paginationDiv = document.getElementById('pagination');
   
+  // Stats elements
+  const statsArticles = document.getElementById('statsArticles');
+  const statsUsers = document.getElementById('statsUsers');
+  const statsInteractions = document.getElementById('statsInteractions');
+  
   // Character counters
   const titleCounter = document.getElementById('titleCounter');
   const contentCounter = document.getElementById('contentCounter');
@@ -1677,11 +1973,10 @@
   const articlesPerPage = 10;
   let totalPages = 1;
   
-  // Comments variables - تحسين منع التكرار
+  // Comments pagination variables
   let commentsPage = 1;
   const commentsPerPage = 10;
   let allComments = [];
-  let loadedCommentIds = new Set(); // لحفظ معرفات التعليقات المحملة
   
   // Rate limiting constants
   const ARTICLE_COOLDOWN = 60 * 60 * 1000;
@@ -1953,6 +2248,37 @@
   };
   
   /* =====================================================
+     STATISTICS
+  ===================================================== */
+  async function updateForumStats() {
+    try {
+      // Get articles count
+      const articlesSnap = await get(ref(db, 'articles'));
+      const articlesCount = articlesSnap.exists() ? articlesSnap.size : 0;
+      statsArticles.textContent = articlesCount.toLocaleString('ar-SA');
+      
+      // Get users count
+      const usersSnap = await get(ref(db, 'users'));
+      const usersCount = usersSnap.exists() ? usersSnap.size : 0;
+      statsUsers.textContent = usersCount.toLocaleString('ar-SA');
+      
+      // Calculate interactions (likes + comments)
+      let interactions = 0;
+      
+      if (articlesSnap.exists()) {
+        articlesSnap.forEach(article => {
+          const data = article.val();
+          interactions += (data.likesCount || 0) + (data.commentsCount || 0);
+        });
+      }
+      
+      statsInteractions.textContent = interactions.toLocaleString('ar-SA');
+    } catch (error) {
+      console.log('Error updating stats:', error);
+    }
+  }
+  
+  /* =====================================================
      AUTHENTICATION
   ===================================================== */
   onAuthStateChanged(auth, async (user) => {
@@ -1972,7 +2298,7 @@
         </div>
         <div class="auth-buttons">
           <button class="btn ghost" id="logout">
-            <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+            <i class="fas fa-sign-out-alt" style="margin-left: 8px;"></i> تسجيل خروج
           </button>
         </div>
       `;
@@ -1989,17 +2315,17 @@
     } else {
       authBox.innerHTML = `
         <h3 style="margin-bottom: 15px; color: var(--text-light);">
-          <i class="fas fa-user"></i> تسجيل الدخول
+          <i class="fas fa-user" style="margin-left: 8px;"></i> تسجيل الدخول
         </h3>
         <div class="auth-form">
           <input id="email" type="email" placeholder="البريد الإلكتروني">
           <input id="pass" type="password" placeholder="كلمة المرور">
           <div class="auth-buttons">
             <button class="btn" id="login">
-              <i class="fas fa-sign-in-alt"></i> دخول
+              <i class="fas fa-sign-in-alt" style="margin-left: 8px;"></i> دخول
             </button>
             <button class="btn ghost" id="register">
-              <i class="fas fa-user-plus"></i> إنشاء حساب جديد
+              <i class="fas fa-user-plus" style="margin-left: 8px;"></i> إنشاء حساب جديد
             </button>
           </div>
         </div>
@@ -2018,6 +2344,8 @@
         });
       }
     }
+    
+    updateForumStats();
     
     if (articlesSection.style.display === 'block') {
       loadArticles();
@@ -2110,7 +2438,7 @@
             <h3>يجب تسجيل الدخول</h3>
             <p>سجل الدخول لعرض وتعديل ملفك الشخصي</p>
             <button class="btn" onclick="showSection('articles')" style="margin-top: 20px; width: auto;">
-              <i class="fas fa-arrow-right"></i> العودة للمقالات
+              <i class="fas fa-arrow-right" style="margin-left: 8px;"></i> العودة للمقالات
             </button>
           </div>
         </div>
@@ -2188,19 +2516,21 @@
           </div>
         </div>
         
-        <div style="background: rgba(30, 30, 36, 0.5); padding: 15px; border-radius: var(--radius-sm); margin: 20px 0;">
-          <h4><i class="fas fa-info-circle"></i> معلومات الحساب</h4>
-          <div class="muted" style="margin-top: 10px;">
+        <div style="background: rgba(30, 30, 36, 0.5); padding: 20px; border-radius: var(--radius); margin: 25px 0; border: 1px solid var(--border);">
+          <h4 style="margin-bottom: 15px; color: var(--accent-light);">
+            <i class="fas fa-info-circle" style="margin-left: 10px;"></i> معلومات الحساب
+          </h4>
+          <div class="muted" style="margin-top: 15px;">
             <p><i class="fas fa-envelope"></i> <strong>البريد:</strong> ${currentUser.email}</p>
-            <p style="margin-top: 8px;"><i class="fas fa-calendar"></i> <strong>تاريخ الانضمام:</strong> ${new Date(userData.joinDate).toLocaleDateString('ar-SA')}</p>
-            <p style="margin-top: 8px;"><i class="fas fa-clock"></i> <strong>آخر نشاط:</strong> ${formatDate(userData.lastLogin || userData.joinDate)}</p>
+            <p style="margin-top: 12px;"><i class="fas fa-calendar"></i> <strong>تاريخ الانضمام:</strong> ${new Date(userData.joinDate).toLocaleDateString('ar-SA')}</p>
+            <p style="margin-top: 12px;"><i class="fas fa-clock"></i> <strong>آخر نشاط:</strong> ${formatDate(userData.lastLogin || userData.joinDate)}</p>
             ${articleCooldownRemaining > 0 ? `
-            <p style="margin-top: 8px; color: var(--accent-light);">
+            <p style="margin-top: 12px; color: var(--accent-light);">
               <i class="fas fa-hourglass-half"></i> <strong>وقت تبريد المقال:</strong> ${articleCooldownMinutes} دقيقة
             </p>
             ` : ''}
             ${commentCooldownRemaining > 0 ? `
-            <p style="margin-top: 8px; color: var(--accent-light);">
+            <p style="margin-top: 12px; color: var(--accent-light);">
               <i class="fas fa-hourglass-end"></i> <strong>وقت تبريد التعليق:</strong> ${commentCooldownSeconds} ثانية
             </p>
             ` : ''}
@@ -2210,15 +2540,15 @@
         <label>اسم المستخدم</label>
         <input id="p-name" value="${userData.username || ''}" placeholder="اسم المستخدم">
         
-        <label style="margin-top: 15px;">نبذة عنك</label>
+        <label style="margin-top: 20px;">نبذة عنك</label>
         <textarea id="p-bio" rows="3" placeholder="اكتب نبذة عن نفسك...">${userData.bio || ''}</textarea>
         
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <div style="display: flex; gap: 15px; margin-top: 25px;">
           <button class="btn" onclick="saveProfile()">
-            <i class="fas fa-save"></i> حفظ التعديلات
+            <i class="fas fa-save" style="margin-left: 8px;"></i> حفظ التعديلات
           </button>
           <button class="btn ghost" onclick="showSection('articles')">
-            <i class="fas fa-arrow-right"></i> العودة
+            <i class="fas fa-arrow-right" style="margin-left: 8px;"></i> العودة
           </button>
         </div>
       </div>
@@ -2332,11 +2662,11 @@
             <p>كن أول من ينشر مقالًا على المنتدى!</p>
             ${currentUser ? `
             <button class="btn" onclick="openPublishModal()" style="margin-top: 20px; width: auto;">
-              <i class="fas fa-pen-fancy"></i> نشر أول مقال
+              <i class="fas fa-pen-fancy" style="margin-left: 8px;"></i> نشر أول مقال
             </button>
             ` : `
             <button class="btn" onclick="login()" style="margin-top: 20px; width: auto;">
-              <i class="fas fa-sign-in-alt"></i> تسجيل الدخول للنشر
+              <i class="fas fa-sign-in-alt" style="margin-left: 8px;"></i> تسجيل الدخول للنشر
             </button>
             `}
           </div>
@@ -2358,6 +2688,13 @@
         filteredArticles.sort((a, b) => (b.viewsCount || 0) - (a.viewsCount || 0));
       } else if (currentFilter === 'recent') {
         filteredArticles.sort((a, b) => b.created - a.created);
+      } else if (currentFilter === 'trending') {
+        // Calculate trending score based on recent interactions
+        filteredArticles.sort((a, b) => {
+          const scoreA = calculateTrendingScore(a);
+          const scoreB = calculateTrendingScore(b);
+          return scoreB - scoreA;
+        });
       } else {
         filteredArticles.sort((a, b) => b.created - a.created);
       }
@@ -2382,6 +2719,19 @@
     } finally {
       articlesLoading = false;
     }
+  }
+  
+  function calculateTrendingScore(article) {
+    const ageInHours = (Date.now() - article.created) / (60 * 60 * 1000);
+    const views = article.viewsCount || 0;
+    const likes = article.likesCount || 0;
+    const comments = article.commentsCount || 0;
+    
+    // Score formula: newer articles with more interactions get higher scores
+    const recencyWeight = Math.max(0, 1 - (ageInHours / 168)); // 168 hours = 1 week
+    const interactionScore = (views * 0.1) + (likes * 5) + (comments * 3);
+    
+    return interactionScore * recencyWeight;
   }
   
   async function displayArticlesPage(articles, page) {
@@ -2580,19 +2930,19 @@
     
     let tagsHTML = '';
     if (article.likesCount > 10) {
-      tagsHTML += '<span class="tag hot">🔥 شائع</span>';
+      tagsHTML += '<span class="tag hot"><i class="fas fa-fire"></i> شائع</span>';
     }
     
     if (Date.now() - article.created < 24 * 60 * 60 * 1000) {
-      tagsHTML += '<span class="tag new">🆕 جديد</span>';
+      tagsHTML += '<span class="tag new"><i class="fas fa-star"></i> جديد</span>';
     }
     
     if (article.category) {
-      tagsHTML += `<span class="tag">${article.category}</span>`;
+      tagsHTML += `<span class="tag"><i class="fas fa-tag"></i> ${article.category}</span>`;
     }
     
     if (article.readTime) {
-      tagsHTML += `<span class="tag" style="background: rgba(108, 117, 125, 0.15); color: #adb5bd;">⏱️ ${article.readTime} د</span>`;
+      tagsHTML += `<span class="tag" style="background: rgba(108, 117, 125, 0.15); color: #adb5bd;"><i class="fas fa-clock"></i> ${article.readTime} د</span>`;
     }
     
     const readTime = article.readTime || Math.max(1, Math.floor((article.content.length || 0) / 500));
@@ -2621,9 +2971,9 @@
       }
     }
     
-    // إنشاء أزرار الإعجاب والتعليق (تصميم حديث يشبه المنصات الكبيرة)
+    // إنشاء أزرار الإعجاب والتعليق
     const likeButton = currentUser ? 
-      `<div class="action-btn like ${liked ? 'active' : ''}" data-id="${article.id}" onclick="toggleLike('${article.id}', ${liked})">
+      `<div class="action-btn like ${liked ? 'active' : ''}" data-id="${article.id}" onclick="toggleLike(event, '${article.id}', ${liked})">
         <i class="${liked ? 'fas' : 'far'} fa-heart"></i>
         <span class="like-count-${article.id}">${article.likesCount || 0}</span>
       </div>` :
@@ -2644,7 +2994,7 @@
     
     card.innerHTML = `
       <div class="article-title">${article.title || 'عنوان غير محدد'}</div>
-      <div style="margin-top: 8px;">
+      <div style="margin-top: 15px;">
         ${tagsHTML}
       </div>
       <div class="article-meta">
@@ -2690,7 +3040,7 @@
             <h3>يجب تسجيل الدخول</h3>
             <p>سجل الدخول لعرض مقالاتك</p>
             <button class="btn" onclick="showSection('articles')" style="margin-top: 20px; width: auto;">
-              <i class="fas fa-arrow-right"></i> العودة للمقالات
+              <i class="fas fa-arrow-right" style="margin-left: 8px;"></i> العودة للمقالات
             </button>
           </div>
         </div>
@@ -2700,7 +3050,7 @@
     
     myArticlesView.innerHTML = `
       <div class="card highlight fade-in">
-        <h3><i class="fas fa-newspaper"></i> مقالاتي</h3>
+        <h3><i class="fas fa-newspaper" style="margin-left: 10px;"></i> مقالاتي</h3>
         <p class="muted" style="margin-top: 10px;">إدارة مقالاتك المنشورة على المنتدى</p>
         <div id="myArticlesList" style="margin-top: 20px;"></div>
       </div>
@@ -2730,7 +3080,7 @@
           <i class="fas fa-newspaper"></i>
           <p>لم تنشر أي مقالات بعد</p>
           <button class="btn" onclick="openPublishModal()" style="margin-top: 15px; width: auto;">
-            <i class="fas fa-pen-fancy"></i> نشر أول مقال
+            <i class="fas fa-pen-fancy" style="margin-left: 8px;"></i> نشر أول مقال
           </button>
         </div>
       `;
@@ -2742,27 +3092,27 @@
     userArticles.forEach(article => {
       const articleEl = document.createElement('div');
       articleEl.className = 'card fade-in';
-      articleEl.style.marginBottom = '15px';
-      articleEl.style.padding = '20px';
+      articleEl.style.marginBottom = '20px';
+      articleEl.style.padding = '25px';
       
       articleEl.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
           <div style="flex: 1; min-width: 200px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <strong>${article.title}</strong>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <strong style="font-size: 18px; color: var(--text-light);">${article.title}</strong>
             </div>
-            <div class="muted" style="margin-top: 5px;">
+            <div class="muted" style="margin-top: 8px;">
               ${formatDate(article.created)} • ${article.category || 'غير مصنف'} • ${article.readTime || '1'} دقيقة قراءة
             </div>
-            <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 14px;">
+            <div style="display: flex; gap: 20px; margin-top: 15px; font-size: 14px;">
               <span><i class="far fa-heart"></i> ${article.likesCount || 0} إعجاب</span>
               <span><i class="far fa-comment"></i> ${article.commentsCount || 0} تعليق</span>
               <span><i class="far fa-eye"></i> ${article.viewsCount || 0} مشاهدة</span>
             </div>
           </div>
-          <div style="display: flex; gap: 8px;">
+          <div style="display: flex; gap: 10px;">
             <button class="btn small danger" onclick="deleteArticle('${article.id}')">
-              <i class="far fa-trash-alt"></i> حذف
+              <i class="far fa-trash-alt" style="margin-left: 5px;"></i> حذف
             </button>
           </div>
         </div>
@@ -2868,28 +3218,30 @@
       showNotification('تم نشر المقال بنجاح', 'success');
       closePublishModal();
       showSection('articles');
+      updateForumStats();
     }).catch(error => {
       showNotification(error.message, 'error');
     });
   };
   
   /* =====================================================
-     LIKES SYSTEM - FIXED
+     LIKES SYSTEM
   ===================================================== */
-  window.toggleLike = async (articleId, liked) => {
+  window.toggleLike = async (event, articleId, liked) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
     if (!currentUser) {
       showNotification('يجب تسجيل الدخول أولاً', 'error');
       return;
     }
     
-    const likeBtn = document.querySelector(`.action-btn.like[data-id="${articleId}"]`);
-    if (!likeBtn) return;
+    const likeBtn = event.currentTarget;
+    const likeIcon = likeBtn.querySelector('i');
+    const likeCountSpan = likeBtn.querySelector(`.like-count-${articleId}`);
     
     if (likeBtn.classList.contains('processing')) return;
     likeBtn.classList.add('processing');
-    
-    const likeIcon = likeBtn.querySelector('i');
-    const likeCountSpan = likeBtn.querySelector(`.like-count-${articleId}`);
     
     const currentCount = parseInt(likeCountSpan.textContent) || 0;
     let newCount;
@@ -2925,6 +3277,8 @@
         await update(articleRef, { likesCount: newCount });
         userLikes.set(articleId, true);
       }
+      
+      updateForumStats();
     } catch (error) {
       showNotification('حدث خطأ أثناء تحديث الإعجاب', 'error');
       if (liked) {
@@ -2944,7 +3298,7 @@
   };
   
   /* =====================================================
-     COMMENTS SYSTEM - FIXED (منع التكرار)
+     COMMENTS SYSTEM
   ===================================================== */
   window.openComments = async (articleId) => {
     if (!currentUser) {
@@ -2955,7 +3309,6 @@
     currentArticleId = articleId;
     commentsPage = 1;
     allComments = [];
-    loadedCommentIds.clear(); // مسح معرفات التعليقات المحملة
     commentModal.style.display = 'flex';
     
     setTimeout(() => {
@@ -3013,15 +3366,10 @@
     }
     
     commentsSnap.forEach(commentSnap => {
-      const commentData = commentSnap.val();
-      // التحقق من عدم تكرار التعليق
-      if (!loadedCommentIds.has(commentSnap.key)) {
-        allComments.push({
-          id: commentSnap.key,
-          ...commentData
-        });
-        loadedCommentIds.add(commentSnap.key);
-      }
+      allComments.push({
+        id: commentSnap.key,
+        ...commentSnap.val()
+      });
     });
     
     allComments.sort((a, b) => b.created - a.created);
@@ -3095,7 +3443,7 @@
     const articleRef = ref(db, `articles/${currentArticleId}`);
     
     try {
-      const newCommentRef = await push(commentRef, {
+      await push(commentRef, {
         text: commentText,
         author: currentUser.uid,
         created: Date.now()
@@ -3118,13 +3466,11 @@
       });
       
       document.getElementById('newComment').value = '';
-      
-      // إعادة تحميل التعليقات مع الحفاظ على عدم التكرار
-      loadedCommentIds.add(newCommentRef.key);
       commentsPage = 1;
-      await loadComments(currentArticleId, 1);
+      loadComments(currentArticleId, 1);
       
       showNotification('تم إضافة التعليق', 'success');
+      updateForumStats();
       
       commentCounter.textContent = '0/1500';
       commentCounter.className = 'char-counter muted';
@@ -3165,6 +3511,7 @@
       }
       
       showNotification('تم حذف المقال', 'success');
+      updateForumStats();
       
       setTimeout(() => {
         if (articlesSection.style.display === 'block') {
