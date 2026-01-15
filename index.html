@@ -1489,7 +1489,8 @@
   
   function closeSidebarOnMobile() {
     if (window.innerWidth <= 992) {
-      toggleSidebar();
+      sidebar.classList.remove('active');
+      sidebarOverlay.classList.remove('active');
     }
   }
   
