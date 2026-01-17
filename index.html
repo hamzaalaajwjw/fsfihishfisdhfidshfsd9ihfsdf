@@ -1440,7 +1440,7 @@ a:focus,
   ===================================================== */
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-  import { getDatabase, ref, push, onValue, update, get, set, remove, increment, query, orderByChild, limitToLast, limitToFirst, startAfter, endBefore } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  import { getDatabase, ref, push, onValue, update, get, set, remove, increment, query, orderByChild, limitToLast, limitToFirst, startAfter, endBefore, equalTo } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
   
   /* =====================================================
      CONFIG
@@ -1590,11 +1590,15 @@ a:focus,
     currentUser = user;
     
     if (user) {
+      // تحميل بيانات المستخدم لعرض اسمه
+      const userData = await getUserData(user.uid);
+      const username = userData?.username || `مستخدم-${Math.floor(100000 + Math.random() * 900000)}`;
+      
       authBox.innerHTML = `
         <div class="profile-header">
-          <div class="avatar">${user.email[0].toUpperCase()}</div>
+          <div class="avatar">${username[0] || user.email[0].toUpperCase()}</div>
           <div class="user-info">
-            <strong>${user.email.split('@')[0]}</strong>
+            <strong>${username}</strong>
             <div class="muted">عضو مسجل</div>
             <div class="muted" style="margin-top: 4px; font-size: 11px;">
               <i class="fas fa-clock"></i> ${formatDate(user.metadata.lastSignInTime || Date.now())}
@@ -1693,7 +1697,25 @@ a:focus,
     }
     
     createUserWithEmailAndPassword(auth, email, pass)
-      .then(() => showNotification('تم إنشاء الحساب بنجاح', 'success'))
+      .then(async (userCredential) => {
+        const userId = userCredential.user.uid;
+        const randomNum = Math.floor(100000 + Math.random() * 900000);
+        const defaultUsername = `مستخدم-${randomNum}`;
+        
+        await set(ref(db, 'users/' + userId), {
+          username: defaultUsername,
+          bio: 'مرحبًا! أنا مستخدم جديد في منتدى الريدبيل.',
+          joinDate: Date.now(),
+          lastLogin: Date.now(),
+          articlesCount: 0,
+          likesCount: 0,
+          commentsCount: 0,
+          lastArticle: 0,
+          lastComment: 0
+        });
+        
+        showNotification('تم إنشاء الحساب بنجاح', 'success');
+      })
       .catch(e => {
         if (e.code === 'auth/email-already-in-use') {
           showNotification('البريد الإلكتروني مسجل بالفعل', 'error');
@@ -1726,45 +1748,20 @@ a:focus,
         const userData = snap.val();
         userDataCache.set(userId, userData);
         return userData;
-      } else {
-        // إذا لم يكن هناك بيانات مستخدم، إنشاء بيانات افتراضية
-        const defaultUserData = {
-          username: `مستخدم_${userId.substring(0, 6)}`,
-          joinDate: Date.now(),
-          lastLogin: Date.now(),
-          articlesCount: 0,
-          likesCount: 0,
-          commentsCount: 0
-        };
-        
-        // حفظ البيانات الافتراضية في قاعدة البيانات
-        await set(userRef, defaultUserData);
-        userDataCache.set(userId, defaultUserData);
-        return defaultUserData;
       }
     } catch (error) {
       console.log('Error fetching user data:', error);
-      // في حالة الخطأ، إرجاع بيانات افتراضية
-      const defaultUserData = {
-        username: `مستخدم_${userId ? userId.substring(0, 6) : 'غير_معروف'}`,
-        joinDate: Date.now(),
-        articlesCount: 0,
-        likesCount: 0,
-        commentsCount: 0
-      };
-      userDataCache.set(userId, defaultUserData);
-      return defaultUserData;
     }
+    
+    return null;
   }
   
   async function getUsername(userId) {
-    if (!userId) return 'مجهول';
-    
     const userData = await getUserData(userId);
     if (userData && userData.username) {
       return userData.username;
     }
-    return 'مستخدم';
+    return `مستخدم-${Math.floor(100000 + Math.random() * 900000)}`;
   }
   
   /* =====================================================
@@ -1988,7 +1985,7 @@ a:focus,
     const isAuthor = currentUser && article.author === currentUser.uid;
     const liked = articleLikes.has(article.id);
     
-    // جلب اسم المستخدم
+    // جلب اسم المستخدم من قاعدة البيانات
     let username = await getUsername(article.author);
     
     let tagsHTML = '';
@@ -2556,33 +2553,26 @@ a:focus,
   /* =====================================================
      PROFILE FUNCTIONS
   ===================================================== */
-  async function initProfile(uid) {
+  function initProfile(uid) {
     const userRef = ref(db, 'users/' + uid);
-    const snap = await get(userRef);
-    
-    if (!snap.exists()) {
-      await set(userRef, {
-        username: currentUser.email.split('@')[0],
-        bio: 'مرحبًا! أنا مستخدم جديد في منتدى الريدبيل.',
-        joinDate: Date.now(),
-        lastLogin: Date.now(),
-        articlesCount: 0,
-        likesCount: 0,
-        commentsCount: 0,
-        lastArticle: 0,
-        lastComment: 0
-      });
-    } else {
-      await update(userRef, { lastLogin: Date.now() });
-    }
-    
-    // إضافة البيانات إلى ذاكرة التخزين المؤقت
-    const userData = snap.exists() ? snap.val() : {
-      username: currentUser.email.split('@')[0],
-      joinDate: Date.now(),
-      lastLogin: Date.now()
-    };
-    userDataCache.set(uid, userData);
+    get(userRef).then(snap => {
+      if (!snap.exists()) {
+        const randomNum = Math.floor(100000 + Math.random() * 900000);
+        set(userRef, {
+          username: `مستخدم-${randomNum}`,
+          bio: 'مرحبًا! أنا مستخدم جديد في منتدى الريدبيل.',
+          joinDate: Date.now(),
+          lastLogin: Date.now(),
+          articlesCount: 0,
+          likesCount: 0,
+          commentsCount: 0,
+          lastArticle: 0,
+          lastComment: 0
+        });
+      } else {
+        update(userRef, { lastLogin: Date.now() });
+      }
+    });
   }
   
   async function openProfile() {
@@ -2605,26 +2595,22 @@ a:focus,
     const snap = await get(ref(db, 'users/' + currentUser.uid));
     const userData = snap.val();
     
-    const articlesSnap = await get(ref(db, 'articles'));
+    // جلب مقالات المستخدم
+    const articlesQuery = query(ref(db, 'articles'), orderByChild('author'));
+    const articlesSnap = await get(articlesQuery);
     let userArticlesCount = 0;
+    let userLikesCount = 0;
+    
     if (articlesSnap.exists()) {
       articlesSnap.forEach(article => {
         if (article.val().author === currentUser.uid) {
           userArticlesCount++;
+          userLikesCount += (article.val().likesCount || 0);
         }
       });
     }
     
-    let userLikesCount = 0;
-    if (articlesSnap.exists()) {
-      articlesSnap.forEach(article => {
-        const likes = article.val().likesCount || 0;
-        if (article.val().author === currentUser.uid) {
-          userLikesCount += likes;
-        }
-      });
-    }
-    
+    // جلب تعليقات المستخدم
     let userCommentsCount = 0;
     const commentsSnap = await get(ref(db, 'comments'));
     if (commentsSnap.exists()) {
@@ -2640,7 +2626,7 @@ a:focus,
     profileView.innerHTML = `
       <div class="card highlight">
         <div class="profile-header">
-          <div class="avatar">${currentUser.email[0].toUpperCase()}</div>
+          <div class="avatar">${userData.username ? userData.username[0] : currentUser.email[0].toUpperCase()}</div>
           <div>
             <h3>${userData.username || 'مستخدم'}</h3>
             <div class="muted">${currentUser.email}</div>
@@ -2690,7 +2676,7 @@ a:focus,
     `;
   }
   
-  window.saveProfile = () => {
+  window.saveProfile = async () => {
     const username = document.getElementById('p-name').value.trim();
     const bio = document.getElementById('p-bio').value.trim();
     
@@ -2704,23 +2690,24 @@ a:focus,
       return;
     }
     
-    update(ref(db, 'users/' + currentUser.uid), {
-      username: username,
-      bio: bio,
-      updated: Date.now()
-    }).then(() => {
-      // تحديث ذاكرة التخزين المؤقت
+    try {
+      await update(ref(db, 'users/' + currentUser.uid), {
+        username: username,
+        bio: bio,
+        updated: Date.now()
+      });
+      
+      // تحديث التخزين المؤقت
       userDataCache.set(currentUser.uid, {
-        ...userDataCache.get(currentUser.uid),
         username: username,
         bio: bio
       });
       
       showNotification('تم تحديث الملف الشخصي', 'success');
       openProfile();
-    }).catch(error => {
+    } catch (error) {
       showNotification(error.message, 'error');
-    });
+    }
   };
   
   /* =====================================================
@@ -2749,7 +2736,7 @@ a:focus,
   }
   
   /* =====================================================
-     MY ARTICLES VIEW
+     MY ARTICLES VIEW - تم التعديل لجلب جميع مقالات المستخدم
   ===================================================== */
   async function openMyArticles() {
     if (!currentUser) {
@@ -2779,13 +2766,11 @@ a:focus,
     const myArticlesList = document.getElementById('myArticlesList');
     myArticlesList.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     
-    // تحميل مقالات المستخدم فقط
+    // تحميل جميع مقالات المستخدم باستخدام الاستعلام الصحيح
     const articlesRef = ref(db, 'articles');
     const articlesQuery = query(
       articlesRef,
-      orderByChild('author'),
-      startAfter(currentUser.uid),
-      limitToFirst(100)
+      orderByChild('created')
     );
     
     const articlesSnap = await get(articlesQuery);
