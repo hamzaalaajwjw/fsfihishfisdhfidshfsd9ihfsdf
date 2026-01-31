@@ -62,6 +62,7 @@
     --green: #2ed573;
     --blue: #1e90ff;
     --yellow: #ffa502;
+    --verified-color: #00d2a0;
     --radius: 12px;
     --radius-sm: 8px;
   }
@@ -266,6 +267,32 @@
   }
   
   /* =====================================================
+     VERIFICATION BADGE
+  ===================================================== */
+  .verified-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--verified-color);
+    margin-right: 5px;
+    position: relative;
+  }
+  
+  .verified-badge i {
+    font-size: 10px;
+    color: white;
+  }
+  
+  .user-with-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  /* =====================================================
      ADMIN TABLES
   ===================================================== */
   .admin-table-container {
@@ -318,6 +345,16 @@
   }
   
   .user-badge.admin {
+    background: rgba(255, 71, 87, 0.2);
+    color: var(--red);
+  }
+  
+  .user-badge.verified {
+    background: rgba(0, 210, 160, 0.2);
+    color: var(--verified-color);
+  }
+  
+  .user-badge.banned {
     background: rgba(255, 71, 87, 0.2);
     color: var(--red);
   }
@@ -1036,6 +1073,11 @@
         <span>حظر مستخدم</span>
       </div>
       
+      <div class="admin-menu-item" onclick="showAdminSection('verifyUser')">
+        <i class="fas fa-badge-check"></i>
+        <span>توثيق مستخدم</span>
+      </div>
+      
       <div class="admin-menu-item" onclick="showAdminSection('reports')">
         <i class="fas fa-chart-bar"></i>
         <span>التقارير والإحصائيات</span>
@@ -1323,6 +1365,46 @@
         </div>
       </div>
       
+      <!-- توثيق مستخدم -->
+      <div id="verifyUserSection" class="admin-section" style="display: none;">
+        <h2 class="admin-section-title"><i class="fas fa-badge-check"></i> توثيق مستخدم</h2>
+        
+        <div class="admin-card">
+          <h3><i class="fas fa-user-check"></i> توثيق مستخدم باستخدام UID</h3>
+          
+          <div class="admin-form-group">
+            <label>رقم تعريف المستخدم (UID)</label>
+            <input type="text" class="admin-form-control" id="verifyUserUID" placeholder="أدخل UID المستخدم">
+            <button class="admin-btn" onclick="searchUserForVerification()" style="margin-top: 10px;">
+              <i class="fas fa-search"></i>
+              <span>بحث عن المستخدم</span>
+            </button>
+          </div>
+          
+          <div id="userVerificationInfo" style="display: none;">
+            <div class="user-details" id="verificationUserDetails">
+              <!-- معلومات المستخدم ستظهر هنا -->
+            </div>
+            
+            <div class="admin-form-group">
+              <label>سبب التوثيق (اختياري)</label>
+              <textarea class="admin-form-control" id="verifyReason" rows="2" placeholder="سبب منح شارة التوثيق"></textarea>
+            </div>
+            
+            <div class="admin-form-group" style="display: flex; gap: 10px;">
+              <button class="admin-btn success" id="verifyUserBtn" onclick="verifyUser()">
+                <i class="fas fa-badge-check"></i>
+                <span>توثيق المستخدم</span>
+              </button>
+              <button class="admin-btn danger" id="unverifyUserBtn" onclick="unverifyUser()" style="display: none;">
+                <i class="fas fa-times-circle"></i>
+                <span>إلغاء التوثيق</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <!-- التقارير والإحصائيات -->
       <div id="reportsSection" class="admin-section" style="display: none;">
         <h2 class="admin-section-title"><i class="fas fa-chart-bar"></i> التقارير والإحصائيات</h2>
@@ -1592,6 +1674,7 @@
   const allPostsSection = document.getElementById('allPostsSection');
   const usersSection = document.getElementById('usersSection');
   const banUserSection = document.getElementById('banUserSection');
+  const verifyUserSection = document.getElementById('verifyUserSection');
   const reportsSection = document.getElementById('reportsSection');
   const settingsSection = document.getElementById('settingsSection');
   
@@ -1629,6 +1712,12 @@
   const banEmailForm = document.getElementById('banEmailForm');
   const searchUserForm = document.getElementById('searchUserForm');
   const userSearchResults = document.getElementById('userSearchResults');
+  
+  // Verify user elements
+  const userVerificationInfo = document.getElementById('userVerificationInfo');
+  const verificationUserDetails = document.getElementById('verificationUserDetails');
+  const verifyUserBtn = document.getElementById('verifyUserBtn');
+  const unverifyUserBtn = document.getElementById('unverifyUserBtn');
   
   // Notification
   const adminNotification = document.getElementById('adminNotification');
@@ -1699,6 +1788,7 @@
     allPostsSection.style.display = 'none';
     usersSection.style.display = 'none';
     banUserSection.style.display = 'none';
+    verifyUserSection.style.display = 'none';
     reportsSection.style.display = 'none';
     settingsSection.style.display = 'none';
     
@@ -1736,14 +1826,18 @@
         document.querySelector('.admin-menu-item:nth-child(5)').classList.add('active');
         setBanOption('uid');
         break;
+      case 'verifyUser':
+        verifyUserSection.style.display = 'block';
+        document.querySelector('.admin-menu-item:nth-child(6)').classList.add('active');
+        break;
       case 'reports':
         reportsSection.style.display = 'block';
-        document.querySelector('.admin-menu-item:nth-child(6)').classList.add('active');
+        document.querySelector('.admin-menu-item:nth-child(7)').classList.add('active');
         loadReports();
         break;
       case 'settings':
         settingsSection.style.display = 'block';
-        document.querySelector('.admin-menu-item:nth-child(7)').classList.add('active');
+        document.querySelector('.admin-menu-item:nth-child(8)').classList.add('active');
         break;
     }
     
@@ -2022,6 +2116,10 @@
         for (const article of pageArticles) {
           const userData = await getUserData(article.author);
           const username = userData ? userData.username : 'مجهول';
+          const isVerified = userData && userData.verified === true;
+          const usernameHTML = isVerified ? 
+            `<div class="user-with-badge"><span>${username}</span><div class="verified-badge"><i class="fas fa-check"></i></div></div>` : 
+            username;
           
           const row = document.createElement('tr');
           row.innerHTML = `
@@ -2037,7 +2135,7 @@
                 <div style="width: 30px; height: 30px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center;">
                   ${username[0] || '?'}
                 </div>
-                <span style="font-size: 13px;">${username}</span>
+                <span style="font-size: 13px;">${usernameHTML}</span>
               </div>
             </td>
             <td>${formatShortDate(article.created)}</td>
@@ -2151,6 +2249,10 @@
     for (const post of allPosts) {
       const userData = await getUserData(post.author);
       const username = userData ? userData.username : 'مجهول';
+      const isVerified = userData && userData.verified === true;
+      const usernameHTML = isVerified ? 
+        `<div class="user-with-badge"><span>${username}</span><div class="verified-badge"><i class="fas fa-check"></i></div></div>` : 
+        username;
       
       // تقصير المحتوى إذا كان طويلاً
       let content = post.content || 'لا يوجد محتوى';
@@ -2164,7 +2266,7 @@
             <div>
               <div class="post-title">${post.title || 'عنوان غير محدد'}</div>
               <div class="post-author">
-                <i class="fas fa-user"></i> ${username} • 
+                <i class="fas fa-user"></i> ${usernameHTML} • 
                 <i class="fas fa-calendar"></i> ${formatDate(post.created)}
                 ${post.category ? ` • <i class="fas fa-tag"></i> ${post.category}` : ''}
               </div>
@@ -2353,12 +2455,16 @@
     for (const comment of currentPostComments) {
       const userData = await getUserData(comment.author);
       const username = userData ? userData.username : 'مجهول';
+      const isVerified = userData && userData.verified === true;
+      const usernameHTML = isVerified ? 
+        `<div class="user-with-badge"><span>${username}</span><div class="verified-badge"><i class="fas fa-check"></i></div></div>` : 
+        username;
       
       html += `
         <div class="comment-item">
           <div class="comment-header">
             <div class="comment-author">
-              <i class="fas fa-user"></i> ${username}
+              <i class="fas fa-user"></i> ${usernameHTML}
             </div>
             <div class="comment-date">
               ${formatDate(comment.created)}
@@ -2493,6 +2599,10 @@
       const article = articleSnap.val();
       const userData = await getUserData(article.author);
       const username = userData ? userData.username : 'مجهول';
+      const isVerified = userData && userData.verified === true;
+      const usernameHTML = isVerified ? 
+        `<div class="user-with-badge"><span>${username}</span><div class="verified-badge"><i class="fas fa-check"></i></div></div>` : 
+        username;
       
       let tagsHTML = '';
       if (article.likesCount > 10) {
@@ -2511,7 +2621,7 @@
           <div class="user-header">
             <div class="user-avatar">${username[0] || '?'}</div>
             <div class="user-info">
-              <h3>${username}</h3>
+              <h3>${usernameHTML}</h3>
               <div class="email">${article.author}</div>
             </div>
           </div>
@@ -2796,7 +2906,19 @@
         let counter = startIndex + 1;
         for (const user of pageUsers) {
           const isAdmin = user.id === ADMIN_USER_ID;
-          const status = isAdmin ? 'admin' : 'active';
+          const isVerified = user.verified === true;
+          const isBanned = await checkIfUserIsBanned(user.id);
+          
+          let status = '';
+          if (isAdmin) {
+            status = '<span class="user-badge admin">مشرف</span>';
+          } else if (isVerified) {
+            status = '<span class="user-badge verified">موثق</span>';
+          } else if (isBanned) {
+            status = '<span class="user-badge banned">محظور</span>';
+          } else {
+            status = '<span class="user-badge">نشط</span>';
+          }
           
           const row = document.createElement('tr');
           row.innerHTML = `
@@ -2817,9 +2939,7 @@
             <td><span class="user-badge">${user.articlesCount || 0}</span></td>
             <td>${formatDate(user.lastLogin || user.joinDate)}</td>
             <td>
-              <span class="user-badge ${isAdmin ? 'admin' : ''}">
-                ${isAdmin ? 'مشرف' : 'نشط'}
-              </span>
+              ${status}
             </td>
             <td>
               <div class="actions">
@@ -2859,6 +2979,29 @@
     loadUsersTable(1);
   });
   
+  async function checkIfUserIsBanned(uid) {
+    try {
+      const banRef = ref(db, `admin/bans/${uid}`);
+      const snap = await get(banRef);
+      
+      if (snap.exists()) {
+        const banInfo = snap.val();
+        const now = Date.now();
+        
+        if (banInfo.bannedUntil !== 'permanent' && banInfo.bannedUntil < now) {
+          // الحظر انتهى صلاحيته
+          return false;
+        }
+        
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.log('Error checking ban status:', error);
+      return false;
+    }
+  }
+  
   window.viewUserDetails = async (userId) => {
     try {
       const userRef = ref(db, `users/${userId}`);
@@ -2871,6 +3014,8 @@
       
       const userData = userSnap.val();
       userData.id = userId;
+      const isVerified = userData.verified === true;
+      const isBanned = await checkIfUserIsBanned(userId);
       
       // جلب مقالات المستخدم
       const articlesRef = ref(db, 'articles');
@@ -2890,13 +3035,27 @@
         });
       }
       
+      // جلب معلومات الحظر إذا كان محظوراً
+      let banInfo = null;
+      if (isBanned) {
+        const banRef = ref(db, `admin/bans/${userId}`);
+        const banSnap = await get(banRef);
+        if (banSnap.exists()) {
+          banInfo = banSnap.val();
+        }
+      }
+      
+      const usernameHTML = isVerified ? 
+        `<div class="user-with-badge"><span>${userData.username || 'مستخدم'}</span><div class="verified-badge"><i class="fas fa-check"></i></div></div>` : 
+        userData.username || 'مستخدم';
+      
       const content = document.getElementById('userDetailsContent');
       content.innerHTML = `
         <div class="user-details">
           <div class="user-header">
             <div class="user-avatar">${userData.username ? userData.username[0] || '?' : '?'}</div>
             <div class="user-info">
-              <h3>${userData.username || 'مستخدم'}</h3>
+              <h3>${usernameHTML}</h3>
               <div class="email">${userData.email || 'غير محدد'}</div>
             </div>
           </div>
@@ -2924,6 +3083,18 @@
               </div>
             </div>
           </div>
+          
+          ${isBanned && banInfo ? `
+          <div style="margin-bottom: 20px; background: rgba(255, 71, 87, 0.1); padding: 15px; border-radius: var(--radius-sm); border: 1px solid var(--red);">
+            <h4 style="font-size: 16px; margin-bottom: 10px; color: var(--red);"><i class="fas fa-ban"></i> حالة الحظر</h4>
+            <div style="font-size: 13px;">
+              <p><strong>سبب الحظر:</strong> ${getBanReasonText(banInfo.reason)}</p>
+              <p style="margin-top: 5px;"><strong>مدة الحظر:</strong> ${banInfo.duration === 'permanent' ? 'دائم' : banInfo.duration + ' يوم'}</p>
+              ${banInfo.notes ? `<p style="margin-top: 5px;"><strong>ملاحظات:</strong> ${banInfo.notes}</p>` : ''}
+              <p style="margin-top: 5px;"><strong>تاريخ الحظر:</strong> ${formatDate(banInfo.bannedAt)}</p>
+            </div>
+          </div>
+          ` : ''}
           
           <div style="margin-bottom: 20px;">
             <h4 style="font-size: 16px; margin-bottom: 10px;">معلومات الحساب</h4>
@@ -2972,6 +3143,16 @@
       showAdminNotification('حدث خطأ في تحميل تفاصيل المستخدم', 'error');
     }
   };
+  
+  function getBanReasonText(reason) {
+    switch(reason) {
+      case 'spam': return 'نشر محتوى غير مرغوب';
+      case 'abuse': return 'إساءة استخدام النظام';
+      case 'violation': return 'انتهاك الشروط';
+      case 'other': return 'سبب آخر';
+      default: return reason;
+    }
+  }
   
   window.closeUserDetailsModal = () => {
     userDetailsModal.style.display = 'none';
@@ -3265,6 +3446,213 @@
   };
   
   /* =====================================================
+     USER VERIFICATION SYSTEM
+  ===================================================== */
+  window.searchUserForVerification = async function() {
+    const uid = document.getElementById('verifyUserUID').value.trim();
+    
+    if (!uid) {
+      showAdminNotification('يرجى إدخال UID المستخدم', 'error');
+      return;
+    }
+    
+    try {
+      const userRef = ref(db, `users/${uid}`);
+      const userSnap = await get(userRef);
+      
+      if (!userSnap.exists()) {
+        showAdminNotification('المستخدم غير موجود', 'error');
+        userVerificationInfo.style.display = 'none';
+        return;
+      }
+      
+      const userData = userSnap.val();
+      userData.id = uid;
+      
+      // جلب إحصائيات المستخدم
+      let articlesCount = 0;
+      let likesCount = 0;
+      let commentsCount = 0;
+      
+      const articlesRef = ref(db, 'articles');
+      const articlesSnap = await get(articlesRef);
+      if (articlesSnap.exists()) {
+        articlesSnap.forEach(articleSnap => {
+          const article = articleSnap.val();
+          if (article.author === uid) {
+            articlesCount++;
+            likesCount += article.likesCount || 0;
+            commentsCount += article.commentsCount || 0;
+          }
+        });
+      }
+      
+      const isVerified = userData.verified === true;
+      
+      verificationUserDetails.innerHTML = `
+        <div class="user-header">
+          <div class="user-avatar">${userData.username ? userData.username[0] || '?' : '?'}</div>
+          <div class="user-info">
+            <h3>
+              ${userData.username || 'مستخدم'}
+              ${isVerified ? '<span class="verified-badge" style="margin-right: 10px;"><i class="fas fa-check"></i></span>' : ''}
+            </h3>
+            <div class="email">${userData.email || 'غير محدد'}</div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 15px;">
+          <h4 style="font-size: 14px; margin-bottom: 10px;">إحصائيات المستخدم</h4>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            <div>
+              <div style="font-size: 11px; color: var(--text-muted);">المقالات</div>
+              <div style="font-weight: 600; font-size: 16px;">${articlesCount}</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; color: var(--text-muted);">الإعجابات</div>
+              <div style="font-weight: 600; font-size: 16px;">${likesCount}</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; color: var(--text-muted);">التعليقات</div>
+              <div style="font-weight: 600; font-size: 16px;">${commentsCount}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 15px;">
+          <h4 style="font-size: 14px; margin-bottom: 10px;">معلومات الحساب</h4>
+          <div style="font-size: 12px; color: var(--text-muted);">
+            <p><i class="fas fa-calendar"></i> تاريخ الانضمام: ${formatDate(userData.joinDate)}</p>
+            <p style="margin-top: 5px;"><i class="fas fa-clock"></i> آخر نشاط: ${formatDate(userData.lastLogin || userData.joinDate)}</p>
+            ${isVerified ? `
+            <p style="margin-top: 5px; color: var(--verified-color);">
+              <i class="fas fa-badge-check"></i> الحساب موثق حالياً
+            </p>
+            ${userData.verifyReason ? `<p style="margin-top: 5px;"><strong>سبب التوثيق:</strong> ${userData.verifyReason}</p>` : ''}
+            ${userData.verifiedAt ? `<p style="margin-top: 5px;"><i class="fas fa-calendar-check"></i> تاريخ التوثيق: ${formatDate(userData.verifiedAt)}</p>` : ''}
+            ` : ''}
+          </div>
+        </div>
+      `;
+      
+      userVerificationInfo.style.display = 'block';
+      
+      if (isVerified) {
+        verifyUserBtn.style.display = 'none';
+        unverifyUserBtn.style.display = 'block';
+        document.getElementById('verifyReason').value = userData.verifyReason || '';
+      } else {
+        verifyUserBtn.style.display = 'block';
+        unverifyUserBtn.style.display = 'none';
+        document.getElementById('verifyReason').value = '';
+      }
+      
+    } catch (error) {
+      console.error('Error searching user for verification:', error);
+      showAdminNotification('حدث خطأ أثناء البحث عن المستخدم', 'error');
+    }
+  };
+  
+  window.verifyUser = async function() {
+    const uid = document.getElementById('verifyUserUID').value.trim();
+    const reason = document.getElementById('verifyReason').value.trim();
+    
+    if (!uid) {
+      showAdminNotification('يرجى إدخال UID المستخدم', 'error');
+      return;
+    }
+    
+    try {
+      const userRef = ref(db, `users/${uid}`);
+      const userSnap = await get(userRef);
+      
+      if (!userSnap.exists()) {
+        showAdminNotification('المستخدم غير موجود', 'error');
+        return;
+      }
+      
+      const btn = document.getElementById('verifyUserBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التوثيق...';
+      
+      await update(userRef, {
+        verified: true,
+        verifyReason: reason || 'توثيق من قبل المشرف',
+        verifiedAt: Date.now(),
+        verifiedBy: currentAdmin.uid
+      });
+      
+      showAdminNotification('تم توثيق المستخدم بنجاح', 'success');
+      searchUserForVerification(); // تحديث العرض
+      
+      // تحديث قائمة المستخدمين
+      loadUsersTable(currentUserPage);
+      
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-badge-check"></i> توثيق المستخدم';
+      
+    } catch (error) {
+      console.error('Error verifying user:', error);
+      showAdminNotification('حدث خطأ أثناء توثيق المستخدم', 'error');
+      
+      const btn = document.getElementById('verifyUserBtn');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-badge-check"></i> توثيق المستخدم';
+    }
+  };
+  
+  window.unverifyUser = async function() {
+    const uid = document.getElementById('verifyUserUID').value.trim();
+    
+    if (!uid) {
+      showAdminNotification('يرجى إدخال UID المستخدم', 'error');
+      return;
+    }
+    
+    if (!confirm('هل أنت متأكد من إلغاء توثيق هذا المستخدم؟')) {
+      return;
+    }
+    
+    try {
+      const userRef = ref(db, `users/${uid}`);
+      const userSnap = await get(userRef);
+      
+      if (!userSnap.exists()) {
+        showAdminNotification('المستخدم غير موجود', 'error');
+        return;
+      }
+      
+      const btn = document.getElementById('unverifyUserBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإلغاء...';
+      
+      await update(userRef, {
+        verified: false,
+        verifyReason: null,
+        verifiedAt: null,
+        verifiedBy: null
+      });
+      
+      showAdminNotification('تم إلغاء توثيق المستخدم', 'success');
+      searchUserForVerification(); // تحديث العرض
+      
+      // تحديث قائمة المستخدمين
+      loadUsersTable(currentUserPage);
+      
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-times-circle"></i> إلغاء التوثيق';
+      
+    } catch (error) {
+      console.error('Error unverifying user:', error);
+      showAdminNotification('حدث خطأ أثناء إلغاء التوثيق', 'error');
+      
+      const btn = document.getElementById('unverifyUserBtn');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-times-circle"></i> إلغاء التوثيق';
+    }
+  };
+  
+  /* =====================================================
      CREATE NEW USER
   ===================================================== */
   window.openCreateUserModal = () => {
@@ -3323,7 +3711,8 @@
         lastArticle: 0,
         lastComment: 0,
         bio: 'تم إنشاء الحساب بواسطة المشرف',
-        status: 'active'
+        status: 'active',
+        verified: false
       });
       
       showAdminNotification('تم إنشاء حساب المستخدم بنجاح', 'success');
@@ -3642,72 +4031,7 @@
   
   // تحميل لوحة التحكم كصفحة افتراضية
   showAdminSection('dashboard');
-  
-/* =====================================================
-   USER VERIFICATION SYSTEM
-===================================================== */
-window.searchUserForVerification = async function() {
-  const uid = document.getElementById('verifyUserUID').value.trim();
-
-  if (!uid) {
-    showAdminNotification('يرجى إدخال UID المستخدم', 'error');
-    return;
-  }
-
-  try {
-    const userRef = ref(db, `users/${uid}`);
-    const userSnap = await get(userRef);
-
-    if (!userSnap.exists()) {
-      showAdminNotification('المستخدم غير موجود', 'error');
-      document.getElementById('userVerificationInfo').style.display = 'none';
-      return;
-    }
-
-    const userData = userSnap.val();
-    userData.id = uid;
-
-    let articlesCount = 0;
-    let likesCount = 0;
-    let commentsCount = 0;
-
-    const articlesRef = ref(db, 'articles');
-    const articlesSnap = await get(articlesRef);
-    if (articlesSnap.exists()) {
-      articlesSnap.forEach(articleSnap => {
-        const article = articleSnap.val();
-        if (article.author === uid) {
-          articlesCount++;
-          likesCount += article.likesCount || 0;
-          commentsCount += article.commentsCount || 0;
-        }
-      });
-    }
-
-    const isVerified = userData.verified === true;
-
-    const userInfo = document.getElementById('verificationUserDetails');
-    userInfo.innerHTML = `
-      <div class="user-header">
-        <div class="user-avatar">${userData.username ? userData.username[0] || '?' : '?'}</div>
-        <div class="user-info">
-          <h3>
-            ${userData.username || 'مستخدم'}
-            ${isVerified ? '<span class="verified-badge" style="margin-right: 10px;"><i class="fas fa-check"></i></span>' : ''}
-          </h3>
-          <div class="email">${userData.email || 'غير محدد'}</div>
-        </div>
-      </div>
-    `;
-
-    document.getElementById('userVerificationInfo').style.display = 'block';
-
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-</script>
+  </script>
 
 </body>
 </html>
