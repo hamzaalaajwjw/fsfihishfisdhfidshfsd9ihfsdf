@@ -59,6 +59,8 @@
     --text-muted: #aaaaaa;
     --text-light: #f5f5f5;
     --red: #ff4757;
+    --blue: #1e90ff;
+    --verified-color: #00d2a0;
     --radius: 12px;
     --radius-sm: 8px;
   }
@@ -348,6 +350,32 @@
     margin-top: 6px;
     font-weight: 500;
     border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  /* =====================================================
+     VERIFICATION BADGE
+  ===================================================== */
+  .verified-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--verified-color);
+    margin-right: 5px;
+    position: relative;
+  }
+  
+  .verified-badge i {
+    font-size: 10px;
+    color: white;
+  }
+  
+  .user-with-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
   }
   
   /* =====================================================
@@ -731,6 +759,9 @@
     font-weight: 600;
     font-size: 14px;
     color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 5px;
   }
   
   .comment-time {
@@ -845,6 +876,59 @@
   .view-count i {
     margin-left: 4px;
     color: var(--text-muted);
+  }
+  
+  /* =====================================================
+     BANNED USER STYLES
+  ===================================================== */
+  .banned-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .banned-message {
+    background: var(--card);
+    border: 2px solid var(--red);
+    border-radius: var(--radius);
+    padding: 40px;
+    max-width: 500px;
+    text-align: center;
+  }
+  
+  .banned-icon {
+    font-size: 60px;
+    color: var(--red);
+    margin-bottom: 20px;
+  }
+  
+  .banned-title {
+    font-size: 24px;
+    color: var(--red);
+    margin-bottom: 15px;
+  }
+  
+  .banned-reason {
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 20px;
+    background: rgba(255, 71, 87, 0.1);
+    padding: 15px;
+    border-radius: var(--radius-sm);
+  }
+  
+  .banned-details {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 20px;
   }
   
   /* =====================================================
@@ -1039,6 +1123,18 @@
     .action-btn span {
       font-size: 12px;
     }
+    
+    .banned-message {
+      padding: 20px;
+    }
+    
+    .banned-icon {
+      font-size: 40px;
+    }
+    
+    .banned-title {
+      font-size: 20px;
+    }
   }
   
   @media (max-width: 576px) {
@@ -1218,6 +1314,21 @@
   </style>
 </head>
 <body>
+  <!-- ================= BANNED USER OVERLAY ================= -->
+  <div class="banned-overlay" id="bannedOverlay">
+    <div class="banned-message">
+      <div class="banned-icon">
+        <i class="fas fa-ban"></i>
+      </div>
+      <h2 class="banned-title">حسابك محظور</h2>
+      <div class="banned-reason" id="banReasonText"></div>
+      <div class="banned-details">
+        <p><i class="fas fa-info-circle"></i> لا يمكنك النشر أو التعليق أو الإعجاب</p>
+        <p><i class="fas fa-clock"></i> للحصول على المساعدة، اتصل بإدارة المنتدى</p>
+      </div>
+    </div>
+  </div>
+  
   <header>
     <div class="logo">
       <i class="fas fa-pills"></i>
@@ -1473,6 +1584,8 @@
   const loadMoreArticlesBtn = document.getElementById('loadMoreArticlesBtn');
   const loadMoreCommentsContainer = document.getElementById('loadMoreCommentsContainer');
   const loadMoreCommentsBtn = document.getElementById('loadMoreCommentsBtn');
+  const bannedOverlay = document.getElementById('bannedOverlay');
+  const banReasonText = document.getElementById('banReasonText');
   
   // Character counters
   const titleCounter = document.getElementById('titleCounter');
@@ -1490,6 +1603,8 @@
   let currentFilter = 'all';
   let allArticles = [];
   let articlesLoading = false;
+  let isUserBanned = false;
+  let banData = null;
   
   // Pagination variables for articles
   let lastArticleTimestamp = null;
@@ -1534,6 +1649,59 @@
   
   // Debounce for API calls
   let fetchDebounceTimer = null;
+  
+  /* =====================================================
+     BAN CHECK SYSTEM
+  ===================================================== */
+  async function checkIfUserIsBanned(uid) {
+    if (!uid) return false;
+    
+    try {
+      const banRef = ref(db, `admin/bans/${uid}`);
+      const snap = await get(banRef);
+      
+      if (snap.exists()) {
+        const banInfo = snap.val();
+        
+        // التحقق إذا كان الحظر لا يزال فعالاً
+        const now = Date.now();
+        if (banInfo.bannedUntil !== 'permanent' && banInfo.bannedUntil < now) {
+          // الحظر انتهى صلاحيته، حذف بيانات الحظر
+          await remove(banRef);
+          return false;
+        }
+        
+        banData = banInfo;
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.log('Error checking ban status:', error);
+      return false;
+    }
+  }
+  
+  function showBanOverlay() {
+    if (banData) {
+      let reasonText = 'تم حظر حسابك';
+      if (banData.reason === 'spam') {
+        reasonText = 'تم حظر حسابك بسبب: نشر محتوى غير مرغوب';
+      } else if (banData.reason === 'abuse') {
+        reasonText = 'تم حظر حسابك بسبب: إساءة استخدام النظام';
+      } else if (banData.reason === 'violation') {
+        reasonText = 'تم حظر حسابك بسبب: انتهاك شروط الاستخدام';
+      } else if (banData.reason === 'other' && banData.notes) {
+        reasonText = `تم حظر حسابك بسبب: ${banData.notes}`;
+      }
+      
+      banReasonText.textContent = reasonText;
+      bannedOverlay.style.display = 'flex';
+    }
+  }
+  
+  function hideBanOverlay() {
+    bannedOverlay.style.display = 'none';
+  }
   
   /* =====================================================
      CACHING FUNCTIONS
@@ -1601,6 +1769,11 @@
      SECTION NAVIGATION
   ===================================================== */
   window.showSection = (sectionName) => {
+    if (isUserBanned) {
+      showBanOverlay();
+      return;
+    }
+    
     articlesSection.style.display = 'none';
     profileSection.style.display = 'none';
     myArticlesSection.style.display = 'none';
@@ -1638,6 +1811,39 @@
     currentUser = user;
     
     if (user) {
+      // التحقق من حالة الحظر
+      isUserBanned = await checkIfUserIsBanned(user.uid);
+      
+      if (isUserBanned) {
+        showBanOverlay();
+        authBox.innerHTML = `
+          <div class="profile-header">
+            <div class="avatar">${user.email[0].toUpperCase()}</div>
+            <div class="user-info">
+              <strong>${user.email.split('@')[0]}</strong>
+              <div class="muted" style="color: var(--red);">
+                <i class="fas fa-ban"></i> حساب محظور
+              </div>
+            </div>
+          </div>
+          <div class="auth-buttons">
+            <button class="btn ghost" id="logout">
+              <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+            </button>
+          </div>
+        `;
+        
+        document.getElementById('logout').onclick = () => {
+          signOut(auth).then(() => {
+            hideBanOverlay();
+            showNotification('تم تسجيل الخروج بنجاح', 'success');
+          });
+        };
+        
+        showSection('articles');
+        return;
+      }
+      
       authBox.innerHTML = `
         <div class="profile-header">
           <div class="avatar">${user.email[0].toUpperCase()}</div>
@@ -1664,6 +1870,10 @@
       
       initProfile(user.uid);
     } else {
+      hideBanOverlay();
+      isUserBanned = false;
+      banData = null;
+      
       authBox.innerHTML = `
         <h3 style="margin-bottom: 12px; color: var(--text-light); font-size: 14px;">
           <i class="fas fa-user" style="margin-left: 6px;"></i> تسجيل الدخول
@@ -1756,7 +1966,7 @@
   }
   
   /* =====================================================
-     USER DATA FUNCTIONS - لجلب اسم المستخدم
+     USER DATA FUNCTIONS - لجلب اسم المستخدم وبيانات التوثيق
   ===================================================== */
   async function getUserData(userId) {
     if (!userId) return null;
@@ -1782,7 +1992,8 @@
           lastLogin: Date.now(),
           articlesCount: 0,
           likesCount: 0,
-          commentsCount: 0
+          commentsCount: 0,
+          verified: false
         };
         
         // حفظ البيانات الافتراضية في قاعدة البيانات
@@ -1798,7 +2009,8 @@
         joinDate: Date.now(),
         articlesCount: 0,
         likesCount: 0,
-        commentsCount: 0
+        commentsCount: 0,
+        verified: false
       };
       userDataCache.set(userId, defaultUserData);
       return defaultUserData;
@@ -1813,6 +2025,27 @@
       return userData.username;
     }
     return 'مستخدم';
+  }
+  
+  async function isUserVerified(userId) {
+    if (!userId) return false;
+    
+    const userData = await getUserData(userId);
+    return userData && userData.verified === true;
+  }
+  
+  function getUsernameWithVerification(username, isVerified) {
+    if (isVerified) {
+      return `
+        <div class="user-with-badge">
+          <span>${username}</span>
+          <div class="verified-badge">
+            <i class="fas fa-check"></i>
+          </div>
+        </div>
+      `;
+    }
+    return username;
   }
   
   /* =====================================================
@@ -1880,7 +2113,7 @@
             <i class="fas fa-newspaper"></i>
             <h3>لا توجد مقالات بعد</h3>
             <p>كن أول من ينشر مقالًا على المنتدى!</p>
-            ${currentUser ? `
+            ${currentUser && !isUserBanned ? `
             <button class="btn" onclick="openPublishModal()" style="margin-top: 16px; width: auto;">
               <i class="fas fa-pen-fancy"></i> نشر أول مقال
             </button>
@@ -1898,7 +2131,7 @@
       articlesDiv.innerHTML = '';
       
       // تحميل الإعجابات للمستخدم الحالي
-      if (currentUser) {
+      if (currentUser && !isUserBanned) {
         await loadUserLikes();
       }
       
@@ -1975,7 +2208,7 @@
       }
       
       // تحميل الإعجابات للمقالات الجديدة
-      if (currentUser) {
+      if (currentUser && !isUserBanned) {
         await loadUserLikesForArticles(articles);
       }
       
@@ -2049,6 +2282,11 @@
   }
   
   window.filterArticles = (filterType) => {
+    if (isUserBanned) {
+      showBanOverlay();
+      return;
+    }
+    
     currentFilter = filterType;
     resetArticlesPagination();
     
@@ -2105,8 +2343,10 @@
     const isAuthor = currentUser && article.author === currentUser.uid;
     const liked = articleLikes.has(article.id);
     
-    // جلب اسم المستخدم
+    // جلب اسم المستخدم وبيانات التوثيق
     let username = await getUsername(article.author);
+    const isVerified = await isUserVerified(article.author);
+    const usernameHTML = getUsernameWithVerification(username, isVerified);
     
     let tagsHTML = '';
     if (article.likesCount > 10) {
@@ -2133,22 +2373,22 @@
     }
     
     // إنشاء أزرار الإعجاب والتعليق
-    const likeButton = currentUser ? 
+    const likeButton = currentUser && !isUserBanned ? 
       `<div class="action-btn like ${liked ? 'active' : ''}" onclick="toggleLike(event, '${article.id}')">
         <i class="${liked ? 'fas' : 'far'} fa-heart" style="${liked ? 'color: #ff4757;' : ''}"></i>
         <span>${article.likesCount || 0}</span>
       </div>` :
-      `<div class="action-btn like" onclick="showNotification('يجب تسجيل الدخول للإعجاب', 'error')">
+      `<div class="action-btn like" onclick="handleBannedAction('يجب تسجيل الدخول للإعجاب')">
         <i class="far fa-heart"></i>
         <span>${article.likesCount || 0}</span>
       </div>`;
     
-    const commentButton = currentUser ?
+    const commentButton = currentUser && !isUserBanned ?
       `<div class="action-btn comment" onclick="openComments('${article.id}')">
         <i class="far fa-comment"></i>
         <span>${article.commentsCount || 0}</span>
       </div>` :
-      `<div class="action-btn comment" onclick="showNotification('يجب تسجيل الدخول للتعليق', 'error')">
+      `<div class="action-btn comment" onclick="handleBannedAction('يجب تسجيل الدخول للتعليق')">
         <i class="far fa-comment"></i>
         <span>${article.commentsCount || 0}</span>
       </div>`;
@@ -2160,7 +2400,7 @@
       </div>
       <div class="article-meta">
         <span><i class="far fa-calendar"></i> ${formatDate(article.created)}</span>
-        <span><i class="far fa-user"></i> ${username}</span>
+        <span><i class="far fa-user"></i> ${usernameHTML}</span>
         <span class="view-count"><i class="far fa-eye"></i> ${viewsCount} مشاهدة</span>
         <span><i class="far fa-clock"></i> ${readTime} دقيقة قراءة</span>
       </div>
@@ -2170,7 +2410,7 @@
       <div class="article-actions">
         ${likeButton}
         ${commentButton}
-        ${isAuthor ? `
+        ${isAuthor && !isUserBanned ? `
         <div class="action-btn delete" onclick="deleteArticle('${article.id}')">
           <i class="far fa-trash-alt"></i>
           <span>حذف</span>
@@ -2182,10 +2422,24 @@
     articlesDiv.appendChild(card);
     
     // تتبع المشاهدة
-    if (currentUser) {
+    if (currentUser && !isUserBanned) {
       setTimeout(() => {
         trackArticleView(article.id);
       }, 1000);
+    }
+  }
+  
+  /* =====================================================
+     HANDLE BANNED ACTIONS
+  ===================================================== */
+  function handleBannedAction(defaultMessage) {
+    if (isUserBanned) {
+      showBanOverlay();
+      return;
+    }
+    
+    if (!currentUser) {
+      showNotification(defaultMessage, 'error');
     }
   }
   
@@ -2195,6 +2449,11 @@
   window.toggleLike = async (event, articleId) => {
     event.preventDefault();
     event.stopPropagation();
+    
+    if (isUserBanned) {
+      showBanOverlay();
+      return;
+    }
     
     if (!currentUser) {
       showNotification('يجب تسجيل الدخول أولاً', 'error');
@@ -2291,6 +2550,11 @@
      مع التخزين المؤقت
   ===================================================== */
   window.openComments = async (articleId) => {
+    if (isUserBanned) {
+      showBanOverlay();
+      return;
+    }
+    
     if (!currentUser) {
       showNotification('يجب تسجيل الدخول أولاً', 'error');
       return;
@@ -2389,12 +2653,15 @@
       // جلب أسماء المستخدمين للتعليقات
       for (const comment of comments) {
         const username = await getUsername(comment.author);
+        const isVerified = await isUserVerified(comment.author);
+        const usernameHTML = getUsernameWithVerification(username, isVerified);
+        
         const commentEl = document.createElement('div');
         commentEl.className = 'comment';
         
         commentEl.innerHTML = `
           <div class="comment-header">
-            <div class="comment-author">${username}</div>
+            <div class="comment-author">${usernameHTML}</div>
             <div class="comment-time">${formatDate(comment.created)}</div>
           </div>
           <div class="comment-content">${comment.text}</div>
@@ -2466,6 +2733,11 @@
   };
   
   window.postComment = async () => {
+    if (isUserBanned) {
+      showBanOverlay();
+      return;
+    }
+    
     const canComment = await checkCommentCooldown();
     if (!canComment) {
       showNotification('يجب الانتظار قبل إضافة التعليق التالي', 'error');
@@ -2726,7 +2998,8 @@
         likesCount: 0,
         commentsCount: 0,
         lastArticle: 0,
-        lastComment: 0
+        lastComment: 0,
+        verified: false
       });
     } else {
       await update(userRef, { lastLogin: Date.now() });
@@ -2736,7 +3009,8 @@
     const userData = snap.exists() ? snap.val() : {
       username: currentUser.email.split('@')[0],
       joinDate: Date.now(),
-      lastLogin: Date.now()
+      lastLogin: Date.now(),
+      verified: false
     };
     userDataCache.set(uid, userData);
   }
@@ -2760,6 +3034,7 @@
     
     const snap = await get(ref(db, 'users/' + currentUser.uid));
     const userData = snap.val();
+    const isVerified = userData.verified === true;
     
     // استخدام التخزين المؤقت لمقالات المستخدم
     let userArticlesCount = 0;
@@ -2813,12 +3088,14 @@
       });
     }
     
+    const usernameHTML = getUsernameWithVerification(userData.username || 'مستخدم', isVerified);
+    
     profileView.innerHTML = `
       <div class="card highlight">
         <div class="profile-header">
           <div class="avatar">${currentUser.email[0].toUpperCase()}</div>
           <div>
-            <h3>${userData.username || 'مستخدم'}</h3>
+            <h3 style="display: flex; align-items: center; gap: 10px;">${usernameHTML}</h3>
             <div class="muted">${currentUser.email}</div>
             <div class="muted">منذ ${formatDate(userData.joinDate)}</div>
           </div>
@@ -2845,6 +3122,11 @@
             <p><i class="fas fa-envelope"></i> <strong>البريد:</strong> ${currentUser.email}</p>
             <p style="margin-top: 6px;"><i class="fas fa-calendar"></i> <strong>تاريخ الانضمام:</strong> ${new Date(userData.joinDate).toLocaleDateString('ar-SA')}</p>
             <p style="margin-top: 6px;"><i class="fas fa-clock"></i> <strong>آخر نشاط:</strong> ${formatDate(userData.lastLogin || userData.joinDate)}</p>
+            ${isVerified ? `
+            <p style="margin-top: 6px; color: var(--verified-color);">
+              <i class="fas fa-badge-check"></i> <strong>الحساب موثق</strong>
+            </p>
+            ` : ''}
           </div>
         </div>
         
@@ -2867,6 +3149,11 @@
   }
   
   window.saveProfile = () => {
+    if (isUserBanned) {
+      showBanOverlay();
+      return;
+    }
+    
     const username = document.getElementById('p-name').value.trim();
     const bio = document.getElementById('p-bio').value.trim();
     
@@ -2945,6 +3232,11 @@
           </div>
         </div>
       `;
+      return;
+    }
+    
+    if (isUserBanned) {
+      showBanOverlay();
       return;
     }
     
@@ -3065,6 +3357,11 @@
      PUBLISH ARTICLE
   ===================================================== */
   window.openPublishModal = () => {
+    if (isUserBanned) {
+      showBanOverlay();
+      return;
+    }
+    
     if (!currentUser) {
       showNotification('يجب تسجيل الدخول أولاً', 'error');
       return;
@@ -3100,6 +3397,11 @@
   };
   
   window.publishArticle = async () => {
+    if (isUserBanned) {
+      showBanOverlay();
+      return;
+    }
+    
     const canPublish = await checkArticleCooldown();
     if (!canPublish) {
       showNotification('يجب الانتظار قبل نشر المقال التالي', 'error');
@@ -3170,6 +3472,11 @@
      DELETE ARTICLE
   ===================================================== */
   window.deleteArticle = async (articleId) => {
+    if (isUserBanned) {
+      showBanOverlay();
+      return;
+    }
+    
     if (!confirm('هل أنت متأكد من حذف هذا المقال؟ سيتم حذف جميع الإعجابات والتعليقات المرتبطة به.')) return;
     
     const articleRef = ref(db, `articles/${articleId}`);
@@ -3304,6 +3611,9 @@
       }
       if (commentModal.style.display === 'flex') {
         closeCommentModal();
+      }
+      if (bannedOverlay.style.display === 'flex') {
+        hideBanOverlay();
       }
     }
     
