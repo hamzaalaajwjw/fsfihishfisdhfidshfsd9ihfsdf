@@ -7,10 +7,35 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    /* =====================================================
+       GLOBAL / RESET
+    ===================================================== */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-touch-callout: none !important;
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+    }
+    
+    html, body {
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-touch-callout: none !important;
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+    }
+    
+    *:focus,
+    *:active,
+    *:hover {
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
     }
     
     body {
@@ -24,6 +49,21 @@
       align-items: center;
       text-align: center;
       padding: 20px;
+      overflow-x: hidden;
+      touch-action: manipulation;
+    }
+    
+    /* إزالة تأثير الضغط/النقر على جميع العناصر */
+    div, p, h1, h2, h3, h4, h5, h6, span, i {
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-touch-callout: none !important;
+      user-select: none !important;
+    }
+    
+    .container {
+      max-width: 600px;
+      width: 100%;
+      padding: 30px;
     }
     
     .error-code {
@@ -32,27 +72,36 @@
       color: #ff4757;
       line-height: 1;
       margin-bottom: 20px;
+      -webkit-tap-highlight-color: transparent !important;
+      user-select: none !important;
     }
     
     .error-title {
       font-size: 28px;
       margin-bottom: 16px;
       color: #ffffff;
+      -webkit-tap-highlight-color: transparent !important;
+      user-select: none !important;
     }
     
     .error-message {
       font-size: 16px;
       color: #aaaaaa;
       max-width: 500px;
-      margin-bottom: 30px;
+      margin: 0 auto 30px;
       line-height: 1.6;
+      -webkit-tap-highlight-color: transparent !important;
+      user-select: none !important;
     }
     
+    /* =====================================================
+       HOME BUTTON - الوحيد القابل للنقر
+    ===================================================== */
     .home-link {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      padding: 14px 28px;
+      padding: 16px 32px;
       background: #ffffff;
       color: #000000;
       border-radius: 8px;
@@ -61,13 +110,75 @@
       text-decoration: none;
       transition: all 0.2s;
       margin-top: 20px;
+      cursor: pointer;
+      border: none;
+      font-family: 'Cairo', sans-serif;
+      
+      /* إزالة التأثيرات الزرقاء */
+      -webkit-tap-highlight-color: rgba(255, 255, 255, 0.3) !important;
+      outline: none !important;
+    }
+    
+    /* تأثير النقر على الزر فقط */
+    .home-link:active {
+      background: #f0f0f0;
+      transform: scale(0.98);
     }
     
     .home-link:hover {
       background: #f5f5f5;
-      transform: translateY(-2px);
     }
     
+    /* إزالة تأثير focus الزرقاء */
+    .home-link:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+    
+    .home-link i {
+      font-size: 18px;
+    }
+    
+    /* إزالة التأثيرات من الروابط الأخرى */
+    a:not(.home-link) {
+      text-decoration: none;
+      color: inherit;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+    
+    /* إزالة التأثير من جميع الأزرار غير المخصصة */
+    button:not(.home-link) {
+      -webkit-tap-highlight-color: transparent !important;
+    }
+    
+    /* منع النسخ والضغط المطول */
+    .no-select {
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+      -webkit-touch-callout: none !important;
+    }
+    
+    /* =====================================================
+       ANIMATION
+    ===================================================== */
+    .error-code {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.7;
+      }
+    }
+    
+    /* =====================================================
+       RESPONSIVE
+    ===================================================== */
     @media (max-width: 768px) {
       .error-code {
         font-size: 80px;
@@ -79,30 +190,128 @@
       
       .error-message {
         font-size: 14px;
+        padding: 0 10px;
+      }
+      
+      .home-link {
+        padding: 14px 28px;
+        font-size: 15px;
+      }
+      
+      .container {
+        padding: 20px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .error-code {
+        font-size: 60px;
+      }
+      
+      .error-title {
+        font-size: 20px;
+      }
+      
+      .error-message {
+        font-size: 13px;
+      }
+      
+      .home-link {
+        padding: 12px 24px;
+        font-size: 14px;
       }
     }
   </style>
 </head>
-<body>
-  <div class="error-code">404</div>
-  <h1 class="error-title">الصفحة غير موجودة</h1>
-  <p class="error-message">
-    عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها.<br>
-    يمكنك العودة إلى الصفحة الرئيسية ومتابعة التصفح.
-  </p>
-  <a href="/" class="home-link">
-    <i class="fas fa-home"></i>
-    العودة للصفحة الرئيسية
-  </a>
+<body class="no-select">
+  <div class="container">
+    <div class="error-code">404</div>
+    <h1 class="error-title">الصفحة غير موجودة</h1>
+    <p class="error-message">
+      عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها.<br>
+      يمكنك العودة إلى الصفحة الرئيسية ومتابعة التصفح.
+    </p>
+    
+    <!-- الزر الوحيد القابل للنقر -->
+    <button class="home-link" onclick="goHome()">
+      <i class="fas fa-home"></i>
+      العودة للصفحة الرئيسية
+    </button>
+  </div>
   
   <script>
-    // Redirect to main page after 5 seconds
-    setTimeout(function() {
+    /* =====================================================
+       SCRIPT - منع جميع التأثيرات غير المرغوبة
+    ===================================================== */
+    
+    // منع قائمة السياق (الضغط المطول)
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    // منع النسخ والقص واللصق
+    document.addEventListener('copy', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    document.addEventListener('cut', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    document.addEventListener('paste', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    // منع سحب الصور والنصوص
+    document.addEventListener('dragstart', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    // منع اختيار النصوص
+    document.addEventListener('selectstart', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    // منع تأثيرات النقر الزرقاء على جميع العناصر
+    document.addEventListener('touchstart', function(e) {
+      // السماح فقط للزر الرئيسي
+      if (!e.target.classList.contains('home-link')) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+    
+    // إزالة تأثير focus الزرقاء
+    document.addEventListener('focusin', function(e) {
+      if (!e.target.classList.contains('home-link')) {
+        e.target.blur();
+      }
+    });
+    
+    // وظيفة العودة للصفحة الرئيسية
+    function goHome() {
+      // مسح أي مسار مخزن
+      if (sessionStorage.getItem('redirectPath')) {
+        sessionStorage.removeItem('redirectPath');
+      }
+      
+      // التوجيه إلى الصفحة الرئيسية
       window.location.href = '/';
+    }
+    
+    // توجيه تلقائي بعد 5 ثواني
+    setTimeout(function() {
+      goHome();
     }, 5000);
     
-    // Log for debugging
-    console.log('404 Page - Redirecting from:', window.location.pathname);
+    // تسجيل للمراقبة
+    console.log('صفحة 404 - تم منع جميع التأثيرات غير المرغوبة');
+    console.log('المسار الحالي:', window.location.pathname);
   </script>
 </body>
 </html>
