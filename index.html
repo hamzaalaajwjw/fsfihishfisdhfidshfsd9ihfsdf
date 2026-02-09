@@ -353,7 +353,7 @@
   }
   
   /* =====================================================
-     VERIFICATION BADGE - UPDATED FOR ALL USERS
+     VERIFICATION BADGE
   ===================================================== */
   .verified-badge {
     display: inline-flex;
@@ -364,18 +364,11 @@
     border-radius: 50%;
     background: var(--verified-color);
     margin-right: 5px;
-    position: relative;
   }
   
   .verified-badge i {
     font-size: 10px;
     color: white;
-  }
-  
-  .user-with-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
   }
   
   .verified-user {
@@ -389,7 +382,7 @@
   }
   
   /* =====================================================
-     ACTION BUTTONS - بدون دوائر
+     ACTION BUTTONS
   ===================================================== */
   .article-actions {
     display: flex;
@@ -1287,7 +1280,6 @@
   
   /* ===============================
      REMOVE DEFAULT BLUE TAP / FOCUS
-     (SAFE - DOES NOT AFFECT CUSTOM EFFECTS)
   ================================ */
   * {
     -webkit-tap-highlight-color: transparent;
@@ -1304,7 +1296,6 @@
     outline: none;
     box-shadow: none;
   }
-
 
   /* ===============================
      COPY CONTROL
@@ -1325,7 +1316,6 @@
 
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <link rel="icon" type="image/png" href="https://d.top4top.io/p_3691o8llf0.png">
-
 
 <!-- Open Graph -->
 <meta property="og:title" content="Redpill Arab Community">
@@ -1572,7 +1562,7 @@
   ===================================================== */
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-  import { getDatabase, ref, push, get, update, set, remove, increment, query, orderByChild, limitToLast, limitToFirst, startAt, endAt } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  import { getDatabase, ref, push, get, update, set, remove, increment, query, orderByChild, limitToLast, limitToFirst, startAt, endAt, runTransaction } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
   
   /* =====================================================
      CONFIG
@@ -1639,9 +1629,9 @@
   const commentsPerPage = 10;
   
   // Rate limiting constants
-  const ARTICLE_COOLDOWN = 60 * 60 * 1000;
-  const COMMENT_COOLDOWN = 60 * 1000;
-  const LIKE_COOLDOWN = 2000;
+  const ARTICLE_COOLDOWN = 60 * 60 * 1000; // 1 hour
+  const COMMENT_COOLDOWN = 60 * 1000; // 1 minute
+  const LIKE_COOLDOWN = 2000; // 2 seconds
   
   // Character limits
   const TITLE_MAX_LENGTH = 70;
@@ -1661,7 +1651,7 @@
   const userDataCache = new Map();
   
   // Cache constants
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 دقائق
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
   const CACHE_KEYS = {
     ARTICLES: 'forum_articles_cache',
     ARTICLES_TIMESTAMP: 'forum_articles_timestamp',
@@ -1744,7 +1734,7 @@
   }
   
   /* =====================================================
-     BAN CHECK SYSTEM
+     BAN CHECK SYSTEM - مطابق للقواعد
   ===================================================== */
   async function checkIfUserIsBanned(uid) {
     if (!uid) return false;
@@ -1755,15 +1745,21 @@
       
       if (snap.exists()) {
         const banInfo = snap.val();
-        
         const now = Date.now();
-        if (banInfo.bannedUntil !== 'permanent' && banInfo.bannedUntil < now) {
-          await remove(banRef);
-          return false;
+        
+        if (banInfo.bannedUntil === 'permanent') {
+          banData = banInfo;
+          return true;
         }
         
-        banData = banInfo;
-        return true;
+        if (banInfo.bannedUntil && banInfo.bannedUntil > now) {
+          banData = banInfo;
+          return true;
+        }
+        
+        // حظر منتهي - حذفه
+        await remove(banRef);
+        return false;
       }
       return false;
     } catch (error) {
@@ -1831,6 +1827,13 @@
     localStorage.setItem(timestampKey, Date.now().toString());
   }
   
+  function clearArticlesCache() {
+    localStorage.removeItem(CACHE_KEYS.ARTICLES);
+    localStorage.removeItem(CACHE_KEYS.ARTICLES_TIMESTAMP);
+    localStorage.removeItem(CACHE_KEYS.USER_ARTICLES);
+    localStorage.removeItem(CACHE_KEYS.USER_ARTICLES_TIMESTAMP);
+  }
+  
   /* =====================================================
      SIDEBAR FUNCTIONS
   ===================================================== */
@@ -1860,7 +1863,7 @@
      SECTION NAVIGATION
   ===================================================== */
   window.showSection = (sectionName) => {
-    if (isUserBanned) {
+    if (isUserBanned && sectionName !== 'articles') {
       showBanOverlay();
       return;
     }
@@ -2052,13 +2055,16 @@
       await set(ref(db, `users/${user.uid}`), {
         username: randomUsername,
         email: email,
+        bio: 'مرحبًا! أنا عضو جديد في منتدى الريدبيل.',
         joinDate: currentTime,
         lastLogin: currentTime,
         articlesCount: 0,
         likesCount: 0,
         commentsCount: 0,
-        verified: (u && u.verified === true),
-        bio: 'مرحبًا! أنا عضو جديد في منتدى الريدبيل.'
+        lastArticle: 0,
+        lastComment: 0,
+        verified: false,
+        updated: currentTime
       });
       
       // إنشاء الملف العام
@@ -2066,7 +2072,7 @@
         username: randomUsername,
         joinDate: currentTime,
         articlesCount: 0,
-        verified: (u && u.verified === true),
+        verified: false,
         bioPreview: 'مرحبًا! أنا عضو جديد في منتدى الريدبيل.'
       });
       
@@ -2085,7 +2091,7 @@
   }
   
   /* =====================================================
-     USER DATA FUNCTIONS - كود معدل للأمان
+     USER DATA FUNCTIONS - متوافق مع القواعد
   ===================================================== */
   async function getPublicUserProfile(userId) {
     if (!userId) {
@@ -2093,13 +2099,12 @@
         username: 'مجهول',
         joinDate: Date.now(),
         articlesCount: 0,
-        verified: (u && u.verified === true),
+        verified: false,
         bioPreview: ''
       };
     }
     
     try {
-      // محاولة جلب من التخزين المؤقت أولاً
       if (userDataCache.has(userId)) {
         const cachedData = userDataCache.get(userId);
         if (cachedData.public && cachedData.timestamp && 
@@ -2114,7 +2119,6 @@
       if (snap.exists()) {
         const publicData = snap.val();
         
-        // حفظ في ذاكرة التخزين المؤقت
         userDataCache.set(userId, {
           public: publicData,
           timestamp: Date.now()
@@ -2123,30 +2127,11 @@
         return publicData;
       }
       
-      // fallback: جلب الاسم الحقيقي من users إذا موجود
-      try {
-        const userRef = ref(db, `users/${userId}`);
-        const userSnap = await get(userRef);
-        if (userSnap.exists()) {
-          const u = userSnap.val();
-          return {
-            username: u.username || 'مجهول',
-            joinDate: u.joinDate || Date.now(),
-            articlesCount: u.articlesCount || 0,
-            verified: u.verified === true,
-            bioPreview: (u.bio || '').substring(0, 120)
-          };
-        }
-      } catch(e) {
-        console.log('fallback users fetch failed', e);
-      }
-      
-      // آخر fallback
       return {
         username: 'مجهول',
         joinDate: Date.now(),
         articlesCount: 0,
-        verified: (u && u.verified === true),
+        verified: false,
         bioPreview: ''
       };
       
@@ -2156,30 +2141,28 @@
         username: 'مجهول',
         joinDate: Date.now(),
         articlesCount: 0,
-        verified: (u && u.verified === true),
+        verified: false,
         bioPreview: ''
       };
     }
   }
   
   async function getUserData(userId) {
-    if (!userId || !currentUser) return null;
-    
-    // إذا كان المستخدم الحالي يطلب بياناته الخاصة
-    if (userId === currentUser.uid) {
-      try {
-        const userRef = ref(db, `users/${userId}`);
-        const snap = await get(userRef);
-        
-        if (snap.exists()) {
-          return snap.val();
-        }
-      } catch (error) {
-        console.log('Error fetching private user data:', error);
-      }
+    if (!userId || !currentUser || currentUser.uid !== userId) {
+      return await getPublicUserProfile(userId);
     }
     
-    // للمستخدمين الآخرين، إرجاع بيانات عامة فقط
+    try {
+      const userRef = ref(db, `users/${userId}`);
+      const snap = await get(userRef);
+      
+      if (snap.exists()) {
+        return snap.val();
+      }
+    } catch (error) {
+      console.log('Error fetching private user data:', error);
+    }
+    
     return await getPublicUserProfile(userId);
   }
   
@@ -2191,29 +2174,16 @@
   }
   
   async function isUserVerified(userId) {
-  if (!userId) return false;
-
-  try {
-    // public profile check
-    const publicRef = ref(db, `userPublicProfiles/${userId}`);
-    const pubSnap = await get(publicRef);
-    if (pubSnap.exists() && pubSnap.val().verified === true) {
-      return true;
+    if (!userId) return false;
+    
+    try {
+      const publicProfile = await getPublicUserProfile(userId);
+      return publicProfile.verified === true;
+    } catch (e) {
+      console.log('verify check error', e);
+      return false;
     }
-
-    // fallback users check
-    const userRef = ref(db, `users/${userId}`);
-    const userSnap = await get(userRef);
-    if (userSnap.exists() && userSnap.val().verified === true) {
-      return true;
-    }
-
-  } catch (e) {
-    console.log('verify check error', e);
   }
-
-  return false;
-}
   
   function getUsernameWithVerification(username, isVerified) {
     const safe = username || 'مجهول';
@@ -2231,7 +2201,7 @@
   }
   
   /* =====================================================
-     ARTICLES SYSTEM - محسن
+     ARTICLES SYSTEM - متوافق مع القواعد
   ===================================================== */
   function resetArticlesPagination() {
     lastArticleTimestamp = null;
@@ -2605,7 +2575,7 @@
   }
   
   /* =====================================================
-     ENHANCED LIKES SYSTEM
+     ENHANCED LIKES SYSTEM - متوافق مع القواعد
   ===================================================== */
   window.toggleLike = async (event, articleId) => {
     event.preventDefault();
@@ -2656,8 +2626,8 @@
     try {
       if (alreadyLiked) {
         await remove(likeRef);
-        await update(ref(db, `articles/${articleId}`), {
-          likesCount: increment(-1)
+        await runTransaction(ref(db, `articles/${articleId}/likesCount`), (current) => {
+          return Math.max(0, (current || 0) - 1);
         });
         showNotification('تم إلغاء الإعجاب', 'success');
       } else {
@@ -2665,14 +2635,15 @@
           userId: currentUser.uid,
           timestamp: Date.now()
         });
-        await update(ref(db, `articles/${articleId}`), {
-          likesCount: increment(1)
+        await runTransaction(ref(db, `articles/${articleId}/likesCount`), (current) => {
+          return (current || 0) + 1;
         });
         showNotification('تم الإعجاب بالمقال', 'success');
       }
       
       clearArticlesCache();
     } catch (error) {
+      console.error('Like error:', error);
       showNotification('حدث خطأ أثناء تحديث الإعجاب', 'error');
       if (alreadyLiked) {
         likeBtn.classList.add('active');
@@ -2693,7 +2664,7 @@
   };
   
   /* =====================================================
-     COMMENTS SYSTEM
+     COMMENTS SYSTEM - متوافق مع القواعد
   ===================================================== */
   window.openComments = async (articleId) => {
     if (isUserBanned) {
@@ -2892,7 +2863,6 @@
     }
     
     const commentRef = ref(db, `comments/${currentArticleId}`);
-    const articleRef = ref(db, `articles/${currentArticleId}`);
     
     try {
       await push(commentRef, {
@@ -2901,11 +2871,9 @@
         created: Date.now()
       });
       
-      const articleSnap = await get(articleRef);
-      const articleData = articleSnap.val();
-      const newCommentsCount = (articleData.commentsCount || 0) + 1;
-      
-      await update(articleRef, { commentsCount: newCommentsCount });
+      await runTransaction(ref(db, `articles/${currentArticleId}/commentsCount`), (current) => {
+        return (current || 0) + 1;
+      });
       
       document.getElementById('newComment').value = '';
       resetCommentsPagination();
@@ -2916,12 +2884,15 @@
       commentCounter.textContent = '0/1500';
       commentCounter.className = 'char-counter muted';
       
-      await checkCommentCooldown();
+      await update(ref(db, `users/${currentUser.uid}`), {
+        lastComment: Date.now()
+      });
       
       localStorage.removeItem(`comments_${currentArticleId}`);
       localStorage.removeItem(`comments_timestamp_${currentArticleId}`);
       
     } catch (error) {
+      console.error('Comment error:', error);
       showNotification('حدث خطأ أثناء إضافة التعليق', 'error');
     }
   };
@@ -3116,7 +3087,7 @@
   }
   
   /* =====================================================
-     PROFILE FUNCTIONS - معدل للأمان
+     PROFILE FUNCTIONS - متوافق مع القواعد
   ===================================================== */
   async function initProfile(uid) {
     try {
@@ -3127,11 +3098,10 @@
         const username = generateRandomUsername();
         const currentTime = Date.now();
         
-        // إنشاء البيانات الخاصة
         await set(userRef, {
           username: username,
           email: currentUser.email,
-          bio: 'مرحبًا! أنا مستخدم جديد في منتدى الريدبيل.',
+          bio: 'مرحبًا! أنا عضو جديد في منتدى الريدبيل.',
           joinDate: currentTime,
           lastLogin: currentTime,
           articlesCount: 0,
@@ -3139,16 +3109,16 @@
           commentsCount: 0,
           lastArticle: 0,
           lastComment: 0,
-          verified: false
+          verified: false,
+          updated: currentTime
         });
         
-        // إنشاء الملف العام
         await set(ref(db, `userPublicProfiles/${uid}`), {
           username: username,
           joinDate: currentTime,
           articlesCount: 0,
-          verified: (u && u.verified === true),
-          bioPreview: 'مرحبًا! أنا مستخدم جديد في منتدى الريدبيل.'
+          verified: false,
+          bioPreview: 'مرحبًا! أنا عضو جديد في منتدى الريدبيل.'
         });
       } else {
         await update(userRef, { lastLogin: Date.now() });
@@ -3184,7 +3154,6 @@
       
       const isVerified = userData.verified === true;
       
-      // حساب الإحصائيات من البيانات المحلية
       let userArticlesCount = 0;
       let userLikesCount = 0;
       
@@ -3213,7 +3182,6 @@
             }
           });
           
-          // حفظ في التخزين المؤقت
           saveToCache(CACHE_KEYS.USER_ARTICLES, userArticles);
           updateCacheTimestamp(CACHE_KEYS.USER_ARTICLES_TIMESTAMP);
         }
@@ -3315,26 +3283,25 @@
     }
     
     try {
-      // تحديث البيانات الخاصة
+      const currentTime = Date.now();
+      
       await update(ref(db, 'users/' + currentUser.uid), {
         username: username,
         bio: bio,
-        updated: Date.now()
+        updated: currentTime
       });
       
-      // تحديث الملف العام
       await update(ref(db, `userPublicProfiles/${currentUser.uid}`), {
         username: username,
         bioPreview: bio ? bio.substring(0, 100) : ''
       });
       
-      // تحديث ذاكرة التخزين المؤقت
       userDataCache.set(currentUser.uid, {
         public: {
           username: username,
           bioPreview: bio ? bio.substring(0, 100) : ''
         },
-        timestamp: Date.now()
+        timestamp: currentTime
       });
       
       showNotification('تم تحديث الملف الشخصي', 'success');
@@ -3348,12 +3315,13 @@
       }, 500);
       
     } catch (error) {
+      console.error('Profile save error:', error);
       showNotification('حدث خطأ أثناء تحديث الملف الشخصي', 'error');
     }
   };
   
   /* =====================================================
-     VIEWS TRACKING SYSTEM
+     VIEWS TRACKING SYSTEM - متوافق مع القواعد
   ===================================================== */
   async function trackArticleView(articleId) {
     if (!currentUser) return;
@@ -3364,12 +3332,11 @@
       
       if (!viewSnap.exists()) {
         await set(viewRef, {
-          timestamp: Date.now(),
-          count: 1
+          timestamp: Date.now()
         });
         
-        await update(ref(db, `articles/${articleId}`), {
-          viewsCount: increment(1)
+        await runTransaction(ref(db, `articles/${articleId}/viewsCount`), (current) => {
+          return (current || 0) + 1;
         });
         
         clearArticlesCache();
@@ -3485,7 +3452,9 @@
       const articlesRef = ref(db, 'articles');
       const articlesQuery = query(
         articlesRef,
-        orderByChild('created'),
+        orderByChild('author'),
+        startAt(currentUser.uid),
+        endAt(currentUser.uid),
         limitToLast(100)
       );
       
@@ -3494,13 +3463,10 @@
       
       if (snap.exists()) {
         snap.forEach(articleSnap => {
-          const article = articleSnap.val();
-          if (article.author === currentUser.uid) {
-            userArticles.push({
-              id: articleSnap.key,
-              ...article
-            });
-          }
+          userArticles.push({
+            id: articleSnap.key,
+            ...articleSnap.val()
+          });
         });
       }
       
@@ -3512,7 +3478,7 @@
   }
   
   /* =====================================================
-     PUBLISH ARTICLE
+     PUBLISH ARTICLE - متوافق مع القواعد
   ===================================================== */
   window.openPublishModal = () => {
     if (isUserBanned) {
@@ -3608,14 +3574,19 @@
       readTime: readTime
     };
     
-    push(ref(db, 'articles'), articleData).then((result) => {
-      update(ref(db, 'users/' + currentUser.uid), { 
-        lastArticle: Date.now(),
-        articlesCount: increment(1)
+    try {
+      const result = await push(ref(db, 'articles'), articleData);
+      
+      await update(ref(db, 'users/' + currentUser.uid), { 
+        lastArticle: Date.now()
       });
       
-      update(ref(db, `userPublicProfiles/${currentUser.uid}`), {
-        articlesCount: increment(1)
+      await runTransaction(ref(db, `users/${currentUser.uid}/articlesCount`), (current) => {
+        return (current || 0) + 1;
+      });
+      
+      await runTransaction(ref(db, `userPublicProfiles/${currentUser.uid}/articlesCount`), (current) => {
+        return (current || 0) + 1;
       });
       
       showNotification('تم نشر المقال بنجاح', 'success');
@@ -3624,13 +3595,15 @@
       clearArticlesCache();
       
       showSection('articles');
-    }).catch(error => {
-      showNotification(error.message, 'error');
-    });
+      
+    } catch (error) {
+      console.error('Publish error:', error);
+      showNotification('حدث خطأ أثناء نشر المقال', 'error');
+    }
   };
   
   /* =====================================================
-     DELETE ARTICLE
+     DELETE ARTICLE - متوافق مع القواعد
   ===================================================== */
   window.deleteArticle = async (articleId) => {
     if (isUserBanned) {
@@ -3643,6 +3616,19 @@
     const articleRef = ref(db, `articles/${articleId}`);
     
     try {
+      const articleSnap = await get(articleRef);
+      if (!articleSnap.exists()) {
+        showNotification('المقال غير موجود', 'error');
+        return;
+      }
+      
+      const articleData = articleSnap.val();
+      
+      if (currentUser.uid !== articleData.author && currentUser.uid !== 't3QsyZbU0UcxGwbLSOeFaclDCja2') {
+        showNotification('ليس لديك صلاحية حذف هذا المقال', 'error');
+        return;
+      }
+      
       await remove(articleRef);
       
       const likesRef = ref(db, `likes/${articleId}`);
@@ -3654,12 +3640,14 @@
       const viewsRef = ref(db, `views/${articleId}`);
       await remove(viewsRef);
       
-      if (currentUser) {
-        const userRef = ref(db, 'users/' + currentUser.uid);
-        update(userRef, { articlesCount: increment(-1) });
+      if (currentUser.uid === articleData.author) {
+        await runTransaction(ref(db, `users/${currentUser.uid}/articlesCount`), (current) => {
+          return Math.max(0, (current || 0) - 1);
+        });
         
-        const publicProfileRef = ref(db, `userPublicProfiles/${currentUser.uid}`);
-        update(publicProfileRef, { articlesCount: increment(-1) });
+        await runTransaction(ref(db, `userPublicProfiles/${currentUser.uid}/articlesCount`), (current) => {
+          return Math.max(0, (current || 0) - 1);
+        });
       }
       
       showNotification('تم حذف المقال', 'success');
@@ -3676,66 +3664,8 @@
       }, 300);
       
     } catch (error) {
+      console.error('Delete error:', error);
       showNotification('حدث خطأ أثناء حذف المقال', 'error');
-    }
-  };
-  
-  /* =====================================================
-     CACHE MANAGEMENT
-  ===================================================== */
-  function clearArticlesCache() {
-    localStorage.removeItem(CACHE_KEYS.ARTICLES);
-    localStorage.removeItem(CACHE_KEYS.ARTICLES_TIMESTAMP);
-    localStorage.removeItem(CACHE_KEYS.USER_ARTICLES);
-    localStorage.removeItem(CACHE_KEYS.USER_ARTICLES_TIMESTAMP);
-  }
-  
-  /* =====================================================
-     MIGRATION FUNCTION - تشغيل مرة واحدة فقط
-  ===================================================== */
-  window.migrateUserProfiles = async () => {
-    if (!currentUser || currentUser.uid !== 't3QsyZbU0UcxGwbLSOeFaclDCja2') {
-      showNotification('هذه الوظيفة للإداري فقط', 'error');
-      return;
-    }
-    
-    try {
-      const usersRef = ref(db, 'users');
-      const usersSnap = await get(usersRef);
-      let migratedCount = 0;
-      
-      if (usersSnap.exists()) {
-        const promises = [];
-        usersSnap.forEach(async (userSnap) => {
-          const userId = userSnap.key;
-          const userData = userSnap.val();
-          
-          const publicProfile = {
-            username: userData.username || generateRandomUsername(),
-            joinDate: userData.joinDate || Date.now(),
-            articlesCount: userData.articlesCount || 0,
-            verified: userData.verified || false,
-            bioPreview: userData.bio ? userData.bio.substring(0, 100) : ''
-          };
-          
-          promises.push(
-            set(ref(db, `userPublicProfiles/${userId}`), publicProfile)
-              .then(() => {
-                migratedCount++;
-                console.log(`تم إنشاء ملف عام لـ: ${userId}`);
-              })
-              .catch(error => {
-                console.error(`خطأ في إنشاء ملف لـ ${userId}:`, error);
-              })
-          );
-        });
-        
-        await Promise.all(promises);
-        showNotification(`تم إنشاء ${migratedCount} ملف عام`, 'success');
-      }
-    } catch (error) {
-      console.error('خطأ في الهجرة:', error);
-      showNotification('حدث خطأ في إنشاء الملفات العامة', 'error');
     }
   };
   
